@@ -1,6 +1,6 @@
 # ADHD Exam Pomodoro (Chrome Extension)
 
-## 日本語（やさしい）
+## 日本語
 
 ADHDの勉強用に作った、シンプルなポモドーロChrome拡張です。
 
@@ -21,6 +21,12 @@ ADHDの勉強用に作った、シンプルなポモドーロChrome拡張です�
 - `session-start.mp3`
 - `focus-complete.mp3`
 - `focus-pause.mp3`
+
+### スクリーンショット
+
+README用の画像は `assets/images/` に入れてください（例: `assets/images/pomodoro-ui.png`）。
+
+![ポモドーロ拡張の画面](assets/images/pomodoro-ui.png)
 
 ### Stack + Chromeで開く（1文）
 
