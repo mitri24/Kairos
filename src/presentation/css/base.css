@@ -1,0 +1,86 @@
+/* ── Tokens & Reset ──────────────────────────── */
+:root {
+  --accent: #aa5a54;
+  --shell:  #e1e0e1;
+  --line:   #c0c2c5;
+  --muted:  #858486;
+  --ink:    #3b2928;
+  --paper:  #fbe8d7;
+}
+
+html,
+body {
+  width: 44rem;
+  min-width: 42rem;
+  max-width: 48rem;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body {
+  width: 44rem;
+  min-width: 42rem;
+  max-width: 48rem;
+  max-height: min(40rem, 100vh);
+  margin: 0;
+  background: var(--shell);
+  color: var(--ink);
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* ── App-Grid ────────────────────────────────── */
+.app {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: clamp(0.65rem, 2.8vw, 1rem);
+  display: grid;
+  grid-template-areas:
+    "head head"
+    "timer todo"
+    "actions todo"
+    "save save";
+  grid-template-columns: minmax(0, 1fr) minmax(15rem, 18rem);
+  grid-template-rows: auto auto auto auto;
+  gap: clamp(0.65rem, 2.2vw, 0.95rem);
+}
+
+.app > * {
+  min-width: 0;
+}
+
+.head       { grid-area: head; }
+.timer-card { grid-area: timer; }
+.actions    { grid-area: actions; }
+.save-info  { grid-area: save; }
+
+/* ── Header ──────────────────────────────────── */
+.head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.head h1 {
+  font-size: clamp(1.25rem, 4.2vw, 1.45rem);
+  letter-spacing: -0.02em;
+}
+
+/* ── Save-Info ───────────────────────────────── */
+.save-info {
+  padding-inline: 0.2rem;
+  color: var(--accent);
+  min-height: 1em;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+

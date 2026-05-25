@@ -1,0 +1,222 @@
+/* ── Todo-Card ───────────────────────────────── */
+.todo-card {
+  grid-area: todo;
+  border: 1px solid var(--line);
+  border-radius: 1.2rem;
+  padding: 0.95rem;
+  background: var(--paper);
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  align-self: stretch;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.todo-card h2 {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.todo-day-info {
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+
+/* ── Input ───────────────────────────────────── */
+.todo-input-row {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.todo-input {
+  flex: 1 1 0;
+  border: 1px solid var(--line);
+  border-radius: 0.85rem;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.84rem;
+  background: var(--paper);
+  color: var(--ink);
+  outline: none;
+  transition: border-color 120ms ease, background-color 120ms ease, box-shadow 120ms ease;
+}
+
+.todo-input::placeholder {
+  color: var(--muted);
+}
+
+.todo-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px rgba(170, 90, 84, 0.18) inset;
+}
+
+.todo-add-btn {
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--paper);
+  border-radius: 0.85rem;
+  min-width: 2.35rem;
+  padding: 0 0.78rem;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  line-height: 1;
+  transition: filter 120ms ease, transform 120ms ease;
+}
+
+.todo-add-btn:hover {
+  filter: brightness(1.05);
+}
+
+/* ── Liste ───────────────────────────────────── */
+.todo-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.28rem;
+  overflow-y: auto;
+  flex: 1 1 0;
+  min-height: 0;
+}
+
+.todo-item {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.5rem 0.55rem;
+  border-radius: 0.85rem;
+  border: 1px solid transparent;
+  background: transparent;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.todo-item:hover {
+  background: var(--shell);
+  border-color: var(--line);
+}
+
+.todo-item.prioritized {
+  border-color: var(--accent);
+  background: rgba(170, 90, 84, 0.06);
+}
+
+/* ── Checkbox ────────────────────────────────── */
+.todo-check {
+  appearance: none;
+  width: 1rem;
+  height: 1rem;
+  border: 1.5px solid var(--line);
+  border-radius: 0.35rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  position: relative;
+  background: var(--paper);
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.todo-check:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.todo-check:checked::after {
+  content: "✓";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  font-size: 0.65rem;
+  color: var(--paper);
+  font-weight: 700;
+}
+
+/* ── Text & Delete ───────────────────────────── */
+.todo-text {
+  flex: 1 1 0;
+  font-size: 0.84rem;
+  color: var(--ink);
+  word-break: break-word;
+  transition: color 120ms ease;
+  line-height: 1.35;
+}
+
+.todo-item.prioritized .todo-text {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.todo-item.done .todo-text {
+  text-decoration: line-through;
+  color: var(--muted);
+}
+
+.todo-priority-btn {
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  font-size: 0.95rem;
+  line-height: 1;
+  width: 1.15rem;
+  height: 1.15rem;
+  display: grid;
+  place-content: center;
+  padding: 0;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: color 120ms ease, transform 120ms ease, opacity 120ms ease;
+}
+
+.todo-priority-btn.active {
+  color: var(--accent);
+  font-weight: 700;
+  opacity: 1;
+}
+
+.todo-priority-btn:hover:not(:disabled) {
+  color: var(--accent);
+  transform: scale(1.06);
+  opacity: 1;
+}
+
+.todo-priority-btn:disabled {
+  opacity: 0.32;
+  cursor: not-allowed;
+}
+
+.todo-context-menu {
+  position: fixed;
+  z-index: 1000;
+  min-width: 8.75rem;
+  padding: 0.28rem;
+  border: 1px solid var(--line);
+  border-radius: 0.8rem;
+  background: var(--paper);
+  box-shadow: 0 10px 24px rgba(59, 41, 40, 0.12);
+}
+
+.todo-context-action {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  text-align: left;
+  border-radius: 0.58rem;
+  padding: 0.5rem 0.65rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.todo-context-action:hover {
+  background: var(--shell);
+}
+
+.todo-empty {
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-align: center;
+  padding: 0.6rem 0;
+}

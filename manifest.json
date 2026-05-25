@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "ADHD Exam Pomodoro",
+  "description": "Energieeffizienter Pomodoro-Timer für ADHS-Lernphasen in der Prüfungsvorbereitung.",
+  "version": "1.0.0",
+  "permissions": ["storage", "alarms", "notifications", "bookmarks", "offscreen"],
+  "background": {
+    "service_worker": "src/background.js",
+    "type": "module"
+  },
+  "icons": {
+    "16": "assets/icons/icon.png",
+    "32": "assets/icons/icon.png",
+    "48": "assets/icons/icon.png",
+    "128": "assets/icons/icon.png"
+  },
+  "action": {
+    "default_title": "ADHD Exam Pomodoro",
+    "default_popup": "src/presentation/popup.html",
+    "default_icon": {
+      "16": "assets/icons/icon.png",
+      "32": "assets/icons/icon.png",
+      "48": "assets/icons/icon.png",
+      "128": "assets/icons/icon.png"
+    }
+  }
+}

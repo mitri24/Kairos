@@ -1,0 +1,119 @@
+/* ── Timer-Card ──────────────────────────────── */
+.timer-card {
+  border: 1px solid var(--line);
+  border-radius: 1.2rem;
+  padding: clamp(0.8rem, 3vw, 1rem);
+  background: var(--paper);
+  color: var(--ink);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+/* ── States ──────────────────────────────────── */
+.timer-card.state-idle         { border-color: var(--line); }
+
+.timer-card.state-paused {
+  border-color: var(--accent);
+  background: var(--paper);
+  box-shadow: 0 0 0 1px rgba(170, 90, 84, 0.2) inset;
+}
+
+.timer-card.state-running-focus {
+  border-color: var(--ink);
+  background: var(--paper);
+  box-shadow: 0 0 0 1px rgba(59, 41, 40, 0.15) inset;
+}
+
+.timer-card.state-running-break {
+  border-color: var(--line);
+  background: var(--shell);
+  box-shadow: 0 0 0 1px rgba(192, 194, 197, 0.3) inset;
+}
+
+/* ── Dial ────────────────────────────────────── */
+.dial-wrap {
+  position: relative;
+  width: min(100%, clamp(12rem, 58vw, 17rem));
+  margin: 0 auto;
+  aspect-ratio: 1 / 1;
+}
+
+.dial-svg {
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: grab;
+}
+
+.dial-svg.dragging { cursor: grabbing; }
+
+.dial-track {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 14;
+}
+
+.dial-progress {
+  fill: none;
+  stroke: var(--accent);
+  stroke-linecap: round;
+  stroke-width: 14;
+  transform: rotate(-90deg);
+  transform-origin: center;
+}
+
+.dial-handle {
+  fill: var(--accent);
+  stroke: var(--paper);
+  stroke-width: 3;
+}
+
+.dial-center {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: 4px;
+  pointer-events: none;
+}
+
+/* ── Labels ──────────────────────────────────── */
+.phase {
+  color: var(--muted);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.status-badge {
+  justify-self: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  padding: 0.16rem 0.52rem;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  background: var(--paper);
+}
+
+.timer-card.state-paused .status-badge        { border-color: var(--accent); }
+.timer-card.state-running-focus .status-badge { border-color: var(--ink);    background: var(--shell); }
+.timer-card.state-running-break .status-badge { border-color: var(--line);   background: var(--shell); }
+
+.time {
+  font-size: clamp(2.35rem, 10vw, 3.2rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  margin: 2px 0;
+  line-height: 1;
+}
+
+.cycle {
+  color: var(--muted);
+  font-size: 0.86rem;
+}

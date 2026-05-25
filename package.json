@@ -1,0 +1,10 @@
+{
+  "name": "adhd-exam-pomodoro-extension",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Minimalistische, energieeffiziente Chrome Extension für Pomodoro in der Prüfungsphase.",
+  "scripts": {
+    "test": "node --test"
+  }
+}

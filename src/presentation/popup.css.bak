@@ -1,0 +1,410 @@
+:root {
+  --accent: #aa5a54;
+  --shell: #e1e0e1;
+  --line: #c0c2c5;
+  --muted: #858486;
+  --ink: #3b2928;
+  --paper: #fbe8d7;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body {
+  width: clamp(28rem, 92vw, 44rem);
+  margin: 0;
+  background: var(--shell);
+  color: var(--ink);
+}
+
+.app {
+  width: 100%;
+  padding: clamp(0.75rem, 3vw, 1rem);
+  display: grid;
+  grid-template-areas:
+    "head    head"
+    "timer   todo"
+    "actions todo"
+    "save    todo";
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto 1fr auto auto;
+  gap: clamp(0.65rem, 2.2vw, 0.95rem);
+}
+
+.head   { grid-area: head; }
+.timer-card { grid-area: timer; }
+.actions    { grid-area: actions; }
+.save-info  { grid-area: save; }
+
+.head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.head h1 {
+  font-size: clamp(1.25rem, 4.2vw, 1.45rem);
+  letter-spacing: -0.02em;
+}
+
+.timer-card {
+  border: 1px solid var(--line);
+  border-radius: 1.2rem;
+  padding: clamp(0.8rem, 3vw, 1rem);
+  background: var(--paper);
+  color: var(--ink);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.timer-card.state-idle {
+  border-color: var(--line);
+}
+
+.timer-card.state-paused {
+  border-color: var(--accent);
+  background: var(--paper);
+  box-shadow: 0 0 0 1px rgba(170, 90, 84, 0.2) inset;
+}
+
+.timer-card.state-running-focus {
+  border-color: var(--ink);
+  background: var(--paper);
+  box-shadow: 0 0 0 1px rgba(59, 41, 40, 0.15) inset;
+}
+
+.timer-card.state-running-break {
+  border-color: var(--line);
+  background: var(--shell);
+  box-shadow: 0 0 0 1px rgba(192, 194, 197, 0.3) inset;
+}
+
+.dial-wrap {
+  position: relative;
+  width: min(100%, clamp(12rem, 58vw, 17rem));
+  margin: 0 auto;
+  aspect-ratio: 1 / 1;
+}
+
+.dial-svg {
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: grab;
+}
+
+.dial-svg.dragging {
+  cursor: grabbing;
+}
+
+.dial-track {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 14;
+}
+
+.dial-progress {
+  fill: none;
+  stroke: var(--accent);
+  stroke-linecap: round;
+  stroke-width: 14;
+  transform: rotate(-90deg);
+  transform-origin: center;
+}
+
+.dial-handle {
+  fill: var(--accent);
+  stroke: var(--paper);
+  stroke-width: 3;
+}
+
+.dial-center {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: 4px;
+  pointer-events: none;
+}
+
+.phase {
+  color: var(--muted);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.status-badge {
+  justify-self: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  padding: 0.16rem 0.52rem;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  background: var(--paper);
+}
+
+.timer-card.state-paused .status-badge {
+  border-color: var(--accent);
+  color: var(--ink);
+  background: var(--paper);
+}
+
+.timer-card.state-running-focus .status-badge {
+  border-color: var(--ink);
+  color: var(--ink);
+  background: var(--shell);
+}
+
+.timer-card.state-running-break .status-badge {
+  border-color: var(--line);
+  color: var(--ink);
+  background: var(--shell);
+}
+
+.time {
+  font-size: clamp(2.35rem, 10vw, 3.2rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  margin: 2px 0;
+  line-height: 1;
+}
+
+.cycle {
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.actions {
+  display: flex;
+  flex-direction: row;
+  gap: clamp(0.45rem, 1.8vw, 0.6rem);
+}
+
+.btn {
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+  border-radius: 0.85rem;
+  height: clamp(2.6rem, 10vw, 2.9rem);
+  font-size: clamp(0.84rem, 2.9vw, 0.94rem);
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  flex: 1 1 0;
+  transition: transform 80ms ease, filter 120ms ease, background-color 140ms ease;
+}
+
+.icon-btn {
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.btn:hover {
+  background: var(--shell);
+}
+
+.btn.primary {
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  color: var(--paper);
+  font-weight: 700;
+}
+
+.btn.pressed {
+  transform: translateY(1px) scale(0.98);
+  filter: brightness(0.95);
+}
+
+.btn.danger {
+  background: var(--shell);
+}
+
+
+.save-info {
+  min-height: 1.2rem;
+  padding-inline: 0.2rem;
+  color: var(--accent);
+  min-height: 1em;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* ── Todo-Liste ───────────────────────────────── */
+.todo-card {
+  grid-area: todo;
+  border: 1px solid var(--line);
+  border-radius: 1.2rem;
+  padding: 0.85rem 0.9rem;
+  background: var(--paper);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  align-self: stretch;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.todo-card h2 {
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.todo-input-row {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.todo-input {
+  flex: 1 1 0;
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  padding: 0.38rem 0.6rem;
+  font-size: 0.84rem;
+  background: var(--shell);
+  color: var(--ink);
+  outline: none;
+  transition: border-color 120ms ease;
+}
+
+.todo-input:focus {
+  border-color: var(--accent);
+}
+
+.todo-add-btn {
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--paper);
+  border-radius: 0.65rem;
+  padding: 0 0.7rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  line-height: 1;
+  transition: filter 120ms ease;
+}
+
+.todo-add-btn:hover {
+  filter: brightness(1.1);
+}
+
+.todo-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  overflow-y: auto;
+  flex: 1 1 0;
+  min-height: 0;
+}
+
+.todo-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.32rem 0.45rem;
+  border-radius: 0.6rem;
+  border: 1px solid transparent;
+  transition: background-color 120ms ease;
+}
+
+.todo-item:hover {
+  background: var(--shell);
+  border-color: var(--line);
+}
+
+.todo-check {
+  appearance: none;
+  width: 1rem;
+  height: 1rem;
+  border: 1.5px solid var(--line);
+  border-radius: 0.3rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  position: relative;
+  background: var(--paper);
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.todo-check:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.todo-check:checked::after {
+  content: "✓";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  font-size: 0.65rem;
+  color: var(--paper);
+  font-weight: 700;
+}
+
+.todo-text {
+  flex: 1 1 0;
+  font-size: 0.84rem;
+  color: var(--ink);
+  word-break: break-word;
+  transition: color 120ms ease;
+}
+
+.todo-item.done .todo-text {
+  text-decoration: line-through;
+  color: var(--muted);
+}
+
+.todo-delete {
+  border: none;
+  background: none;
+  color: var(--muted);
+  font-size: 0.95rem;
+  cursor: pointer;
+  padding: 0 0.15rem;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 120ms ease, color 120ms ease;
+}
+
+.todo-item:hover .todo-delete {
+  opacity: 1;
+}
+
+.todo-delete:hover {
+  color: var(--accent);
+}
+
+.todo-empty {
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-align: center;
+  padding: 0.6rem 0;
+}
+
+@media (max-width: 420px) {
+  .app {
+    grid-template-areas:
+      "head"
+      "timer"
+      "actions"
+      "todo"
+      "save";
+    grid-template-columns: 1fr;
+  }
+}
