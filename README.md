@@ -24,9 +24,9 @@ ADHDの勉強用に作った、シンプルなポモドーロChrome拡張です�
 
 ### スクリーンショット
 
-README用の画像は `assets/images/` に入れてください（例: `assets/images/pomodoro-ui.png`）。
+README用の画像は `assets/images/` に入れてください（例: `assets/images/screenshot1.png`）。
 
-![ポモドーロ拡張の画面](assets/images/pomodoro-ui.png)
+![ポモドーロ拡張の画面](assets/images/screenshot1.png)
 
 ### Stack + Chromeで開く（1文）
 
