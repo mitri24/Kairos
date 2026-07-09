@@ -1,5 +1,5 @@
 // Formatierungs- & Label-Helfer, geteilt von allen Feature-Modulen.
-export { formatMs, formatDurationHM, PHASES, STATUS, phaseLabelJa, phaseLabelDe } from "/shared/pomodoro.js";
+export { formatDurationHM, PHASES, STATUS, phaseLabelJa, phaseLabelDe } from "/shared/pomodoro.js";
 // Tages-Zeitstrahl-Helfer durchreichen, damit Feature-Module nur "/js/util.js" kennen.
 export {
   minToClock, clockToMin, nowMinOfDay, fractionOfDay, slotStatus, isOverdue,

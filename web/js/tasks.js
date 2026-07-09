@@ -3,7 +3,7 @@
 import {
   formatDurationHM, formatMinutes, priorityLabel, priorityClass, dueLabel,
   escapeHtml, toDatetimeLocal, fromDatetimeLocal, dayKeyOf, formatDayShort, PHASES,
-  minToClock, clockToMin,
+  minToClock, clockToMin, DAY_START_MIN, DAY_END_MIN, SLOT_STEP_MIN,
 } from "/js/util.js";
 
 export function initTasks({ store, api }) {
@@ -111,8 +111,9 @@ export function initTasks({ store, api }) {
     if (elm.dataset.field === "plannedDate") return act(() => api.tasks.update(id, { plannedDate: elm.value || null }));
     if (elm.dataset.field === "subject") return act(() => api.tasks.update(id, { subject: elm.value.trim() }));
     if (elm.dataset.field === "scheduledMin") {
-      // Uhrzeit setzen → auf den Tages-Zeitstrahl; leeren → wieder herunternehmen.
-      const min = clockToMin(elm.value);
+      // Uhrzeit setzen → auf den Tages-Zeitstrahl (aufs Tagesfenster begrenzt); leeren → herunternehmen.
+      const raw = clockToMin(elm.value);
+      const min = raw == null ? null : Math.max(DAY_START_MIN, Math.min(DAY_END_MIN - SLOT_STEP_MIN, raw));
       return act(() => api.tasks.update(id, { scheduledMin: min }));
     }
   });
@@ -308,7 +309,7 @@ export function initTasks({ store, api }) {
       d: dayKeyOf(store.now()),
       x: s.ui.expandedTaskId,
       t: s.tasks.map((t) => [t.id, t.text, t.subject, t.priority, t.dueDate, t.plannedDate,
-        t.estMinutes, t.done, t.doneAt, t.spentMs, t.active, t.sortOrder,
+        t.scheduledMin, t.estMinutes, t.done, t.doneAt, t.spentMs, t.active, t.sortOrder,
         (t.subtasks || []).map((st) => [st.id, st.text, st.done, st.sortOrder])]),
     });
   }

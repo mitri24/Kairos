@@ -43,8 +43,11 @@
 
       <p id="saveInfo" class="save-info" aria-live="polite"></p>
 
-      <aside class="todo-card" aria-label="Today's tasks and priorities">
-        <h2>Today's tasks</h2>
+      <aside class="todo-card" aria-label="Today's plan and timeline">
+        <div class="todo-head">
+          <h2>Today's plan</h2>
+          <span class="todo-clock" id="todoClock" title="Current time">--:--</span>
+        </div>
         <p id="todoDayInfo" class="todo-day-info"></p>
 
         <div class="todo-input-row">
@@ -59,8 +62,13 @@
           <button id="todoAddBtn" class="todo-add-btn" aria-label="Add" title="Add">+</button>
         </div>
 
+        <!-- Tages-Zeitstrahl: Todos an ihrer Uhrzeit; läuft mit der Systemuhr mit -->
+        <div class="todo-timeline" id="todoTimeline" aria-label="Day timeline">
+          <div class="todo-timeline__inner" id="todoTimelineInner"></div>
+        </div>
+
         <ul id="todoList" class="todo-list" aria-live="polite"></ul>
-        <p id="todoEmpty" class="todo-empty">No tasks yet today.</p>
+        <p id="todoEmpty" class="todo-empty">No tasks yet today. Add one and drag it onto the timeline.</p>
       </aside>
 
     </main>

@@ -222,3 +222,104 @@
   text-align: center;
   padding: 0.6rem 0;
 }
+
+/* ── Kopf mit Live-Uhr ───────────────────────── */
+.todo-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.todo-clock {
+  font-size: 0.78rem; font-weight: 800; color: var(--accent);
+  background: var(--accent-soft); border-radius: var(--r-pill);
+  padding: 0.1rem 0.5rem; font-variant-numeric: tabular-nums;
+}
+
+/* ── Drag-Griff & Zeit-Feld in der Liste ─────── */
+.todo-grip {
+  flex: none; cursor: grab; color: var(--muted-2); font-size: 0.8rem;
+  line-height: 1; letter-spacing: -2px; user-select: none;
+}
+.todo-grip:hover { color: var(--accent); }
+.todo-grip:active { cursor: grabbing; }
+.todo-time {
+  flex: none; width: 5.4rem; border: 1px solid var(--line);
+  background: var(--paper-2); color: var(--ink-soft);
+  border-radius: var(--r-chip); padding: 0.2rem 0.35rem; font-size: 0.72rem;
+  font-variant-numeric: tabular-nums; outline: none;
+}
+.todo-time:focus { border-color: var(--accent); }
+
+/* ── Tages-Zeitstrahl ────────────────────────── */
+.todo-timeline {
+  position: relative; height: min(46vh, 460px); flex: 0 0 auto;
+  overflow-y: auto; border: 1px solid var(--line);
+  border-radius: var(--r-inner); background: var(--paper-2);
+}
+.todo-timeline.is-drop { border-color: var(--accent); box-shadow: inset 0 0 0 2px var(--accent-soft2); }
+.todo-timeline__inner { position: relative; width: 100%; }
+
+.tl-hour { position: absolute; left: 0; right: 0; height: 0; border-top: 1px dashed var(--line-soft); pointer-events: none; }
+.tl-hour__lbl {
+  position: absolute; left: 5px; top: -7px; font-size: 0.62rem; font-weight: 700;
+  color: var(--muted-2); font-variant-numeric: tabular-nums; background: var(--paper-2); padding: 0 2px;
+}
+
+.tl-now { position: absolute; left: 0; right: 0; height: 0; border-top: 2px solid var(--accent); pointer-events: none; z-index: 4; }
+.tl-now__dot { position: absolute; left: 38px; top: -4px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+.tl-item {
+  position: absolute; left: 42px; right: 6px; z-index: 2; overflow: hidden;
+  display: flex; align-items: flex-start; gap: 6px; padding: 4px 6px;
+  border-radius: 9px; cursor: grab; background: var(--paper);
+  border: 1px solid var(--line); border-left: 3px solid var(--line-strong);
+  transition: box-shadow 120ms ease, opacity 120ms ease, background 120ms ease;
+}
+.tl-item:hover { box-shadow: var(--shadow-soft); }
+.tl-item.is-dragging { opacity: 0.45; cursor: grabbing; }
+.tl-item.is-prio { box-shadow: inset 0 0 0 1px var(--accent-soft2); }
+.tl-item__check {
+  flex: none; width: 15px; height: 15px; margin-top: 1px; border-radius: 4px;
+  border: 1.6px solid var(--line-strong); background: var(--paper-2);
+  color: var(--paper); font-size: 0.6rem; font-weight: 900; line-height: 1;
+  display: grid; place-content: center; cursor: pointer;
+}
+.tl-item__body { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.tl-item__name {
+  font-size: 0.74rem; font-weight: 700; color: var(--ink); line-height: 1.2;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.tl-item__range { font-size: 0.62rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.tl-item.is-future { border-left-color: var(--muted-2); }
+.tl-item.is-now { border-color: var(--accent-border); border-left-color: var(--accent); background: var(--accent-soft); }
+.tl-item.is-now .tl-item__check { border-color: var(--accent); }
+.tl-item.is-past {
+  border-color: var(--danger); border-left-color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 12%, var(--paper));
+}
+.tl-item.is-past .tl-item__name { color: var(--danger); }
+.tl-item.is-past .tl-item__check { border-color: var(--danger); }
+.tl-item.is-done { border-color: rgba(94,133,119,0.4); border-left-color: var(--green); background: var(--green-soft); opacity: 0.72; }
+.tl-item.is-done .tl-item__check { background: var(--green); border-color: var(--green); }
+.tl-item.is-done .tl-item__name { text-decoration: line-through; color: var(--muted); }
+
+/* ── Nachfrage-Modal (überfällige Aufgabe) ───── */
+.todo-modal {
+  position: fixed; inset: 0; z-index: 2000; display: grid; place-content: center;
+  padding: 1rem; background: rgba(38,34,29,0.42);
+}
+.todo-modal[hidden] { display: none; }
+.todo-modal__box {
+  width: min(20rem, 90vw); background: var(--paper); border: 1px solid var(--line);
+  border-radius: var(--r-card); box-shadow: var(--shadow-card); padding: 1.1rem;
+  text-align: center; display: flex; flex-direction: column; gap: 0.7rem;
+}
+.todo-modal__title { font-size: 0.95rem; font-weight: 800; color: var(--ink); }
+.todo-modal__msg { font-size: 0.8rem; color: var(--ink-soft); line-height: 1.5; }
+.todo-modal__actions { display: flex; gap: 0.5rem; }
+.todo-modal .btn {
+  flex: 1; width: auto; min-width: 0; height: auto; padding: 0.5rem 0.6rem;
+  border-radius: var(--r-btn); border: 1px solid var(--line);
+  background: var(--paper-2); color: var(--ink); font-size: 0.78rem; font-weight: 700; cursor: pointer;
+}
+.todo-modal .btn[data-a="yes"] { background: var(--accent); border-color: var(--accent); color: var(--paper); }
+.todo-modal .btn:hover { filter: brightness(0.97); }
+.todo-modal__later { border: none; background: transparent; color: var(--muted); font-size: 0.74rem; text-decoration: underline; cursor: pointer; }
+.todo-modal__later:hover { color: var(--ink-soft); }

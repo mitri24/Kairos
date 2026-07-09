@@ -5,7 +5,7 @@
 //                          (Code-Updates greifen sofort, offline bleibt bedienbar).
 // Version im Cache-Namen erzwingt saubere Aktualisierung beim Aktivieren.
 
-const VERSION = "v5";
+const VERSION = "v6";
 const CACHE = `lernuhr-shell-${VERSION}`;
 
 // App-Shell: alles, was zum Kaltstart offline nötig ist.

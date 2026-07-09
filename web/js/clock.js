@@ -9,17 +9,19 @@ export function initClock({ store }) {
 
   function render() {
     const now = store.now();
-    elTime.textContent = formatClock(now);
-    const dateStr = formatDate(now);
-    elDate.textContent = dateStr;
-    // Titel der Heute-Ansicht (z. B. "Mittwoch, 08.07.")
+    // Wanduhr im Sidebar-Kopf wurde entfernt — Elemente können fehlen.
+    if (elTime) elTime.textContent = formatClock(now);
+    if (elDate) elDate.textContent = formatDate(now);
+    // Titel der Heute-Ansicht (z. B. "Thursday, 09/07") — bleibt erhalten.
     if (elTodayLabel) {
       elTodayLabel.textContent = new Date(now).toLocaleDateString("en-GB", { weekday: "long", day: "2-digit", month: "2-digit" });
     }
     // Zeitquelle: NTP (server-korrigiert) vs. lokal
-    const synced = store.state.online && store.state.loaded;
-    elSrc.textContent = synced ? "NTP" : "lokal";
-    elSrc.dataset.mode = synced ? "ntp" : "local";
+    if (elSrc) {
+      const synced = store.state.online && store.state.loaded;
+      elSrc.textContent = synced ? "NTP" : "lokal";
+      elSrc.dataset.mode = synced ? "ntp" : "local";
+    }
   }
 
   render();

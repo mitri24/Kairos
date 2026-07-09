@@ -31,15 +31,16 @@ export function initDayTimeline({ store, api }) {
   document.body.appendChild(modal.overlay);
 
   const handled = new Set();     // key `${id}:${scheduledMin}` bereits beantwortet
-  const snoozed = new Map();     // key -> min-of-day, bis dahin nicht erneut fragen
+  const snoozed = new Map();     // key -> absolute epoch ms, bis dahin nicht erneut fragen
   let currentKey = null;         // gerade offener Prompt (null = keiner)
   let lastMin = -1;
+  let lastDayKey = null;         // Tageswechsel → handled/snoozed leeren
 
   inner.style.height = `${WINDOW_MIN * PX_PER_MIN}px`;
 
   async function act(fn) {
-    try { store.applySnapshot(await fn()); }
-    catch (e) { console.warn("[plan]", e.message); }
+    try { store.applySnapshot(await fn()); return true; }
+    catch (e) { console.warn("[plan]", e.message); return false; }
   }
 
   // ── Datenauswahl: heute geplante Aufgaben (mit Uhrzeit) ──
@@ -62,6 +63,10 @@ export function initDayTimeline({ store, api }) {
     lastMin = Math.floor(nowMin);
     if (clockLabel) clockLabel.textContent = minToClock(nowMin);
 
+    // Tageswechsel: beantwortete/aufgeschobene Nachfragen zurücksetzen.
+    const dayKey = dayKeyOf(store.now());
+    if (dayKey !== lastDayKey) { handled.clear(); snoozed.clear(); lastDayKey = dayKey; }
+
     const tasks = scheduledToday();
     if (emptyHint) emptyHint.hidden = tasks.length > 0;
 
@@ -73,8 +78,9 @@ export function initDayTimeline({ store, api }) {
     // Aufgaben-Blöcke
     for (const t of tasks) {
       const dur = durOf(t);
-      const top = yOf(t.scheduledMin);
       const height = Math.max(MIN_BLOCK_MIN, dur) * PX_PER_MIN - 2;
+      // Außerhalb des Fensters (z. B. < 06:00) sichtbar halten statt abschneiden.
+      const top = clamp(yOf(t.scheduledMin), 0, WINDOW_MIN * PX_PER_MIN - height);
       const status = t.done ? "done" : slotStatus({ startMin: t.scheduledMin, durationMin: dur }, nowMin);
       const range = `${minToClock(t.scheduledMin)}–${minToClock(t.scheduledMin + dur)}`;
       h += `<div class="tl-item is-${status}${t.active ? " is-active" : ""}" data-id="${escapeHtml(String(t.id))}"
@@ -117,7 +123,7 @@ export function initDayTimeline({ store, api }) {
       const key = `${t.id}:${t.scheduledMin}`;
       if (handled.has(key)) continue;
       const until = snoozed.get(key);
-      if (until != null && nowMin < until) continue;
+      if (until != null && store.now() < until) continue;
       showPrompt(t, key);
       return;
     }
@@ -129,13 +135,14 @@ export function initDayTimeline({ store, api }) {
     modal.overlay.hidden = false;
     modal.yes.focus();
 
-    modal.onYes = () => {
-      handled.add(key);
+    // handled erst NACH erfolgreichem Update setzen; scheitert es (offline),
+    // bleibt der Slot re-promptbar (kurz zurückgestellt, statt für immer stumm).
+    modal.onYes = async () => {
       close();
-      act(() => api.tasks.update(task.id, { done: true }));
+      if (await act(() => api.tasks.update(task.id, { done: true }))) handled.add(key);
+      else snoozed.set(key, store.now() + SNOOZE_MIN * 60_000);
     };
-    modal.onNo = () => {
-      handled.add(key); // dieser Slot ist beantwortet; der neue Slot fragt ggf. später erneut
+    modal.onNo = async () => {
       close();
       const today = dayKeyOf(store.now());
       const nowMin = nowMinOfDay(store.now());
@@ -144,10 +151,11 @@ export function initDayTimeline({ store, api }) {
         .map((x) => ({ startMin: x.scheduledMin, durationMin: durOf(x) }));
       const from = Math.max(ceilToStep(nowMin, SLOT_STEP_MIN), DAY_START_MIN);
       const newMin = nextFreeSlot(occupied, durOf(task), from);
-      act(() => api.tasks.update(task.id, { scheduledMin: newMin, plannedDate: today }));
+      if (await act(() => api.tasks.update(task.id, { scheduledMin: newMin, plannedDate: today }))) handled.add(key);
+      else snoozed.set(key, store.now() + SNOOZE_MIN * 60_000);
     };
     modal.onLater = () => {
-      snoozed.set(key, nowMinOfDay(store.now()) + SNOOZE_MIN);
+      snoozed.set(key, store.now() + SNOOZE_MIN * 60_000);
       close();
     };
   }
