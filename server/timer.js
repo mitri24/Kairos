@@ -3,6 +3,7 @@
 import * as domain from "../shared/pomodoro.js";
 import * as repo from "./repo.js";
 import { nowMs, dayKey } from "./lib/util.js";
+import { computeHealthContext } from "./health/context.js";
 
 const { STATUS, PHASES } = domain;
 
@@ -58,6 +59,11 @@ export function getSnapshot(now = nowMs()) {
   }
   const daily = repo.getDailyMetrics(dayKey(new Date(now)));
 
+  // Persönliches Profil + abgeleiteter Health-Kontext (Brücke zu KI/Planung).
+  const profile = repo.getProfile();
+  const contextSource = repo.resolveContextSource();
+  const health = computeHealthContext(repo.recentDaily(contextSource, 14), profile, now);
+
   return {
     serverTime: now,
     timer: {
@@ -70,6 +76,8 @@ export function getSnapshot(now = nowMs()) {
       updatedAt: state.updatedAt,
     },
     settings,
+    profile,
+    health,
     exams: repo.listExams(),
     tasks,
     topics: repo.listTopics(),

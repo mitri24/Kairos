@@ -1,6 +1,7 @@
 // Datenzugriff: mappt SQLite-Zeilen (snake_case) auf JS-Objekte (camelCase).
 import { getDb } from "./db.js";
 import { nowMs } from "./lib/util.js";
+import { DAILY_FIELDS, DAILY_COLS } from "./health/fields.js";
 
 // ── Mapper ───────────────────────────────────────
 const mapExam = (r) => r && ({
@@ -261,6 +262,169 @@ export function setMeta(key, value) {
     INSERT INTO app_meta (key, value) VALUES (?, ?)
     ON CONFLICT(key) DO UPDATE SET value = excluded.value
   `).run(key, value);
+}
+
+// ── Profil (Singleton) ───────────────────────────
+const mapProfile = (r) => r && ({
+  displayName: r.display_name, birthDate: r.birth_date, sex: r.sex,
+  heightCm: r.height_cm, weightKg: r.weight_kg, timezone: r.timezone,
+  chronotype: r.chronotype, adhd: !!r.adhd, conditions: r.conditions,
+  primaryDevice: r.primary_device, sleepGoalHours: r.sleep_goal_hours,
+  targetBedtime: r.target_bedtime, targetWakeTime: r.target_wake_time,
+  restingHrBaseline: r.resting_hr_baseline, hrvBaselineMs: r.hrv_baseline_ms,
+  aiEnabled: !!r.ai_enabled, aiNotes: r.ai_notes,
+  dataConsentAt: r.data_consent_at, updatedAt: r.updated_at,
+});
+
+// Profil-Felder: key (camelCase) → col (snake_case) + Coercion-Kind.
+const PROFILE_FIELDS = [
+  ["displayName", "display_name", "text"], ["birthDate", "birth_date", "text"],
+  ["sex", "sex", "text"], ["heightCm", "height_cm", "num"], ["weightKg", "weight_kg", "num"],
+  ["timezone", "timezone", "text"], ["chronotype", "chronotype", "text"],
+  ["adhd", "adhd", "bool"], ["conditions", "conditions", "text"],
+  ["primaryDevice", "primary_device", "text"], ["sleepGoalHours", "sleep_goal_hours", "num"],
+  ["targetBedtime", "target_bedtime", "text"], ["targetWakeTime", "target_wake_time", "text"],
+  ["restingHrBaseline", "resting_hr_baseline", "num"], ["hrvBaselineMs", "hrv_baseline_ms", "num"],
+  ["aiEnabled", "ai_enabled", "bool"], ["aiNotes", "ai_notes", "text"],
+];
+
+export function getProfile() {
+  return mapProfile(getDb().prepare("SELECT * FROM profile WHERE id = 1").get());
+}
+
+// Partielles Update: nur mitgeschickte Felder ändern, Rest bleibt bestehen.
+export function saveProfile(patch = {}) {
+  const sets = [];
+  const vals = [];
+  for (const [key, col, kind] of PROFILE_FIELDS) {
+    if (patch[key] === undefined) continue;
+    let v = patch[key];
+    if (kind === "bool") v = v ? 1 : 0;
+    else if (kind === "num") v = v === null || v === "" ? null : Number(v);
+    else v = v === null ? null : String(v);
+    if (kind === "num" && v !== null && !Number.isFinite(v)) continue;
+    sets.push(`${col} = ?`);
+    vals.push(v);
+  }
+  // Consent-Zeitstempel setzen, sobald KI erstmals aktiviert wird.
+  if (patch.aiEnabled) { sets.push("data_consent_at = COALESCE(data_consent_at, ?)"); vals.push(nowMs()); }
+  sets.push("updated_at = ?");
+  vals.push(nowMs());
+  getDb().prepare(`UPDATE profile SET ${sets.join(", ")} WHERE id = 1`).run(...vals);
+  return getProfile();
+}
+
+// ── Health: tägliche Rollups ─────────────────────
+const mapDaily = (r, includeRaw = false) => {
+  if (!r) return null;
+  const out = { dayKey: r.day_key, source: r.source };
+  for (const f of DAILY_FIELDS) out[f.key] = r[f.col];
+  out.recordedAt = r.recorded_at;
+  out.importedAt = r.imported_at;
+  out.updatedAt = r.updated_at;
+  if (includeRaw && r.raw_json) { try { out.raw = JSON.parse(r.raw_json); } catch { out.raw = null; } }
+  return out;
+};
+
+// Upsert-SQL einmalig aus der Feld-Spec bauen (Spaltennamen sind statisch/sicher).
+const DAILY_INSERT_SQL = (() => {
+  const cols = ["day_key", "source", ...DAILY_COLS, "raw_json", "recorded_at", "imported_at", "updated_at"];
+  const placeholders = cols.map(() => "?").join(", ");
+  const merge = [...DAILY_COLS, "raw_json", "recorded_at"]
+    .map((c) => `${c} = COALESCE(excluded.${c}, health_daily.${c})`)
+    .join(", ");
+  return `INSERT INTO health_daily (${cols.join(", ")}) VALUES (${placeholders})
+    ON CONFLICT(day_key, source) DO UPDATE SET ${merge}, updated_at = excluded.updated_at`;
+})();
+
+// Einen normalisierten Tagesdatensatz schreiben (neue Werte überschreiben,
+// fehlende Felder bleiben erhalten → mehrfacher Teil-Import ist idempotent).
+export function upsertDaily({ dayKey, source, cols = {}, raw = null, recordedAt = null } = {}) {
+  const now = nowMs();
+  const vals = [
+    dayKey, source,
+    ...DAILY_COLS.map((c) => (cols[c] === undefined ? null : cols[c])),
+    raw == null ? null : JSON.stringify(raw),
+    recordedAt ?? null, now, now,
+  ];
+  getDb().prepare(DAILY_INSERT_SQL).run(...vals);
+  return getDaily(dayKey, source);
+}
+
+export function getDaily(dayKey, source) {
+  const r = getDb().prepare("SELECT * FROM health_daily WHERE day_key = ? AND source = ?").get(dayKey, source);
+  return mapDaily(r, true);
+}
+
+// Alle Quellen eines Tages (z. B. RingConn + WHOOP parallel).
+export function getDayAllSources(dayKey) {
+  return getDb().prepare("SELECT * FROM health_daily WHERE day_key = ? ORDER BY source")
+    .all(dayKey).map((r) => mapDaily(r, true));
+}
+
+// Bereichsabfrage (ohne raw_json, um große Antworten zu vermeiden).
+export function listDaily({ from = null, to = null, source = null, limit = 400 } = {}) {
+  const where = [];
+  const args = [];
+  if (from) { where.push("day_key >= ?"); args.push(from); }
+  if (to) { where.push("day_key <= ?"); args.push(to); }
+  if (source) { where.push("source = ?"); args.push(source); }
+  const sql = `SELECT * FROM health_daily ${where.length ? "WHERE " + where.join(" AND ") : ""}
+    ORDER BY day_key DESC, source LIMIT ?`;
+  return getDb().prepare(sql).all(...args, Math.max(1, Math.min(2000, limit))).map((r) => mapDaily(r, false));
+}
+
+// Jüngster Tagesdatensatz — optional auf eine Quelle beschränkt.
+export function latestDaily(source = null) {
+  const sql = source
+    ? "SELECT * FROM health_daily WHERE source = ? ORDER BY day_key DESC LIMIT 1"
+    : "SELECT * FROM health_daily ORDER BY day_key DESC LIMIT 1";
+  const r = source ? getDb().prepare(sql).get(source) : getDb().prepare(sql).get();
+  return mapDaily(r, true);
+}
+
+// Letzte `n` Tage einer Quelle, absteigend — Eingabe für den Health-Kontext.
+export function recentDaily(source, n = 14) {
+  return getDb().prepare("SELECT * FROM health_daily WHERE source = ? ORDER BY day_key DESC LIMIT ?")
+    .all(source, Math.max(1, Math.min(90, n))).map((r) => mapDaily(r, false));
+}
+
+// Welche Quelle liefert die Kontextbasis? Bevorzugt profile.primaryDevice,
+// fällt sonst auf die Quelle mit den jüngsten Daten zurück.
+export function resolveContextSource() {
+  const prof = getProfile();
+  const preferred = prof?.primaryDevice || "ringconn";
+  const hasPreferred = getDb().prepare("SELECT 1 FROM health_daily WHERE source = ? LIMIT 1").get(preferred);
+  if (hasPreferred) return preferred;
+  const any = getDb().prepare("SELECT source FROM health_daily ORDER BY day_key DESC LIMIT 1").get();
+  return any?.source ?? preferred;
+}
+
+export function deleteDaily(dayKey, source = null) {
+  if (source) getDb().prepare("DELETE FROM health_daily WHERE day_key = ? AND source = ?").run(dayKey, source);
+  else getDb().prepare("DELETE FROM health_daily WHERE day_key = ?").run(dayKey);
+}
+
+// ── Health: Intraday-Samples ─────────────────────
+export function insertSamples(samples = []) {
+  if (!samples.length) return 0;
+  const stmt = getDb().prepare(
+    "INSERT INTO health_samples (source, metric, t, value, unit) VALUES (?, ?, ?, ?, ?)"
+  );
+  let n = 0;
+  for (const s of samples) { stmt.run(s.source, s.metric, s.t, s.value, s.unit ?? null); n++; }
+  return n;
+}
+
+export function listSamples({ metric = null, from = null, to = null, limit = 2000 } = {}) {
+  const where = [];
+  const args = [];
+  if (metric) { where.push("metric = ?"); args.push(metric); }
+  if (from != null) { where.push("t >= ?"); args.push(from); }
+  if (to != null) { where.push("t <= ?"); args.push(to); }
+  const sql = `SELECT source, metric, t, value, unit FROM health_samples
+    ${where.length ? "WHERE " + where.join(" AND ") : ""} ORDER BY t DESC LIMIT ?`;
+  return getDb().prepare(sql).all(...args, Math.max(1, Math.min(10000, limit)));
 }
 
 // ── Push-Abonnements ─────────────────────────────

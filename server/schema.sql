@@ -102,6 +102,83 @@ CREATE TABLE IF NOT EXISTS app_meta (
   value TEXT
 );
 
+-- ── Persönliches Profil (Singleton, id = 1) ─────────────────────────
+-- Backend des "Persönliche Informationen"-Tabs. Speist später KI + Planung:
+-- Baselines (Ruhepuls/HRV), Schlafziel & -fenster, Chronotyp, Consent-Flag.
+CREATE TABLE IF NOT EXISTS profile (
+  id                 INTEGER PRIMARY KEY CHECK (id = 1),
+  display_name       TEXT,
+  birth_date         TEXT,                         -- YYYY-MM-DD (→ Alter)
+  sex                TEXT,                          -- 'female'|'male'|'diverse'|'unspecified'
+  height_cm          REAL,
+  weight_kg          REAL,
+  timezone           TEXT,                          -- IANA, z. B. Europe/Zurich
+  chronotype         TEXT,                          -- 'early'|'intermediate'|'late'
+  adhd               INTEGER NOT NULL DEFAULT 0,     -- 0/1
+  conditions         TEXT,                          -- freie Notiz (sensibel)
+  primary_device     TEXT    NOT NULL DEFAULT 'ringconn',
+  sleep_goal_hours   REAL    NOT NULL DEFAULT 8,     -- ≥7 h harte Constraint (SPEC)
+  target_bedtime     TEXT,                          -- HH:MM (Schlaffenster-Start)
+  target_wake_time   TEXT,                          -- HH:MM (Schlaffenster-Ende)
+  resting_hr_baseline REAL,                          -- persönliche Baseline für Abweichungen
+  hrv_baseline_ms    REAL,
+  ai_enabled         INTEGER NOT NULL DEFAULT 0,     -- Einwilligung: Daten für KI-Planung nutzen
+  ai_notes           TEXT,                          -- Ziele/Vorlieben, die die KI kennen soll
+  data_consent_at    INTEGER,                        -- Zeitpunkt der Einwilligung (epoch ms)
+  updated_at         INTEGER NOT NULL DEFAULT 0
+);
+
+-- ── Tägliche Health-Rollups (eine Zeile je Tag + Quelle) ────────────
+-- Kanonische Spalten siehe server/health/fields.js. raw_json bewahrt den
+-- Originalexport (zukunfts-/KI-fest). Upsert über (day_key, source).
+CREATE TABLE IF NOT EXISTS health_daily (
+  day_key           TEXT NOT NULL,                  -- YYYY-MM-DD (lokal)
+  source            TEXT NOT NULL,                  -- 'ringconn'|'whoop'|'apple_health'|…
+  sleep_start       INTEGER,                        -- epoch ms
+  sleep_end         INTEGER,
+  sleep_total_min   INTEGER,
+  sleep_deep_min    INTEGER,
+  sleep_rem_min     INTEGER,
+  sleep_light_min   INTEGER,
+  sleep_awake_min   INTEGER,
+  sleep_efficiency  REAL,
+  sleep_score       INTEGER,
+  resting_hr        REAL,
+  avg_hr            REAL,
+  min_hr            REAL,
+  max_hr            REAL,
+  hrv_ms            REAL,
+  respiratory_rate  REAL,
+  spo2_avg          REAL,
+  spo2_min          REAL,
+  skin_temp_c       REAL,
+  skin_temp_delta_c REAL,
+  steps             INTEGER,
+  active_calories   REAL,
+  total_calories    REAL,
+  activity_min      INTEGER,
+  distance_m        REAL,
+  recovery_score    INTEGER,
+  strain_score      REAL,
+  stress_avg        REAL,
+  readiness         INTEGER,
+  raw_json          TEXT,                           -- Originalexport (JSON)
+  recorded_at       INTEGER,                        -- vom Gerät (epoch ms)
+  imported_at       INTEGER NOT NULL,               -- Zeitpunkt des Imports
+  updated_at        INTEGER NOT NULL,
+  PRIMARY KEY (day_key, source)
+);
+
+-- ── Intraday-Zeitreihen (z. B. Live-Herzfrequenz, SpO₂, Stress) ─────
+CREATE TABLE IF NOT EXISTS health_samples (
+  id      INTEGER PRIMARY KEY AUTOINCREMENT,
+  source  TEXT    NOT NULL,
+  metric  TEXT    NOT NULL,                          -- 'heart_rate'|'spo2'|'hrv'|'stress'|…
+  t       INTEGER NOT NULL,                          -- epoch ms
+  value   REAL    NOT NULL,
+  unit    TEXT
+);
+
 -- Web-Push-Abonnements (Browser/PWA). endpoint ist eindeutig.
 CREATE TABLE IF NOT EXISTS push_subscriptions (
   endpoint   TEXT PRIMARY KEY,
@@ -116,7 +193,10 @@ CREATE INDEX IF NOT EXISTS idx_tasks_exam ON tasks(exam_id);
 CREATE INDEX IF NOT EXISTS idx_subtasks_task ON subtasks(task_id);
 CREATE INDEX IF NOT EXISTS idx_topics_exam ON topics(exam_id);
 CREATE INDEX IF NOT EXISTS idx_sessions_task ON sessions(task_id);
+CREATE INDEX IF NOT EXISTS idx_health_daily_day ON health_daily(day_key);
+CREATE INDEX IF NOT EXISTS idx_health_samples_metric ON health_samples(metric, t);
 
 -- Singleton-Zeilen anlegen, falls nicht vorhanden
 INSERT OR IGNORE INTO settings (id) VALUES (1);
 INSERT OR IGNORE INTO timer_state (id, remaining_ms) VALUES (1, 1500000);
+INSERT OR IGNORE INTO profile (id) VALUES (1);

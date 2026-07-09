@@ -4,6 +4,9 @@ import * as timer from "./timer.js";
 import * as repo from "./repo.js";
 import * as push from "./push.js";
 import { readJsonBody, toInt, toNum, str, nowMs } from "./lib/util.js";
+import { normalizeDaily, normalizeSamples, normalizeSource, SUPPORTED_SOURCES } from "./health/normalize.js";
+import { computeHealthContext } from "./health/context.js";
+import { DAILY_FIELDS } from "./health/fields.js";
 
 // Route-Tabelle: [METHOD, RegExp, handler(params, body) → responseObj]
 const routes = [];
@@ -125,6 +128,101 @@ add("PUT", /^\/api\/topics\/(\d+)$/, (p, b) => {
 });
 add("DELETE", /^\/api\/topics\/(\d+)$/, (p) => { repo.deleteTopic(Number(p[0])); return timer.getSnapshot(); });
 
+// ── Profil (persönliche Informationen) ───────────
+add("GET", /^\/api\/profile$/, () => repo.getProfile());
+add("PUT", /^\/api\/profile$/, (_p, b) => repo.saveProfile(b || {}));
+
+// ── Health: Import & Abfrage ─────────────────────
+// Abgeleiteter Readiness-/Kapazitäts-Kontext (Brücke zu KI + Planung).
+function healthContext() {
+  const source = repo.resolveContextSource();
+  const rows = repo.recentDaily(source, 14);
+  return computeHealthContext(rows, repo.getProfile(), nowMs());
+}
+
+// Einen Rohtag einer Quelle normalisieren und schreiben. Ohne auflösbaren
+// Tagesschlüssel wird der Datensatz übersprungen (statt Fehler zu werfen).
+function ingestDay(source, raw) {
+  const norm = normalizeDaily(source, raw);
+  if (!norm.dayKey) return { stored: null, skipped: true };
+  const stored = repo.upsertDaily({
+    dayKey: norm.dayKey, source: norm.source, cols: norm.cols,
+    raw: norm.raw, recordedAt: norm.recordedAt,
+  });
+  return { stored, skipped: false };
+}
+
+// Maschinenlesbare Feld-/Quellen-Referenz (für Doku, Clients, KI-Prompts).
+add("GET", /^\/api\/health\/schema$/, () => ({
+  sources: SUPPORTED_SOURCES,
+  fields: DAILY_FIELDS.map(({ key, unit, min, max }) => ({ key, unit, min, max })),
+}));
+
+// Batch-Import — der Haupteinstieg. Body: { source, days:[…], samples?:[…]|{…} }
+add("POST", /^\/api\/health\/import$/, (_p, b) => {
+  const source = normalizeSource(b.source);
+  const list = Array.isArray(b.days) ? b.days
+    : Array.isArray(b.records) ? b.records
+    : Array.isArray(b.daily) ? b.daily
+    : b.day ? [b.day] : [];
+  let imported = 0;
+  let skipped = 0;
+  const days = [];
+  for (const raw of list) {
+    const { stored, skipped: sk } = ingestDay(source, raw);
+    if (sk) skipped++; else { imported++; days.push(stored.dayKey); }
+  }
+  const samples = b.samples ? repo.insertSamples(normalizeSamples(source, b.samples)) : 0;
+  return { source, imported, skipped, days, samples, context: healthContext() };
+});
+
+// Einzelnen Tag einspeisen. Body: { source, day/date/…, …kanonisch } oder { source, raw:{…} }
+add("POST", /^\/api\/health\/daily$/, (_p, b) => {
+  const source = normalizeSource(b.source);
+  const { stored, skipped } = ingestDay(source, b.raw ?? b);
+  if (skipped) throw httpError(400, "Kein Tagesschlüssel (day/date) erkennbar");
+  return { day: stored, context: healthContext() };
+});
+
+// Intraday-Zeitreihen. Body: { source, samples:[{metric,t,value,unit}]|{metric:[…]} }
+add("POST", /^\/api\/health\/samples$/, (_p, b) => {
+  const source = normalizeSource(b.source);
+  const n = repo.insertSamples(normalizeSamples(source, b.samples ?? b));
+  return { source, samples: n };
+});
+
+add("GET", /^\/api\/health\/context$/, () => healthContext());
+
+add("GET", /^\/api\/health\/latest$/, (_p, _b, q) => {
+  const source = q.source ? normalizeSource(q.source) : repo.resolveContextSource();
+  return { source, day: repo.latestDaily(source) };
+});
+
+add("GET", /^\/api\/health\/daily$/, (_p, _b, q) => ({
+  days: repo.listDaily({
+    from: q.from || null, to: q.to || null,
+    source: q.source ? normalizeSource(q.source) : null,
+    limit: toInt(q.limit, 400),
+  }),
+}));
+
+add("GET", /^\/api\/health\/daily\/(\d{4}-\d{2}-\d{2})$/, (p, _b, q) => {
+  if (q.source) return { dayKey: p[0], sources: [repo.getDaily(p[0], normalizeSource(q.source))].filter(Boolean) };
+  return { dayKey: p[0], sources: repo.getDayAllSources(p[0]) };
+});
+
+add("DELETE", /^\/api\/health\/daily\/(\d{4}-\d{2}-\d{2})$/, (p, _b, q) => {
+  repo.deleteDaily(p[0], q.source ? normalizeSource(q.source) : null);
+  return { deleted: true, dayKey: p[0] };
+});
+
+add("GET", /^\/api\/health\/samples$/, (_p, _b, q) => ({
+  samples: repo.listSamples({
+    metric: q.metric || null, from: toInt(q.from, null), to: toInt(q.to, null),
+    limit: toInt(q.limit, 2000),
+  }),
+}));
+
 // ── Dispatcher ───────────────────────────────────
 export function httpError(status, message) {
   const e = new Error(message);
@@ -132,8 +230,18 @@ export function httpError(status, message) {
   return e;
 }
 
+// Query-Parameter als einfaches Objekt (letzter Wert gewinnt bei Duplikaten).
+function parseQuery(url) {
+  try {
+    return Object.fromEntries(new URL(url, "http://localhost").searchParams);
+  } catch {
+    return {};
+  }
+}
+
 // Gibt { status, body } zurück oder null, wenn keine API-Route passt.
 export async function handleApi(req, pathname) {
+  const query = parseQuery(req.url);
   for (const r of routes) {
     if (r.method !== req.method) continue;
     const m = pathname.match(r.pattern);
@@ -143,7 +251,7 @@ export async function handleApi(req, pathname) {
     if (req.method !== "GET" && req.method !== "DELETE") {
       body = await readJsonBody(req);
     }
-    const result = await r.handler(params, body); // Handler dürfen async sein (z. B. Push)
+    const result = await r.handler(params, body, query); // Handler dürfen async sein (z. B. Push)
     return { status: 200, body: result };
   }
   return null;
