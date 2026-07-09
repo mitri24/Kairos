@@ -6,6 +6,6 @@ export const isExtensionContext = Boolean(
 
 export async function send(type, rest = {}) {
   const response = await chrome.runtime.sendMessage({ type, ...rest });
-  if (!response?.ok) throw new Error(response?.error ?? "不明なエラー");
+  if (!response?.ok) throw new Error(response?.error ?? "Unknown error");
   return response.payload;
 }

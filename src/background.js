@@ -28,6 +28,14 @@ bootstrapService().catch((error) => {
   console.error("[Pomodoro] Service worker bootstrap failed:", error);
 });
 
+// Klick auf das Toolbar-Icon öffnet die angedockte Seitenleiste (statt eines
+// Popups), damit der Timer tab-übergreifend sichtbar bleibt.
+if (chrome.sidePanel?.setPanelBehavior) {
+  chrome.sidePanel
+    .setPanelBehavior({ openPanelOnActionClick: true })
+    .catch((error) => console.warn("[Pomodoro] sidePanel setup failed:", error));
+}
+
 chrome.runtime.onInstalled.addListener(async () => {
   await service.init();
 });

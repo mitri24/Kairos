@@ -9,13 +9,14 @@
   border: 1px solid var(--line);
   background: var(--paper);
   color: var(--ink);
-  border-radius: 0.85rem;
+  border-radius: var(--r-btn);
   height: clamp(2.6rem, 10vw, 2.9rem);
   font-size: clamp(0.84rem, 2.9vw, 0.94rem);
   font-weight: 600;
   cursor: pointer;
   width: 100%;
   flex: 1 1 0;
+  box-shadow: var(--shadow-soft);
   transition: transform 80ms ease, filter 120ms ease, background-color 140ms ease;
 }
 
@@ -28,7 +29,7 @@
   padding: 0;
 }
 
-.btn:hover    { background: var(--shell); }
+.btn:hover    { background: var(--warm-2); }
 
 .btn.primary {
   background: var(--accent);
@@ -37,9 +38,9 @@
   font-weight: 700;
 }
 
-.btn.primary:hover { filter: brightness(1.08); background: var(--accent); }
+.btn.primary:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
 
-.btn.danger   { background: var(--shell); }
+.btn.danger   { background: var(--paper-2); }
 
 .btn.pressed {
   transform: translateY(1px) scale(0.98);

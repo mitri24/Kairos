@@ -1,0 +1,66 @@
+/* ── Prüfungs-Countdown-Karte ────────────────────────────── */
+/* Die Chips oben (.exam-chip*) sind bereits in base.css gestylt.
+   Hier nur die Countdown-Karte (#examCard) und ihre Innenteile. */
+
+.exam-card {
+  gap: 12px;
+  border-color: rgba(94, 133, 119, 0.32);
+}
+
+.exam-card__head {
+  display: flex; align-items: center; gap: 8px;
+}
+.exam-card__name {
+  flex: 1; min-width: 0;
+  font-size: 15px; font-weight: 800; letter-spacing: .2px;
+  color: var(--ink); background: var(--paper-2);
+  border: 1.5px solid var(--line); border-radius: var(--r-chip);
+  padding: 8px 12px; outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.exam-card__name::placeholder { color: var(--muted); font-weight: 700; }
+.exam-card__name:focus { border-color: var(--green); box-shadow: 0 0 0 3px var(--green-soft); }
+
+/* Große Zählanzeige: Resttage + Sekunden-HMS */
+.exam-card__count {
+  display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+}
+.exam-card__days {
+  font-size: clamp(38px, 9vw, 48px); font-weight: 800; line-height: 1;
+  color: var(--green); font-variant-numeric: tabular-nums; letter-spacing: -1px;
+}
+.exam-card__daysunit {
+  font-size: 14px; font-weight: 700; color: var(--muted); margin-right: auto;
+}
+.exam-card__hms {
+  font-family: var(--num);
+  font-size: 15px; font-weight: 700; color: var(--ink-soft);
+  font-variant-numeric: tabular-nums; letter-spacing: 1px;
+}
+
+.exam-card__date {
+  width: 100%;
+  border: 1.5px solid var(--line); background: var(--paper-2); color: var(--ink);
+  border-radius: var(--r-chip); padding: 8px 10px; font-size: 13px; outline: none;
+}
+.exam-card__date:focus { border-color: var(--green); }
+
+.exam-card__foot {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  flex-wrap: wrap;
+}
+.exam-pensum {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12.5px; font-weight: 700; color: var(--muted);
+}
+.exam-pensum input[type="number"] {
+  width: 68px; text-align: right;
+}
+.exam-card__remain {
+  font-size: 12.5px; font-weight: 700; color: var(--green);
+}
+
+.exam-card__empty {
+  font-size: 13px; color: var(--muted); text-align: center;
+  padding: 10px 6px 2px; line-height: 1.5;
+}

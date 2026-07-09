@@ -1,10 +1,10 @@
-// Timer-Rendering: DOM-Updates für Uhr, Labels und Card-States
+// Timer-Rendering: Labels, Button-Zustand und Card-States (ohne Countdown-Zahl —
+// die Restzeit zeigt das ablaufende Zifferblatt in dial.js).
 import { STATUS, PHASE } from "./constants.js";
-import { formatMs, phaseText } from "./utils.js";
+import { phaseText } from "./utils.js";
 
 const phaseLabel  = document.getElementById("phaseLabel");
 const statusLabel = document.getElementById("statusLabel");
-const timeLabel   = document.getElementById("timeLabel");
 const cycleLabel  = document.getElementById("cycleLabel");
 const timerCard   = document.getElementById("timerCard");
 
@@ -12,35 +12,25 @@ export const startPauseBtn = document.getElementById("startPauseBtn");
 
 export function renderMeta(state, settings) {
   if (phaseLabel) phaseLabel.textContent = phaseText(state.phase);
-  if (cycleLabel) cycleLabel.textContent = `セット ${state.cycleInBlock + 1}/${settings.cyclesUntilLongBreak}`;
+  if (cycleLabel) cycleLabel.textContent = `Set ${state.cycleInBlock + 1}/${settings.cyclesUntilLongBreak}`;
+  if (timerCard) timerCard.dataset.phase = state.phase;
   renderVisualState(state);
   renderStartPauseLabel(state.status);
-}
-
-export function renderTimer(state) {
-  const remainingMs = state.status === STATUS.RUNNING && state.endsAt
-    ? Math.max(0, state.endsAt - Date.now())
-    : state.remainingMs;
-  if (timeLabel) timeLabel.textContent = formatMs(remainingMs);
-}
-
-export function renderDraftTimer(minutes) {
-  if (timeLabel) timeLabel.textContent = formatMs(minutes * 60_000);
 }
 
 function renderStartPauseLabel(status) {
   if (status === STATUS.RUNNING) {
     startPauseBtn.textContent = "⏸";
-    startPauseBtn.setAttribute("aria-label", "一時停止");
-    startPauseBtn.setAttribute("title",      "一時停止");
+    startPauseBtn.setAttribute("aria-label", "Pause");
+    startPauseBtn.setAttribute("title",      "Pause");
   } else if (status === STATUS.PAUSED) {
     startPauseBtn.textContent = "▶";
-    startPauseBtn.setAttribute("aria-label", "つづける");
-    startPauseBtn.setAttribute("title",      "つづける");
+    startPauseBtn.setAttribute("aria-label", "Resume");
+    startPauseBtn.setAttribute("title",      "Resume");
   } else {
     startPauseBtn.textContent = "▶";
-    startPauseBtn.setAttribute("aria-label", "スタート");
-    startPauseBtn.setAttribute("title",      "スタート");
+    startPauseBtn.setAttribute("aria-label", "Start");
+    startPauseBtn.setAttribute("title",      "Start");
   }
 }
 
@@ -49,19 +39,19 @@ function renderVisualState(state) {
 
   if (state.status === STATUS.RUNNING && state.phase === PHASE.FOCUS) {
     timerCard.classList.add("state-running-focus");
-    if (statusLabel) statusLabel.textContent = "集中中";
+    if (statusLabel) statusLabel.textContent = "Focusing";
     return;
   }
   if (state.status === STATUS.RUNNING) {
     timerCard.classList.add("state-running-break");
-    if (statusLabel) statusLabel.textContent = "休けい中";
+    if (statusLabel) statusLabel.textContent = "On break";
     return;
   }
   if (state.status === STATUS.PAUSED) {
     timerCard.classList.add("state-paused");
-    if (statusLabel) statusLabel.textContent = "一時停止中";
+    if (statusLabel) statusLabel.textContent = "Paused";
     return;
   }
   timerCard.classList.add("state-idle");
-  if (statusLabel) statusLabel.textContent = "じゅんびOK";
+  if (statusLabel) statusLabel.textContent = "Ready";
 }

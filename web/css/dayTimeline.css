@@ -1,0 +1,113 @@
+/* ── Tages-Zeitstrahl (Heute, linke Spalte) ──────────────── */
+.plan-card { flex: 1; min-height: 0; }
+.plan-card .card__head { flex: 0 0 auto; }
+.plan-hint {
+  flex: 0 0 auto; font-size: 11px; color: var(--muted); line-height: 1.4;
+  margin-top: 2px;
+}
+
+/* Scroll-Viewport */
+.day-timeline {
+  position: relative; flex: 1; min-height: 0; overflow-y: auto;
+  border: 1.5px solid var(--line); border-radius: var(--r-inner);
+  background: var(--paper-2); margin-top: 8px;
+}
+.day-timeline.is-drop { border-color: var(--accent); box-shadow: inset 0 0 0 2px var(--accent-soft2); }
+
+/* Inhalt in voller Tageshöhe (Höhe wird per JS gesetzt) */
+.day-timeline__inner { position: relative; width: 100%; }
+
+/* Stundenlinien + Labels */
+.tl-hour {
+  position: absolute; left: 0; right: 0; height: 0;
+  border-top: 1px dashed var(--line-soft); pointer-events: none;
+}
+.tl-hour__lbl {
+  position: absolute; left: 6px; top: -8px;
+  font-size: 10.5px; font-weight: 700; color: var(--muted-2);
+  font-variant-numeric: tabular-nums; background: var(--paper-2); padding: 0 2px;
+}
+
+/* Now-Linie — läuft mit der Systemuhr mit */
+.tl-now {
+  position: absolute; left: 0; right: 0; height: 0;
+  border-top: 2px solid var(--accent); pointer-events: none; z-index: 4;
+}
+.tl-now__dot {
+  position: absolute; left: 44px; top: -4px; width: 8px; height: 8px;
+  border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* Aufgaben-Block */
+.tl-item {
+  position: absolute; left: 48px; right: 8px; z-index: 2;
+  display: flex; align-items: flex-start; gap: 8px; overflow: hidden;
+  padding: 5px 8px; border-radius: 10px; cursor: grab;
+  border: 1.5px solid var(--line); border-left: 3px solid var(--line-strong);
+  background: var(--paper);
+  transition: border-color .12s, background .12s, opacity .12s, box-shadow .12s;
+}
+.tl-item:hover { box-shadow: var(--shadow-soft); }
+.tl-item.is-dragging { opacity: .45; cursor: grabbing; }
+.tl-item.is-active { box-shadow: 0 0 0 2px var(--accent-soft2); }
+
+.tl-item__check {
+  flex: none; width: 17px; height: 17px; margin-top: 1px; border-radius: 5px;
+  border: 1.7px solid var(--line-strong); background: var(--paper-2);
+  color: #FDF6EE; font-size: 11px; font-weight: 900; line-height: 1;
+  display: grid; place-content: center;
+}
+.tl-item__body { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.tl-item__name {
+  font-size: 12.5px; font-weight: 700; color: var(--ink); line-height: 1.2;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.tl-item__range { font-size: 10.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* Status-Farben */
+.tl-item.is-future { border-left-color: var(--muted-2); }
+.tl-item.is-now {
+  border-color: var(--accent-border); border-left-color: var(--accent);
+  background: var(--accent-soft);
+}
+.tl-item.is-now .tl-item__check { border-color: var(--accent); }
+/* Vorbei & offen → Warnfarbe + Nachfrage */
+.tl-item.is-past {
+  border-color: var(--danger); border-left-color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 10%, var(--paper));
+}
+.tl-item.is-past .tl-item__name { color: var(--danger); }
+.tl-item.is-past .tl-item__check { border-color: var(--danger); }
+/* Erledigt → grün, durchgestrichen, gedämpft */
+.tl-item.is-done {
+  border-color: rgba(94,133,119,.4); border-left-color: var(--green);
+  background: var(--green-soft); opacity: .75;
+}
+.tl-item.is-done .tl-item__check { background: var(--green); border-color: var(--green); }
+.tl-item.is-done .tl-item__name { text-decoration: line-through; color: var(--muted); }
+
+/* ── Chip „geplante Uhrzeit" in der Aufgabenliste rechts ── */
+.chip--sched { color: var(--accent); background: var(--accent-soft); font-variant-numeric: tabular-nums; }
+
+/* ── Nachfrage-Modal (überfällige Aufgabe) ──────────────── */
+.plan-modal {
+  position: fixed; inset: 0; z-index: 50;
+  display: grid; place-content: center; padding: 20px;
+  background: rgba(38,34,29,.42); backdrop-filter: blur(2px);
+}
+.plan-modal[hidden] { display: none; }
+.plan-modal__box {
+  width: min(360px, 92vw); background: var(--paper);
+  border: 1.5px solid var(--line); border-radius: var(--r-card);
+  box-shadow: var(--shadow-card); padding: 20px; text-align: center;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.plan-modal__title { font-size: 16px; font-weight: 800; color: var(--ink); }
+.plan-modal__msg { font-size: 13.5px; color: var(--ink-soft); line-height: 1.5; }
+.plan-modal__actions { display: flex; gap: 10px; }
+.plan-modal__actions .btn { flex: 1; }
+.plan-modal__later {
+  border: none; background: transparent; color: var(--muted);
+  font-size: 12px; font-weight: 600; text-decoration: underline; padding: 2px;
+}
+.plan-modal__later:hover { color: var(--ink-soft); }

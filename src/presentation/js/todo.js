@@ -18,10 +18,25 @@ export function initTodo() {
   ensureToday();
   ensureContextMenu();
   render();
+  mirrorCurrentTask();
 
   todoAddBtn.addEventListener("click", add);
   todoInput.addEventListener("keydown", (e) => { if (e.key === "Enter") add(); });
   todoList.addEventListener("scroll", hideContextMenu);
+}
+
+// Spiegelt die oberste offene Aufgabe nach chrome.storage.local, damit das
+// Content-Script-Overlay (auf allen Websites) „die Aufgabe, die ich gerade
+// mache" anzeigen kann. No-op außerhalb des Extension-Kontexts.
+function mirrorCurrentTask() {
+  const store = globalThis.chrome?.storage?.local;
+  if (!store) return;
+  const top = getSortedTodos().find((todo) => !todo.done);
+  try {
+    store.set({ adhdCurrentTask: top ? { id: top.id, text: top.text } : null });
+  } catch (_) {
+    // noop
+  }
 }
 
 // ── Aktionen ─────────────────────────────────────
@@ -91,7 +106,7 @@ function render() {
     checkbox.type = "checkbox";
     checkbox.className = "todo-check";
     checkbox.checked = todo.done;
-    checkbox.setAttribute("aria-label", `完了: ${todo.text}`);
+    checkbox.setAttribute("aria-label", `Done: ${todo.text}`);
     checkbox.addEventListener("change", () => toggle(todo.id));
 
     const span = document.createElement("span");
@@ -102,8 +117,8 @@ function render() {
     prioritizeBtn.type = "button";
     prioritizeBtn.className = "todo-priority-btn" + (todo.prioritized ? " active" : "");
     prioritizeBtn.textContent = todo.prioritized ? "♥" : "♡";
-    prioritizeBtn.setAttribute("aria-label", `優先: ${todo.text}`);
-    prioritizeBtn.title = todo.prioritized ? "優先を外す" : "優先にする";
+    prioritizeBtn.setAttribute("aria-label", `Prioritize: ${todo.text}`);
+    prioritizeBtn.title = todo.prioritized ? "Unprioritize" : "Prioritize";
     prioritizeBtn.disabled = todo.done;
     prioritizeBtn.addEventListener("click", () => togglePrioritized(todo.id));
 
@@ -117,7 +132,7 @@ function render() {
   }
 
   if (todoDayInfo) {
-    todoDayInfo.textContent = `今日 · ${formatDate(new Date())}`;
+    todoDayInfo.textContent = `Today · ${formatDate(new Date())}`;
   }
 }
 
@@ -131,7 +146,7 @@ function ensureContextMenu() {
   contextMenuDeleteBtn = document.createElement("button");
   contextMenuDeleteBtn.type = "button";
   contextMenuDeleteBtn.className = "todo-context-action";
-  contextMenuDeleteBtn.textContent = "タスクを削除";
+  contextMenuDeleteBtn.textContent = "Delete task";
   contextMenuDeleteBtn.addEventListener("click", () => {
     if (contextMenuTodoId == null) return;
     remove(contextMenuTodoId);
@@ -185,6 +200,7 @@ function save() {
   } catch (_) {
     // noop
   }
+  mirrorCurrentTask();
 }
 
 function load() {
@@ -252,9 +268,9 @@ function todayKey() {
 }
 
 function formatDate(date) {
-  return date.toLocaleDateString("ja-JP", {
+  return date.toLocaleDateString("en-US", {
     weekday: "short",
     day: "2-digit",
-    month: "2-digit",
+    month: "short",
   });
 }

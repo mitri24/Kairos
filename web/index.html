@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#a9524a" />
+    <meta name="description" content="Adaptable — adaptiver Lernplaner mit Fokus-Timer, Tagesplan und Wochenkalender bei immer sichtbarer Uhr." />
+    <title>Adaptable</title>
+
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/icons/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+
+    <link rel="stylesheet" href="/css/tokens.css" />
+    <link rel="stylesheet" href="/css/base.css" />
+    <link rel="stylesheet" href="/css/timer.css" />
+    <link rel="stylesheet" href="/css/tasks.css" />
+    <link rel="stylesheet" href="/css/exam.css" />
+    <link rel="stylesheet" href="/css/today.css" />
+    <link rel="stylesheet" href="/css/dayTimeline.css" />
+    <link rel="stylesheet" href="/css/timeline.css" />
+    <link rel="stylesheet" href="/css/topics.css" />
+    <link rel="stylesheet" href="/css/week.css" />
+    <link rel="stylesheet" href="/css/push.css" />
+  </head>
+  <body>
+    <div id="app" class="shell">
+      <!-- ════════ Sidebar: clock, navigation, timer ════════ -->
+      <aside class="sidebar">
+        <div class="brand">ADHD Study Clock</div>
+
+        <!-- Always-visible live clock (NTP) -->
+        <div class="wallclock" id="wallClock" title="Current time">
+          <div class="wallclock__time" id="wallTime">--:--:--</div>
+          <div class="wallclock__meta">
+            <span class="wallclock__date" id="wallDate">–</span>
+            <span class="wallclock__src" id="wallSrc" title="Time source">NTP</span>
+          </div>
+        </div>
+
+        <nav class="nav" aria-label="Views">
+          <button class="nav-item is-active" data-view="today" id="navToday">Today</button>
+          <button class="nav-item" data-view="week" id="navWeek">Week</button>
+          <button class="nav-item" data-view="exam" id="navExam">Exam</button>
+        </nav>
+
+        <!-- Timer (analog clock + countdown) — always visible, bottom left -->
+        <div class="card timer-card timer-card--sidebar" id="timerCard">
+          <div class="phase-tabs" role="tablist">
+            <button class="phase-tab" id="tabFocus" data-phase="focus" role="tab">Focus</button>
+            <button class="phase-tab" id="tabShort" data-phase="short-break" role="tab">Short break</button>
+            <button class="phase-tab" id="tabLong" data-phase="long-break" role="tab">Long break</button>
+          </div>
+
+          <div class="dial-wrap">
+            <svg class="dial" id="dial" viewBox="0 0 280 280" role="img" aria-label="Clock and timer">
+              <circle cx="140" cy="140" r="132" fill="none" stroke="var(--line-strong)" stroke-width="6" />
+              <circle id="dialProgress" cx="140" cy="140" r="132" fill="none" stroke="var(--accent)"
+                      stroke-width="6" stroke-linecap="round" transform="rotate(-90 140 140)" />
+              <circle cx="140" cy="140" r="118" fill="var(--face)" stroke="rgba(150,138,124,0.25)" stroke-width="1.5" />
+              <g class="dial-ticks">
+                <line x1="140" y1="22" x2="140" y2="42" stroke="var(--ink-soft)" stroke-width="3" transform="rotate(0 140 140)" />
+                <line x1="140" y1="26" x2="140" y2="40" stroke="var(--line-strong)" stroke-width="2" transform="rotate(30 140 140)" />
+                <line x1="140" y1="26" x2="140" y2="40" stroke="var(--line-strong)" stroke-width="2" transform="rotate(60 140 140)" />
+                <line x1="140" y1="22" x2="140" y2="42" stroke="var(--ink-soft)" stroke-width="3" transform="rotate(90 140 140)" />
+                <line x1="140" y1="26" x2="140" y2="40" stroke="var(--line-strong)" stroke-width="2" transform="rotate(120 140 140)" />
+                <line x1="140" y1="26" x2="140" y2="40" stroke="var(--line-strong)" stroke-width="2" transform="rotate(150 140 140)" />
+                <line x1="140" y1="22" x2="140" y2="42" stroke="var(--ink-soft)" stroke-width="3" transform="rotate(180 140 140)" />
+                <line x1="140" y1="26" x2="140" y2="40" stroke="var(--line-strong)" stroke-width="2" transform="rotate(210 140 140)" />
+                <line x1="140" y1="26" x2="140" y2="40" stroke="var(--line-strong)" stroke-width="2" transform="rotate(240 140 140)" />
+                <line x1="140" y1="22" x2="140" y2="42" stroke="var(--ink-soft)" stroke-width="3" transform="rotate(270 140 140)" />
+                <line x1="140" y1="26" x2="140" y2="40" stroke="var(--line-strong)" stroke-width="2" transform="rotate(300 140 140)" />
+                <line x1="140" y1="26" x2="140" y2="40" stroke="var(--line-strong)" stroke-width="2" transform="rotate(330 140 140)" />
+              </g>
+              <line id="hourHand" x1="140" y1="140" x2="140" y2="86" stroke="var(--ink)" stroke-width="5" stroke-linecap="round" />
+              <line id="minHand" x1="140" y1="140" x2="140" y2="58" stroke="var(--ink-soft)" stroke-width="4" stroke-linecap="round" />
+              <line id="secHand" x1="140" y1="154" x2="140" y2="42" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" />
+              <circle cx="140" cy="140" r="6.5" fill="var(--ink)" />
+              <circle cx="140" cy="140" r="3" fill="var(--accent)" />
+            </svg>
+          </div>
+
+          <div class="timer-readout">
+            <div class="time-big" id="timeStr">25:00</div>
+            <div class="timer-readout__meta">
+              <span class="mode-label" id="modeLabel">Focus</span>
+              <span class="dial-digital" id="digitalTime">--:--:--</span>
+            </div>
+          </div>
+
+          <div class="current-task" id="currentTaskCard">
+            <div class="current-task__kicker" id="ctKicker">FOCUS NOW</div>
+            <div class="current-task__title" id="ctTitle">No task selected</div>
+            <div class="current-task__chips" id="ctChips"></div>
+            <div class="current-task__sub" id="ctSub"></div>
+          </div>
+
+          <div class="controls">
+            <button class="btn btn--primary btn--wide" id="toggleBtn">▶ Start</button>
+            <button class="btn btn--ghost" id="skipBtn" title="Skip">⏭</button>
+            <button class="btn btn--ghost btn--danger" id="resetBtn" title="Reset">↺</button>
+          </div>
+
+          <div class="sliders">
+            <div class="slider-row">
+              <div class="slider-row__head">
+                <span class="slider-label">Session length</span>
+                <div class="preset-group" id="sessionPresets"></div>
+              </div>
+              <div class="slider-line">
+                <input type="range" id="sessionRange" min="5" max="90" step="5" value="25" />
+                <span class="slider-value" id="sessionLabel">25 min</span>
+              </div>
+            </div>
+            <div class="slider-duo">
+              <div class="slider-row">
+                <div class="slider-mini"><span>Short</span><span class="slider-value slider-value--green" id="shortLabel">5 min</span></div>
+                <input type="range" id="shortRange" min="1" max="30" step="1" value="5" />
+              </div>
+              <div class="slider-row">
+                <div class="slider-mini"><span>Long</span><span class="slider-value slider-value--green" id="longLabel">15 min</span></div>
+                <input type="range" id="longRange" min="5" max="45" step="1" value="15" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Push notifications (work even when the app is closed) -->
+        <button class="push-toggle" id="pushToggle" type="button" aria-pressed="false" hidden>
+          <span class="push-toggle__icon" aria-hidden="true">🔔</span>
+          <span class="push-toggle__label" id="pushLabel">Enable notifications</span>
+        </button>
+        <p class="push-hint" id="pushHint" hidden></p>
+
+        <div class="offline-banner" id="offlineBanner" hidden>Offline — kept locally.</div>
+      </aside>
+
+      <!-- ════════ Main area with views ════════ -->
+      <main class="main">
+
+        <!-- ─────── TODAY ─────── -->
+        <section class="view view--today" id="viewToday">
+          <div class="view__head">
+            <h1 class="view__title">Today · <span id="todayDateLabel">—</span></h1>
+          </div>
+
+          <div class="today-grid">
+            <!-- Day timeline (left) -->
+            <div class="today-col today-col--plan">
+              <div class="card plan-card">
+                <div class="card__head">
+                  <h2 class="card__title">Day plan</h2>
+                  <span class="pill pill--muted" id="planClock" title="Current time">--:--</span>
+                </div>
+                <p class="plan-hint">Drag a task onto the timeline or set its time · Past &amp; open → you'll be asked</p>
+                <div class="day-timeline" id="dayTimeline" aria-label="Day timeline">
+                  <div class="day-timeline__inner" id="dayTimelineInner"></div>
+                </div>
+                <p class="empty" id="planEmpty" hidden>Nothing planned yet — give a task a time.</p>
+              </div>
+            </div>
+
+            <!-- Today's tasks -->
+            <div class="today-col today-col--tasks">
+              <div class="card today-card" id="todayCard">
+                <div class="card__head">
+                  <h2 class="card__title">Today's study</h2>
+                  <div class="today-goal">Goal
+                    <input type="number" id="todayGoalHours" class="today-goal__input" min="0.5" max="16" step="0.5" value="4" /> h
+                  </div>
+                </div>
+                <div class="progress"><div class="progress__bar" id="todayProgressBar"></div></div>
+                <div class="today-foot">
+                  <span id="todayDoneLabel">0.0 h of 4.0 h done</span>
+                  <button class="btn btn--soft" id="startTodayBtn">▶ Start now</button>
+                </div>
+              </div>
+
+              <div class="card tasks-card">
+                <div class="card__head">
+                  <h2 class="card__title">Today's tasks</h2>
+                  <span class="pill" id="taskCount">0</span>
+                </div>
+                <div class="task-input-row">
+                  <input type="text" id="taskInput" class="text-input" placeholder="Add a task…" maxlength="160" />
+                  <button class="add-btn" id="taskAddBtn" title="Add">+</button>
+                </div>
+
+                <div class="next-task" id="nextTaskCard" hidden>
+                  <div class="next-task__kicker">UP NEXT</div>
+                  <div class="next-task__text" id="nextText">–</div>
+                  <div class="next-task__chips" id="nextChips"></div>
+                  <button class="btn btn--primary btn--wide" id="startNextBtn">▶ Start this task</button>
+                </div>
+
+                <div class="task-list" id="taskListOpen"></div>
+                <p class="empty" id="taskEmpty">No tasks yet today.</p>
+
+                <details class="done-wrap" id="doneWrap">
+                  <summary>Done today (<span id="doneCount">0</span>)</summary>
+                  <div class="task-list task-list--done" id="taskListDone"></div>
+                </details>
+                <span id="taskExamName" hidden></span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ─────── WEEK ─────── -->
+        <section class="view view--week" id="viewWeek" hidden>
+          <div class="view__head">
+            <h1 class="view__title">Week</h1>
+            <div class="week-nav">
+              <button class="week-nav__btn" id="weekPrev" title="Previous week">‹</button>
+              <button class="week-nav__today" id="weekToday">This week</button>
+              <span class="week-nav__label" id="weekLabel">–</span>
+              <button class="week-nav__btn" id="weekNext" title="Next week">›</button>
+            </div>
+          </div>
+          <div class="week-grid" id="weekGrid"></div>
+        </section>
+
+        <!-- ─────── EXAM ─────── -->
+        <section class="view view--exam" id="viewExam" hidden>
+          <div class="view__head">
+            <h1 class="view__title">Exam</h1>
+            <div class="exam-switch">
+              <div class="exam-chips" id="examChips" aria-label="Exams"></div>
+              <button class="exam-chip exam-chip--add" id="addExamBtn" title="Add exam">+ Exam</button>
+            </div>
+          </div>
+
+          <div class="exam-grid">
+            <div class="card exam-card" id="examCard">
+              <div class="exam-card__head">
+                <input type="text" id="examName" class="exam-card__name" placeholder="Name the exam…" value="" />
+                <button class="icon-btn" id="deleteExamBtn" title="Delete this exam">🗑</button>
+              </div>
+              <div class="exam-card__count">
+                <span class="exam-card__days" id="examDaysNum">–</span>
+                <span class="exam-card__daysunit">Days</span>
+                <span class="exam-card__hms" id="examHMS">--:--:--</span>
+              </div>
+              <input type="datetime-local" id="examDate" class="exam-card__date" />
+              <div class="progress progress--green"><div class="progress__bar" id="examProgressBar"></div></div>
+              <div class="exam-card__foot">
+                <label class="exam-pensum">Workload <input type="number" id="examPensum" min="0" step="1" value="0" /> h</label>
+                <span id="examRemainLabel" class="exam-card__remain">–</span>
+              </div>
+              <div class="exam-card__empty" id="examEmpty" hidden>No exam yet — add one with “+ Exam”.</div>
+            </div>
+
+            <div class="card topics-card">
+              <div class="card__head">
+                <h2 class="card__title">Exam scope · All topics</h2>
+                <span class="pill" id="topicCount">0</span>
+              </div>
+              <p class="card__hint">Topics to master before the exam (a checklist separate from Todos)</p>
+              <div class="task-input-row">
+                <input type="text" id="topicInput" class="text-input" placeholder="Add a topic…" maxlength="160" />
+                <button class="add-btn" id="topicAddBtn" title="Add">+</button>
+              </div>
+              <div class="topic-list" id="topicList"></div>
+              <p class="empty" id="topicEmpty">List every topic you need to master before the exam.</p>
+            </div>
+
+            <div class="card timeline-card">
+              <div class="card__head">
+                <h2 class="card__title">Timeline</h2>
+                <span class="pill pill--muted" id="paceLabel">–</span>
+              </div>
+              <div class="timeline-foot"><span>Expected finish</span><span id="finishLabel" class="timeline-finish">–</span></div>
+              <div class="timeline" id="timeline"></div>
+              <p class="empty" id="timelineEmpty">Add open tasks and a schedule will appear here.</p>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="/js/main.js"></script>
+  </body>
+</html>

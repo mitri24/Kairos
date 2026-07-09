@@ -1,10 +1,15 @@
 {
-  "name": "adhd-exam-pomodoro-extension",
+  "name": "adaptable",
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Minimalistische, energieeffiziente Chrome Extension für Pomodoro in der Prüfungsphase.",
+  "description": "Adaptable — adaptiver, evidenzbasierter Lernplaner mit Fokus-Timer, Tagesplan und Node/SQLite-Backend.",
+  "engines": {
+    "node": ">=22.5.0"
+  },
   "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
     "test": "node --test"
   }
 }

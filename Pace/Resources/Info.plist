@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleName</key>
+    <string>Pace</string>
+    <key>CFBundleDisplayName</key>
+    <string>Pace</string>
+    <key>CFBundleIdentifier</key>
+    <string>ch.dentdesk.pace</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>CFBundleShortVersionString</key>
+    <string>0.1</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleExecutable</key>
+    <string>PaceApp</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>14.0</string>
+    <key>NSCalendarsFullAccessUsageDescription</key>
+    <string>Pace liest deine Termine, um freie Zeit zu erkennen und Lern-Sessions zu planen — alles bleibt lokal auf deinem Mac.</string>
+    <key>NSCalendarsUsageDescription</key>
+    <string>Pace liest und schreibt Lern-Sessions in deinen Kalender.</string>
+    <key>NSRemindersFullAccessUsageDescription</key>
+    <string>Pace kann offene Aufgaben aus deinen Erinnerungen übernehmen.</string>
+</dict>
+</plist>

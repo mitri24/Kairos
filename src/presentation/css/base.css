@@ -1,18 +1,75 @@
-/* ── Tokens & Reset ──────────────────────────── */
+/* ── Design-Tokens (aus web/css/tokens.css dupliziert — die Extension kann
+   tokens.css nicht laden) ─────────────────────────────────────────────── */
 :root {
-  --accent: #aa5a54;
-  --shell:  #e1e0e1;
-  --line:   #c0c2c5;
-  --muted:  #858486;
-  --ink:    #3b2928;
-  --paper:  #fbe8d7;
+  /* Farben — warmes Papier + Terrakotta-Akzent + salbeigrün für Pausen/Erfolg */
+  --accent:        #a9524a;
+  --accent-dark:   #8f423b;
+  --accent-soft:   rgba(169, 82, 74, 0.08);
+  --accent-soft2:  rgba(169, 82, 74, 0.12);
+  --accent-border: rgba(169, 82, 74, 0.32);
+
+  --green:         #5E8577;
+  --green-dark:    #4d7266;
+  --green-soft:    rgba(94, 133, 119, 0.12);
+
+  --ink:           #38332C;
+  --ink-soft:      #4A4437;
+  --muted:         #9A9086;
+  --muted-2:       #A89D90;
+
+  --paper:         #FBF7F0;
+  --paper-2:       #FCFAF5;
+  --shell:         #F3EEE6;
+  --warm:          #F6E9D9;
+  --warm-2:        #EBE6DE;
+
+  --line:          rgba(150, 138, 124, 0.28);
+  --line-soft:     rgba(150, 138, 124, 0.2);
+  --line-strong:   #D0C6B6;
+  --track:         #E6DFD3;
+
+  --danger:        #b5514a;
+
+  /* Radien */
+  --r-card:  22px;
+  --r-inner: 16px;
+  --r-btn:   12px;
+  --r-chip:  8px;
+  --r-pill:  999px;
+
+  /* Schatten */
+  --shadow-card: 0 1px 2px rgba(56,51,44,0.05), 0 12px 30px rgba(56,51,44,0.06);
+  --shadow-soft: 0 1px 2px rgba(56,51,44,0.05);
 }
 
+/* Dezenter Dark-Mode (parallel zur PWA) */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ink:         #ECE4D8;
+    --ink-soft:    #D8CFBF;
+    --muted:       #A79C8C;
+    --muted-2:     #948A7B;
+    --paper:       #26221D;
+    --paper-2:     #2E2823;
+    --shell:       #1B1815;
+    --warm:        #322820;
+    --warm-2:      #2C2620;
+    --line:        rgba(190, 176, 156, 0.18);
+    --line-soft:   rgba(190, 176, 156, 0.12);
+    --line-strong: #4A4237;
+    --track:       #3A332B;
+    --accent-soft:  rgba(200, 110, 100, 0.14);
+    --accent-soft2: rgba(200, 110, 100, 0.2);
+    --shadow-card: 0 1px 2px rgba(0,0,0,0.3), 0 12px 30px rgba(0,0,0,0.35);
+  }
+}
+
+/* Schmale, angedockte Seitenleiste (chrome.sidePanel) — volle Breite, vertikal. */
 html,
 body {
-  width: 44rem;
-  min-width: 42rem;
-  max-width: 48rem;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
 }
 
 * {
@@ -23,10 +80,8 @@ body {
 }
 
 body {
-  width: 44rem;
-  min-width: 42rem;
-  max-width: 48rem;
-  max-height: min(40rem, 100vh);
+  width: 100%;
+  min-height: 100vh;
   margin: 0;
   background: var(--shell);
   color: var(--ink);
@@ -34,43 +89,55 @@ body {
   overflow-y: auto;
 }
 
-/* ── App-Grid ────────────────────────────────── */
+/* ── App-Layout (einspaltig, vertikal gestapelt) ─ */
 .app {
   width: 100%;
-  max-width: 100%;
+  max-width: 34rem;
+  min-height: 100vh;
   margin: 0 auto;
-  padding: clamp(0.65rem, 2.8vw, 1rem);
-  display: grid;
-  grid-template-areas:
-    "head head"
-    "timer todo"
-    "actions todo"
-    "save save";
-  grid-template-columns: minmax(0, 1fr) minmax(15rem, 18rem);
-  grid-template-rows: auto auto auto auto;
-  gap: clamp(0.65rem, 2.2vw, 0.95rem);
+  padding: clamp(0.75rem, 4vw, 1.15rem);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.7rem, 3vw, 1rem);
 }
 
 .app > * {
   min-width: 0;
 }
 
-.head       { grid-area: head; }
-.timer-card { grid-area: timer; }
-.actions    { grid-area: actions; }
-.save-info  { grid-area: save; }
-
 /* ── Header ──────────────────────────────────── */
 .head {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
   text-align: center;
 }
 
 .head h1 {
   font-size: clamp(1.25rem, 4.2vw, 1.45rem);
   letter-spacing: -0.02em;
+}
+
+/* ── Vollansicht-Link ────────────────────────── */
+.fullview-link {
+  border: 1px solid var(--line);
+  background: var(--paper-2);
+  color: var(--muted);
+  border-radius: var(--r-pill);
+  padding: 0.28rem 0.7rem;
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 120ms ease, border-color 120ms ease, background-color 120ms ease;
+}
+
+.fullview-link:hover {
+  color: var(--accent);
+  border-color: var(--accent-border);
+  background: var(--accent-soft);
 }
 
 /* ── Save-Info ───────────────────────────────── */

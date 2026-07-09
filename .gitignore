@@ -1,2 +1,12 @@
 node_modules/
 .DS_Store
+
+# Lokale SQLite-Datenbank (Laufzeit)
+server/data/
+*.db
+*.db-wal
+*.db-shm
+
+# Swift-Build-Artefakte (Pace) — rebuildbar via `swift run`
+Pace/.build/
+Pace/Pace.app/

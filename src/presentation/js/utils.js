@@ -12,14 +12,14 @@ export function formatMs(value) {
 }
 
 export function phaseText(phase) {
-  if (phase === "focus")       return "集中";
-  if (phase === "short-break") return "みじかい休けい";
-  return "ながい休けい";
+  if (phase === "focus")       return "Focus";
+  if (phase === "short-break") return "Short break";
+  return "Long break";
 }
 
 export function confirmAction(actionType) {
   if (typeof globalThis.confirm !== "function") return true;
-  if (actionType === "SKIP")  return globalThis.confirm("次へ進みますか？");
-  if (actionType === "RESET") return globalThis.confirm("タイマーをリセットしますか？");
+  if (actionType === "SKIP")  return globalThis.confirm("Move to the next phase?");
+  if (actionType === "RESET") return globalThis.confirm("Reset the timer?");
   return true;
 }

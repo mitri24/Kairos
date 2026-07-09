@@ -1,0 +1,58 @@
+/* ── Prüfungs-Themen-Checkliste ──────────────────────────── */
+.topic-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+.topic-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: var(--paper-2);
+  border: 1.5px solid var(--line);
+  border-radius: var(--r-chip);
+  transition: border-color .15s, background .15s;
+}
+.topic-row:hover { border-color: var(--green); }
+
+.topic-check {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  border: 1.5px solid var(--line-strong);
+  background: var(--paper);
+  color: #FDF6EE;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  display: grid;
+  place-content: center;
+  transition: background .15s, border-color .15s;
+}
+.topic-check:hover { border-color: var(--green); }
+
+.topic-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 13.5px;
+  color: var(--ink);
+  word-break: break-word;
+  line-height: 1.4;
+}
+
+.topic-del { flex: none; }
+
+.topic-row.is-done { background: var(--paper); }
+.topic-row.is-done .topic-check {
+  background: var(--green);
+  border-color: var(--green);
+}
+.topic-row.is-done .topic-text {
+  color: var(--muted);
+  text-decoration: line-through;
+}

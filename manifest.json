@@ -1,12 +1,25 @@
 {
   "manifest_version": 3,
-  "name": "ADHD Exam Pomodoro",
-  "description": "Energieeffizienter Pomodoro-Timer für ADHS-Lernphasen in der Prüfungsvorbereitung.",
+  "name": "Adaptable",
+  "description": "Adaptable — Fokus-Timer für ADHS-Lernphasen, als Browser-Begleiter zum Lernplaner.",
   "version": "1.0.0",
-  "permissions": ["storage", "alarms", "notifications", "bookmarks", "offscreen"],
+  "permissions": ["storage", "alarms", "notifications", "bookmarks", "offscreen", "sidePanel"],
+  "host_permissions": ["http://localhost:4321/*", "http://127.0.0.1:4321/*"],
   "background": {
     "service_worker": "src/background.js",
     "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "exclude_matches": ["http://localhost:4321/*", "http://127.0.0.1:4321/*"],
+      "js": ["src/content/overlay.js"],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+  "side_panel": {
+    "default_path": "src/presentation/sidepanel.html"
   },
   "icons": {
     "16": "assets/icons/icon.png",
@@ -15,8 +28,7 @@
     "128": "assets/icons/icon.png"
   },
   "action": {
-    "default_title": "ADHD Exam Pomodoro",
-    "default_popup": "src/presentation/popup.html",
+    "default_title": "Adaptable — open sidebar",
     "default_icon": {
       "16": "assets/icons/icon.png",
       "32": "assets/icons/icon.png",

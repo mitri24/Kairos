@@ -1,7 +1,7 @@
 /* ── Timer-Card ──────────────────────────────── */
 .timer-card {
   border: 1px solid var(--line);
-  border-radius: 1.2rem;
+  border-radius: var(--r-card);
   padding: clamp(0.8rem, 3vw, 1rem);
   background: var(--paper);
   color: var(--ink);
@@ -10,6 +10,7 @@
   flex-direction: column;
   align-items: center;
   gap: 0.75rem;
+  box-shadow: var(--shadow-card);
   transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
 }
 
@@ -19,26 +20,26 @@
 .timer-card.state-paused {
   border-color: var(--accent);
   background: var(--paper);
-  box-shadow: 0 0 0 1px rgba(170, 90, 84, 0.2) inset;
+  box-shadow: var(--shadow-card), 0 0 0 1px var(--accent-border) inset;
 }
 
 .timer-card.state-running-focus {
-  border-color: var(--ink);
+  border-color: var(--accent);
   background: var(--paper);
-  box-shadow: 0 0 0 1px rgba(59, 41, 40, 0.15) inset;
+  box-shadow: var(--shadow-card), 0 0 0 1px var(--accent-soft2) inset;
 }
 
 .timer-card.state-running-break {
-  border-color: var(--line);
-  background: var(--shell);
-  box-shadow: 0 0 0 1px rgba(192, 194, 197, 0.3) inset;
+  border-color: var(--green);
+  background: var(--paper-2);
+  box-shadow: var(--shadow-card), 0 0 0 1px var(--green-soft) inset;
 }
 
-/* ── Dial ────────────────────────────────────── */
+/* ── Dial (ablaufende Uhr im Time-Timer-Prinzip) ── */
 .dial-wrap {
   position: relative;
-  width: min(100%, clamp(12rem, 58vw, 17rem));
-  margin: 0 auto;
+  width: min(80%, 15.5rem);
+  margin: 0.15rem auto 0;
   aspect-ratio: 1 / 1;
 }
 
@@ -50,27 +51,44 @@
 }
 
 .dial-svg.dragging { cursor: grabbing; }
+/* Nur im Ruhezustand ist das Zifferblatt ein Dauer-Wähler. */
+.timer-card:not(.state-idle) .dial-svg { cursor: default; }
 
 .dial-track {
   fill: none;
-  stroke: var(--line);
-  stroke-width: 14;
+  stroke: var(--track);
+  stroke-width: 16;
 }
 
 .dial-progress {
   fill: none;
   stroke: var(--accent);
   stroke-linecap: round;
-  stroke-width: 14;
+  stroke-width: 16;
   transform: rotate(-90deg);
   transform-origin: center;
 }
+
+/* Weiches, kontinuierliches Ablaufen bei laufender/pausierter Uhr. */
+.dial-progress.ticking {
+  transition: stroke-dashoffset 1s linear;
+}
+
+/* Phasenfarbe: Terrakotta beim Fokus, Salbeigrün in den Pausen. */
+.timer-card[data-phase="short-break"] .dial-progress,
+.timer-card[data-phase="long-break"] .dial-progress { stroke: var(--green); }
 
 .dial-handle {
   fill: var(--accent);
   stroke: var(--paper);
   stroke-width: 3;
 }
+
+.timer-card[data-phase="short-break"] .dial-handle,
+.timer-card[data-phase="long-break"] .dial-handle { fill: var(--green); }
+
+/* Der Zeiger dient nur zum Einstellen — beim Ablaufen wird er ausgeblendet. */
+.timer-card:not(.state-idle) .dial-handle { display: none; }
 
 .dial-center {
   position: absolute;
@@ -83,10 +101,26 @@
 
 /* ── Labels ──────────────────────────────────── */
 .phase {
-  color: var(--muted);
-  font-size: 0.92rem;
-  font-weight: 600;
+  color: var(--accent);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
 }
+
+.timer-card[data-phase="short-break"] .phase,
+.timer-card[data-phase="long-break"] .phase { color: var(--green); }
+
+/* Zentraler Hinweis: zeigt beim Einstellen die gewählte Dauer,
+   während die Uhr läuft/pausiert ist er ausgeblendet (rein bildlich). */
+.dial-hint {
+  font-size: clamp(1.5rem, 8vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--muted);
+  line-height: 1;
+}
+
+.timer-card:not(.state-idle) .dial-hint { display: none; }
 
 .status-badge {
   justify-self: center;
@@ -102,18 +136,10 @@
 }
 
 .timer-card.state-paused .status-badge        { border-color: var(--accent); }
-.timer-card.state-running-focus .status-badge { border-color: var(--ink);    background: var(--shell); }
-.timer-card.state-running-break .status-badge { border-color: var(--line);   background: var(--shell); }
-
-.time {
-  font-size: clamp(2.35rem, 10vw, 3.2rem);
-  font-weight: 700;
-  letter-spacing: -0.04em;
-  margin: 2px 0;
-  line-height: 1;
-}
+.timer-card.state-running-focus .status-badge { border-color: var(--accent); background: var(--paper-2); }
+.timer-card.state-running-break .status-badge { border-color: var(--green);  background: var(--paper-2); color: var(--green-dark); }
 
 .cycle {
   color: var(--muted);
-  font-size: 0.86rem;
+  font-size: 0.82rem;
 }

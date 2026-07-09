@@ -1,0 +1,82 @@
+/* ── Design-Tokens — abgeleitet aus dem "ADHD Lernuhr"-Mockup ────────── */
+:root {
+  /* Farben — warmes Papier + Terrakotta-Akzent + salbeigrün für Pausen/Erfolg */
+  --accent:        #a9524a;   /* Fokus / Primär */
+  --accent-dark:   #8f423b;   /* Hover */
+  --accent-soft:   rgba(169, 82, 74, 0.08);
+  --accent-soft2:  rgba(169, 82, 74, 0.12);
+  --accent-border: rgba(169, 82, 74, 0.32);
+
+  --green:         #5E8577;   /* Pause / Erfolg / Prüfung */
+  --green-dark:    #4d7266;
+  --green-soft:    rgba(94, 133, 119, 0.12);
+
+  --ink:           #38332C;   /* Haupttext */
+  --ink-soft:      #4A4437;
+  --muted:         #9A9086;   /* Sekundärtext */
+  --muted-2:       #A89D90;
+
+  --paper:         #FBF7F0;   /* Karten */
+  --paper-2:       #FCFAF5;   /* Innenflächen */
+  --shell:         #F3EEE6;   /* Seitenhintergrund */
+  --warm:          #F6E9D9;
+  --warm-2:        #EBE6DE;
+
+  --line:          rgba(150, 138, 124, 0.28);
+  --line-soft:     rgba(150, 138, 124, 0.2);
+  --line-strong:   #D0C6B6;
+  --track:         #E6DFD3;
+  --face:          #FCFAF5;
+
+  --danger:        #b5514a;
+
+  /* Radien */
+  --r-card: 22px;
+  --r-inner: 16px;
+  --r-btn: 12px;
+  --r-chip: 8px;
+  --r-pill: 999px;
+
+  /* Schatten */
+  --shadow-card: 0 1px 2px rgba(56,51,44,0.05), 0 12px 30px rgba(56,51,44,0.06);
+  --shadow-soft: 0 1px 2px rgba(56,51,44,0.05);
+
+  /* Typografie */
+  --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN",
+          "Noto Sans JP", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --num: "SF Mono", ui-monospace, "Cascadia Code", Menlo, monospace;
+
+  --maxw: 1440px;
+}
+
+/* Dezenter Dark-Mode für abendliches Dauer-Offenlassen */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ink:         #ECE4D8;
+    --ink-soft:    #D8CFBF;
+    --muted:       #A79C8C;
+    --muted-2:     #948A7B;
+    --paper:       #26221D;
+    --paper-2:     #2E2823;
+    --shell:       #1B1815;
+    --warm:        #322820;
+    --warm-2:      #2C2620;
+    --line:        rgba(190, 176, 156, 0.18);
+    --line-soft:   rgba(190, 176, 156, 0.12);
+    --line-strong: #4A4237;
+    --track:       #3A332B;
+    --face:        #2A251F;
+    --accent-soft:  rgba(200, 110, 100, 0.14);
+    --accent-soft2: rgba(200, 110, 100, 0.2);
+    --shadow-card: 0 1px 2px rgba(0,0,0,0.3), 0 12px 30px rgba(0,0,0,0.35);
+  }
+}
+
+:root[data-theme="dark"] {
+  --ink: #ECE4D8; --ink-soft: #D8CFBF; --muted: #A79C8C; --muted-2: #948A7B;
+  --paper: #26221D; --paper-2: #2E2823; --shell: #1B1815; --warm: #322820; --warm-2: #2C2620;
+  --line: rgba(190,176,156,0.18); --line-soft: rgba(190,176,156,0.12); --line-strong: #4A4237;
+  --track: #3A332B; --face: #2A251F;
+  --accent-soft: rgba(200,110,100,0.14); --accent-soft2: rgba(200,110,100,0.2);
+  --shadow-card: 0 1px 2px rgba(0,0,0,0.3), 0 12px 30px rgba(0,0,0,0.35);
+}

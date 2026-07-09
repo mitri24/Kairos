@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ADHD Pomodoro</title>
+    <link rel="stylesheet" href="./css/base.css" />
+    <link rel="stylesheet" href="./css/timer.css" />
+    <link rel="stylesheet" href="./css/buttons.css" />
+    <link rel="stylesheet" href="./css/todo.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="head">
+        <h1>ADHD Pomodoro</h1>
+      </header>
+
+      <section class="timer-card" id="timerCard" data-phase="focus">
+        <p id="phaseLabel" class="phase">Focus</p>
+
+        <div class="dial-wrap">
+          <svg id="dial" class="dial-svg" viewBox="0 0 240 240" role="slider"
+               aria-label="Choose focus time" aria-valuemin="10" aria-valuemax="90" aria-valuenow="25">
+            <circle class="dial-track" cx="120" cy="120" r="90"></circle>
+            <circle id="dialProgress" class="dial-progress" cx="120" cy="120" r="90"></circle>
+            <circle id="dialHandle" class="dial-handle" cx="120" cy="30" r="9"></circle>
+          </svg>
+
+          <div class="dial-center">
+            <p id="dialHint" class="dial-hint">25 min</p>
+          </div>
+        </div>
+
+        <p id="statusLabel" class="status-badge">Ready</p>
+        <p id="cycleLabel" class="cycle"></p>
+      </section>
+
+      <section class="actions">
+        <button id="startPauseBtn" class="btn icon-btn primary" aria-label="Start" title="Start">▶</button>
+        <button id="skipBtn"       class="btn icon-btn"         aria-label="Skip"  title="Skip">⏭</button>
+        <button id="resetBtn"      class="btn icon-btn danger"  aria-label="Reset" title="Reset">↺</button>
+      </section>
+
+      <p id="saveInfo" class="save-info" aria-live="polite"></p>
+
+      <aside class="todo-card" aria-label="Today's tasks and priorities">
+        <h2>Today's tasks</h2>
+        <p id="todoDayInfo" class="todo-day-info"></p>
+
+        <div class="todo-input-row">
+          <input
+            id="todoInput"
+            class="todo-input"
+            type="text"
+            placeholder="Add a task…"
+            maxlength="120"
+            aria-label="Enter a task"
+          />
+          <button id="todoAddBtn" class="todo-add-btn" aria-label="Add" title="Add">+</button>
+        </div>
+
+        <ul id="todoList" class="todo-list" aria-live="polite"></ul>
+        <p id="todoEmpty" class="todo-empty">No tasks yet today.</p>
+      </aside>
+
+    </main>
+
+    <script type="module" src="./js/main.js"></script>
+  </body>
+</html>
