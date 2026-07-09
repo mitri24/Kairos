@@ -10,6 +10,12 @@
   "scripts": {
     "start": "node server/index.js",
     "dev": "node --watch server/index.js",
-    "test": "node --test"
+    "test": "node --test",
+    "gen:vapid": "node scripts/gen-vapid.mjs",
+    "docker:build": "docker compose build",
+    "docker:up": "docker compose up -d",
+    "docker:proxy": "docker compose --profile proxy up -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f app"
   }
 }

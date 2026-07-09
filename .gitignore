@@ -1,6 +1,12 @@
 node_modules/
 .DS_Store
 
+# Deployment-Secrets (u. a. VAPID_PRIVATE_KEY, DOMAIN) — Template bleibt versioniert.
+# .env.* matcht auch .env.example, daher die Negation danach (Reihenfolge zählt).
+.env
+.env.*
+!.env.example
+
 # Lokale SQLite-Datenbank (Laufzeit)
 server/data/
 *.db

@@ -1,0 +1,31 @@
+# Build context is trimmed to what the runtime image needs:
+# package.json + server/ + shared/ + web/.
+
+.git
+.gitignore
+.claude
+.dockerignore
+Dockerfile
+docker-compose*.yml
+Caddyfile
+.env
+.env.*
+
+node_modules
+npm-debug.log*
+
+# Local runtime SQLite — must NEVER be baked into the image.
+server/data
+**/*.db
+**/*.db-wal
+**/*.db-shm
+
+# Not needed for the backend/PWA runtime image.
+Pace
+assets
+docs
+tests
+scripts
+*.md
+manifest.json
+.DS_Store

@@ -1,0 +1,21 @@
+# Automatic HTTPS (Let's Encrypt) → reverse-proxy to the Kairos app container.
+# HTTPS is required for the PWA service worker and Web Push in production.
+#
+# DOMAIN is injected from .env and is MANDATORY for this profile (an empty value
+# will not start — see the guard in docker-compose.yml). Point its DNS A/AAAA
+# record at this host first; Caddy then obtains and renews the certificate itself.
+
+{$DOMAIN} {
+	encode zstd gzip
+
+	# Baseline hardening headers (Caddy does not send these by default).
+	# HSTS without includeSubDomains/preload — enable those only if you control
+	# every subdomain and are ready to commit permanently.
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+	}
+
+	reverse_proxy app:4321
+}

@@ -1,0 +1,99 @@
+# Kairos — container stack.
+#
+#   docker compose up -d                    → app only (reachable on 127.0.0.1:4321)
+#   docker compose --profile proxy up -d    → app + Caddy with automatic HTTPS
+#                                             (requires a real DOMAIN in .env)
+#
+# The `app` service is intentionally single-instance: it owns an authoritative
+# per-second timer tick and a local SQLite database, so it must not be replicated
+# (that would double-count focus time and duplicate push notifications). Scale it
+# vertically (CPU/RAM below) and scale out at the proxy/edge. See docs/DEPLOY.md
+# for the migration path to true horizontal scaling.
+#
+# WARNING: the API has NO authentication — every /api/* route is world-writable.
+# Do not expose the app to an untrusted network without an auth/allowlist layer
+# in front (see docs/DEPLOY.md → "HTTPS, Zugriffsschutz & Web Push").
+
+# Bounded container logs so the json-file driver can't fill the host disk.
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
+services:
+  app:
+    build: .
+    image: kairos:latest
+    restart: unless-stopped
+    logging: *default-logging
+    environment:
+      PORT: 4321
+      LERNUHR_DB: /data/kairos.db
+      TZ: ${TZ:-Europe/Zurich}
+      # Optional fixed Web-Push keys. Leave empty → generated once and persisted
+      # in the database. Set them to keep subscriptions valid across DB resets.
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+      VAPID_SUBJECT: ${VAPID_SUBJECT:-mailto:admin@localhost}
+    volumes:
+      - kairos-data:/data
+    # Published host binding. Defaults to host-localhost only; the proxy reaches
+    # the app over the internal network (app:4321) regardless. Behind the proxy
+    # you may set APP_BIND= (empty) to not publish it at all.
+    ports:
+      - "${APP_BIND:-127.0.0.1:4321}:4321"
+    # Healthcheck is inherited from the image's PORT-aware HEALTHCHECK (Dockerfile).
+    # Hardening: the app only ever writes to the /data volume, so the rest of the
+    # filesystem can be read-only. Combined with dropped capabilities and
+    # no-new-privileges this shrinks the blast radius of any code-execution bug.
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    # Vertical-scaling knob: raise these as your user base grows.
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 256M
+          pids: 256
+
+  # Optional TLS edge. Enable with:  docker compose --profile proxy up -d
+  # Provides the HTTPS that PWA service workers and Web Push require in production.
+  # Requires a real, DNS-pointed DOMAIN in .env — the guard below fails fast
+  # (instead of a cryptic Caddy error) on an empty or leftover-placeholder value.
+  caddy:
+    image: caddy:2-alpine
+    profiles: ["proxy"]
+    restart: unless-stopped
+    logging: *default-logging
+    depends_on:
+      - app
+    environment:
+      DOMAIN: ${DOMAIN:-}
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        if [ -z "$$DOMAIN" ] || [ "$$DOMAIN" = "kairos.example.com" ]; then
+          echo "FEHLER: Setze eine echte, per DNS auf diesen Host zeigende DOMAIN in .env," >&2
+          echo "       bevor du das 'proxy'-Profil startest (leer/Platzhalter => Abbruch)." >&2
+          exit 1
+        fi
+        exec caddy run --config /etc/caddy/Caddyfile --adapter caddyfile
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  kairos-data:
+  caddy-data:
+  caddy-config:
