@@ -42,14 +42,14 @@ export function initToday({ store, api }) {
 
     if (doneLabel) {
       doneLabel.textContent =
-        `${formatHours(focusMs)} h von ${goalHours.toFixed(1)} h geschafft`;
+        `${formatHours(focusMs)} h of ${goalHours.toFixed(1)} h done`;
     }
 
     if (remainLabel) {
       const remainMs = Math.max(0, goalMs - focusMs);
       remainLabel.textContent = remainMs > 0
-        ? `noch ${formatHours(remainMs)} h`
-        : "Ziel erreicht 🎉";
+        ? `${formatHours(remainMs)} h left`
+        : "Goal reached 🎉";
     }
   }
 

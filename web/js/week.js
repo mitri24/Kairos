@@ -80,22 +80,22 @@ export function initWeek({ store, api }) {
     const doneToday = tasks.filter((t) => t.done && t.doneAt && dayKeyOf(t.doneAt) === dayKey);
     const focusMs = metrics[dayKey]?.focusMs || 0;
 
-    const dow = new Date(keyToMs(dayKey)).toLocaleDateString("de-DE", { weekday: "short" });
-    const dnum = new Date(keyToMs(dayKey)).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" });
+    const dow = new Date(keyToMs(dayKey)).toLocaleDateString("en-GB", { weekday: "short" });
+    const dnum = new Date(keyToMs(dayKey)).toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit" });
 
     const openRows = planned.map((t) => `
       <div class="wk-task" data-id="${t.id}">
-        <button class="wk-check" data-act="toggle" title="Erledigt"></button>
+        <button class="wk-check" data-act="toggle" title="Done"></button>
         <span class="wk-dot ${priorityClass(t.priority)}"></span>
         <span class="wk-text">${escapeHtml(t.text)}</span>
-        <button class="wk-del" data-act="del" title="Löschen">✕</button>
+        <button class="wk-del" data-act="del" title="Delete">✕</button>
       </div>`).join("");
 
     const doneRows = doneToday.map((t) => `
       <div class="wk-task wk-task--done" data-id="${t.id}">
-        <button class="wk-check is-done" data-act="toggle" title="Wieder offen">✓</button>
+        <button class="wk-check is-done" data-act="toggle" title="Reopen">✓</button>
         <span class="wk-text">${escapeHtml(t.text)}</span>
-        <button class="wk-del" data-act="del" title="Löschen">✕</button>
+        <button class="wk-del" data-act="del" title="Delete">✕</button>
       </div>`).join("");
 
     const meta = (doneToday.length || focusMs)
@@ -113,7 +113,7 @@ export function initWeek({ store, api }) {
         ${doneRows ? `<div class="wk-divider"></div>${doneRows}` : ""}
         ${!openRows && !doneRows ? `<div class="wk-empty">–</div>` : ""}
       </div>
-      <input class="wk-add" data-add-key="${dayKey}" placeholder="+ Aufgabe" maxlength="160" />
+      <input class="wk-add" data-add-key="${dayKey}" placeholder="+ Task" maxlength="160" />
     </div>`;
   }
 
@@ -123,8 +123,8 @@ export function initWeek({ store, api }) {
     const days = weekDays();
 
     if (label) {
-      const a = new Date(keyToMs(days[0])).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" });
-      const b = new Date(keyToMs(days[6])).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
+      const a = new Date(keyToMs(days[0])).toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit" });
+      const b = new Date(keyToMs(days[6])).toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" });
       label.textContent = `${a} – ${b}`;
     }
 

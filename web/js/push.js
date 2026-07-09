@@ -27,7 +27,7 @@ export function initPush(ctx) {
 
   if (!supported) {
     btn.hidden = true;
-    if (hint) { hint.hidden = false; hint.textContent = "Dieser Browser unterstützt keine Push-Benachrichtigungen."; }
+    if (hint) { hint.hidden = false; hint.textContent = "This browser doesn't support push notifications."; }
     return null;
   }
   btn.hidden = false;
@@ -43,13 +43,13 @@ export function initPush(ctx) {
     btn.disabled = busy || blocked;
     if (label) {
       label.textContent = blocked
-        ? "Benachrichtigungen blockiert"
+        ? "Notifications blocked"
         : subscribed
-          ? "Benachrichtigungen an"
-          : "Benachrichtigungen aktivieren";
+          ? "Notifications on"
+          : "Enable notifications";
     }
     if (hint) {
-      if (blocked) { hint.hidden = false; hint.textContent = "In den Browser-Einstellungen für diese Seite erlauben."; }
+      if (blocked) { hint.hidden = false; hint.textContent = "Allow notifications in your browser settings for this site."; }
       else { hint.hidden = true; }
     }
   }

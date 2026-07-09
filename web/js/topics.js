@@ -67,9 +67,9 @@ export function initTopics({ store, api }) {
     list.innerHTML = topics.map((t) => {
       const doneCls = t.done ? " is-done" : "";
       return `<div class="topic-row${doneCls}" data-id="${t.id}">
-        <button class="topic-check" data-act="toggle" aria-pressed="${t.done ? "true" : "false"}" title="${t.done ? "Als offen markieren" : "Als erledigt markieren"}">${t.done ? "✓" : ""}</button>
+        <button class="topic-check" data-act="toggle" aria-pressed="${t.done ? "true" : "false"}" title="${t.done ? "Mark as open" : "Mark as done"}">${t.done ? "✓" : ""}</button>
         <span class="topic-text">${escapeHtml(t.text)}</span>
-        <button class="icon-btn topic-del" data-act="remove" title="Thema löschen">🗑</button>
+        <button class="icon-btn topic-del" data-act="remove" title="Delete topic">🗑</button>
       </div>`;
     }).join("");
   }

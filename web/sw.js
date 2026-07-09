@@ -5,7 +5,7 @@
 //                          (Code-Updates greifen sofort, offline bleibt bedienbar).
 // Version im Cache-Namen erzwingt saubere Aktualisierung beim Aktivieren.
 
-const VERSION = "v4";
+const VERSION = "v5";
 const CACHE = `lernuhr-shell-${VERSION}`;
 
 // App-Shell: alles, was zum Kaltstart offline nötig ist.
@@ -143,7 +143,7 @@ self.addEventListener("push", (event) => {
       try {
         data = event.data ? event.data.json() : {};
       } catch {
-        data = { title: "ADHD Lernuhr", body: event.data ? event.data.text() : "" };
+        data = { title: "Kairos", body: event.data ? event.data.text() : "" };
       }
 
       const clientsArr = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
@@ -158,7 +158,7 @@ self.addEventListener("push", (event) => {
       // Fokussierte Seite → Nutzer schaut ohnehin hin; keine zusätzliche OS-Notification.
       if (hasFocused) return;
 
-      await self.registration.showNotification(data.title || "ADHD Lernuhr", {
+      await self.registration.showNotification(data.title || "Kairos", {
         body: data.body || "",
         tag: data.tag || "lernuhr",
         renotify: !!data.renotify,
@@ -166,7 +166,7 @@ self.addEventListener("push", (event) => {
         icon: data.icon || "/icons/icon-192.png",
         badge: data.badge || "/icons/icon.svg",
         timestamp: data.timestamp || Date.now(),
-        lang: "de",
+        lang: "en",
         data: { url: data.url || "/" },
       });
     })()

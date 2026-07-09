@@ -71,7 +71,7 @@ export function initTimeline({ store }) {
         <div class="tl-block__time">${formatClock(b.start)}</div>
         <div class="tl-block__body">
           <div class="tl-block__name">${escapeHtml(b.text)}</div>
-          <div class="tl-block__range">${formatClock(b.start)}–${formatClock(b.end)} · ${b.mins} Min</div>
+          <div class="tl-block__range">${formatClock(b.start)}–${formatClock(b.end)} · ${b.mins} min</div>
         </div>
       </div>`).join("");
 
@@ -80,7 +80,7 @@ export function initTimeline({ store }) {
 
     const n = blocks.length;
     const totalMin = blocks.reduce((sum, b) => sum + b.mins, 0);
-    paceLabel.textContent = `${n} ${n === 1 ? "Block" : "Blöcke"} · ${formatHours(totalMin * 60_000)} h`;
+    paceLabel.textContent = `${n} ${n === 1 ? "block" : "blocks"} · ${formatHours(totalMin * 60_000)} h`;
   }
 
   // Sekundengenau ist unnötig — nur neu rendern, wenn sich die Minute geändert hat.

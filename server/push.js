@@ -37,7 +37,7 @@ export function getVapid() {
     repo.setMeta("vapid_private_key", keys.privateKey);
     publicKey = keys.publicKey;
     privateKey = keys.privateKey;
-    console.log("[Lernuhr] Neue VAPID-Schlüssel erzeugt und in der DB gespeichert.");
+    console.log("[push] New VAPID keys generated and stored in the DB.");
   }
 
   vapidCache = { publicKey, privateKey, subject };
@@ -57,7 +57,7 @@ function badRequest(message) {
 
 export function subscribe(sub) {
   if (!sub || !sub.endpoint || !sub.keys || !sub.keys.p256dh || !sub.keys.auth) {
-    throw badRequest("Ungültige Push-Subscription");
+    throw badRequest("Invalid push subscription");
   }
   repo.saveSubscription({
     endpoint: sub.endpoint,
@@ -112,7 +112,7 @@ async function deliver(sub, json, vapid, opts) {
       repo.touchSubscription(sub.endpoint);
       return { sent: true };
     }
-    console.warn(`[Lernuhr] Push HTTP ${res.statusCode} für …${sub.endpoint.slice(-24)}: ${res.body?.slice(0, 120) || ""}`);
+    console.warn(`[push] HTTP ${res.statusCode} for …${sub.endpoint.slice(-24)}: ${res.body?.slice(0, 120) || ""}`);
     return { failed: true };
   } catch (err) {
     console.warn(`[Lernuhr] Push-Versand fehlgeschlagen: ${err.message}`);
@@ -122,9 +122,9 @@ async function deliver(sub, json, vapid, opts) {
 
 // ── Konkrete Benachrichtigungen ──────────────────
 const LABEL = {
-  focus: "Fokus",
-  "short-break": "Kurze Pause",
-  "long-break": "Lange Pause",
+  focus: "Focus",
+  "short-break": "Short break",
+  "long-break": "Long break",
 };
 
 // Wird vom Server-Tick aufgerufen, sobald eine Phase real abläuft.
@@ -134,10 +134,10 @@ export async function notifyPhaseComplete({ from, to } = {}) {
   const focusDone = from === "focus";
 
   const payload = {
-    title: `${fromLabel} beendet`,
+    title: `${fromLabel} done`,
     body: focusDone
-      ? `Gut gemacht! Jetzt ${toLabel}. Kurz durchatmen 🌿`
-      : `Pause vorbei — zurück in den ${toLabel}. Du schaffst das 💪`,
+      ? `Nice work! Now ${toLabel}. Take a breath 🌿`
+      : `Break over — back to ${toLabel}. You've got this 💪`,
     tag: "lernuhr-phase",
     renotify: true,
     requireInteraction: focusDone, // Fokus-Ende bleibt stehen, bis quittiert
@@ -151,8 +151,8 @@ export async function notifyPhaseComplete({ from, to } = {}) {
 // Testbenachrichtigung (z. B. Button in der PWA nach dem Aktivieren).
 export async function sendTest() {
   const payload = {
-    title: "🔔 Test · ADHD Lernuhr",
-    body: "Benachrichtigungen funktionieren — auch wenn die App geschlossen ist.",
+    title: "🔔 Test · Kairos",
+    body: "Notifications are working — even when the app is closed.",
     tag: "lernuhr-test",
     renotify: true,
     url: "/",

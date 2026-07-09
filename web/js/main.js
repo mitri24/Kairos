@@ -61,11 +61,11 @@ function onPhaseComplete(from, to) {
   // geschlossener App) — hier NICHT doppelt anzeigen. Nur als Fallback, wenn
   // Push nicht aktiv ist (Browser ohne Push / nicht abonniert), lokal anzeigen.
   if (!pushState.active && "Notification" in window && Notification.permission === "granted") {
-    const map = { focus: "Fokus", "short-break": "Kurze Pause", "long-break": "Lange Pause" };
-    // tag wie im Service Worker → das OS führt Notifications aus mehreren offenen
-    // Tabs zu EINER zusammen (statt pro Tab eine eigene anzuzeigen).
-    new Notification(`${map[from]} beendet`, {
-      body: `Weiter: ${map[to]}. Ruhig durchatmen.`,
+    const map = { focus: "Focus", "short-break": "Short break", "long-break": "Long break" };
+    // tag matches the service worker → the OS coalesces notifications from several
+    // open tabs into ONE (instead of showing one per tab).
+    new Notification(`${map[from]} done`, {
+      body: `Next: ${map[to]}. Take a breath.`,
       tag: "lernuhr-phase",
       silent: false,
     });

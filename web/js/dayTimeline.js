@@ -79,7 +79,7 @@ export function initDayTimeline({ store, api }) {
       const range = `${minToClock(t.scheduledMin)}–${minToClock(t.scheduledMin + dur)}`;
       h += `<div class="tl-item is-${status}${t.active ? " is-active" : ""}" data-id="${escapeHtml(String(t.id))}"
               draggable="true" style="top:${top}px;height:${height}px" title="${escapeHtml(t.text)} · ${range}">
-              <button class="tl-item__check" data-act="toggle" title="erledigt umschalten">${t.done ? "✓" : ""}</button>
+              <button class="tl-item__check" data-act="toggle" title="toggle done" aria-label="toggle done">${t.done ? "✓" : ""}</button>
               <div class="tl-item__body">
                 <div class="tl-item__name">${escapeHtml(t.text)}</div>
                 <div class="tl-item__range">${range}</div>
@@ -125,7 +125,7 @@ export function initDayTimeline({ store, api }) {
 
   function showPrompt(task, key) {
     currentKey = key;
-    modal.msg.textContent = `„${task.text}" war für ${minToClock(task.scheduledMin)} geplant und ist vorbei. Hast du es erledigt?`;
+    modal.msg.textContent = `"${task.text}" was planned for ${minToClock(task.scheduledMin)} and is now past. Did you finish it?`;
     modal.overlay.hidden = false;
     modal.yes.focus();
 
@@ -219,13 +219,13 @@ function buildModal() {
   overlay.hidden = true;
   overlay.innerHTML = `
     <div class="plan-modal__box" role="dialog" aria-modal="true" aria-labelledby="planModalTitle">
-      <div class="plan-modal__title" id="planModalTitle">Erledigt?</div>
+      <div class="plan-modal__title" id="planModalTitle">Done?</div>
       <div class="plan-modal__msg" id="planModalMsg"></div>
       <div class="plan-modal__actions">
-        <button class="btn btn--primary" data-a="yes">Ja, erledigt</button>
-        <button class="btn btn--ghost" data-a="no">Nein → neuer Slot</button>
+        <button class="btn btn--primary" data-a="yes">Yes, done</button>
+        <button class="btn btn--ghost" data-a="no">No → new slot</button>
       </div>
-      <button class="plan-modal__later" data-a="later">später erinnern</button>
+      <button class="plan-modal__later" data-a="later">remind me later</button>
     </div>`;
 
   const box = overlay.querySelector(".plan-modal__box");

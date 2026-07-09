@@ -15,13 +15,13 @@ export function formatClock(epochMs) {
 }
 
 export function formatDate(epochMs) {
-  return new Date(epochMs).toLocaleDateString("de-DE", {
+  return new Date(epochMs).toLocaleDateString("en-GB", {
     weekday: "long", day: "2-digit", month: "long", year: "numeric",
   });
 }
 
 export function formatDateShort(epochMs) {
-  return new Date(epochMs).toLocaleDateString("de-DE", { weekday: "short", day: "2-digit", month: "2-digit" });
+  return new Date(epochMs).toLocaleDateString("en-GB", { weekday: "short", day: "2-digit", month: "2-digit" });
 }
 
 // Stunden mit einer Nachkommastelle: 2.5 h
@@ -29,13 +29,13 @@ export function formatHours(ms) {
   return (ms / 3_600_000).toFixed(1);
 }
 
-// Minuten → "1 Std 25 Min" / "25 Min"
+// Minutes → "1h 25m" / "25m"
 export function formatMinutes(mins) {
   mins = Math.max(0, Math.round(mins));
   const h = Math.floor(mins / 60), m = mins % 60;
-  if (h && m) return `${h} Std ${m} Min`;
-  if (h) return `${h} Std`;
-  return `${m} Min`;
+  if (h && m) return `${h}h ${m}m`;
+  if (h) return `${h}h`;
+  return `${m}m`;
 }
 
 // Rest bis zu einem Zeitpunkt als H:MM (ohne Sekunden — "nur h und min").
@@ -64,10 +64,10 @@ export function priorityClass(p) {
 export function dueLabel(dueMs, nowMs) {
   if (!dueMs) return null;
   const days = Math.ceil((dueMs - nowMs) / 86_400_000);
-  if (days < 0) return { text: "überfällig", soon: true };
-  if (days === 0) return { text: "heute fällig", soon: true };
-  if (days === 1) return { text: "morgen", soon: true };
-  return { text: `in ${days} Tg`, soon: days <= 2 };
+  if (days < 0) return { text: "overdue", soon: true };
+  if (days === 0) return { text: "due today", soon: true };
+  if (days === 1) return { text: "tomorrow", soon: true };
+  return { text: `in ${days} d`, soon: days <= 2 };
 }
 
 // ── Tages-Schlüssel (YYYY-MM-DD, lokal) für die Tagesplanung ──
@@ -87,11 +87,11 @@ export function addDaysKey(key, days) {
 }
 export function formatDayShort(key) {
   const ms = keyToMs(key);
-  return ms == null ? "" : new Date(ms).toLocaleDateString("de-DE", { weekday: "short", day: "2-digit", month: "2-digit" });
+  return ms == null ? "" : new Date(ms).toLocaleDateString("en-GB", { weekday: "short", day: "2-digit", month: "2-digit" });
 }
 export function weekdayName(key) {
   const ms = keyToMs(key);
-  return ms == null ? "" : new Date(ms).toLocaleDateString("de-DE", { weekday: "long" });
+  return ms == null ? "" : new Date(ms).toLocaleDateString("en-GB", { weekday: "long" });
 }
 // Montag der Woche, in der `key` liegt.
 export function mondayOf(key) {
@@ -104,7 +104,7 @@ export function mondayOf(key) {
 
 export function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, (c) => (
-    { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]
+    { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] // keep entity map
   ));
 }
 

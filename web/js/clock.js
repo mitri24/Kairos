@@ -14,7 +14,7 @@ export function initClock({ store }) {
     elDate.textContent = dateStr;
     // Titel der Heute-Ansicht (z. B. "Mittwoch, 08.07.")
     if (elTodayLabel) {
-      elTodayLabel.textContent = new Date(now).toLocaleDateString("de-DE", { weekday: "long", day: "2-digit", month: "2-digit" });
+      elTodayLabel.textContent = new Date(now).toLocaleDateString("en-GB", { weekday: "long", day: "2-digit", month: "2-digit" });
     }
     // Zeitquelle: NTP (server-korrigiert) vs. lokal
     const synced = store.state.online && store.state.loaded;

@@ -8,7 +8,7 @@ function emptyState() {
     loaded: false,
     serverTime: Date.now(),
     timer: { status: "idle", phase: "focus", cycleInBlock: 0, remainingMs: 1500000, endsAt: null, activeTaskId: null },
-    settings: { focusMinutes: 25, shortBreakMinutes: 5, longBreakMinutes: 15, cyclesUntilLongBreak: 4, autoStartNextPhase: false, todayGoalHours: 4, profileName: "Prüfungsfokus", activeExamId: null },
+    settings: { focusMinutes: 25, shortBreakMinutes: 5, longBreakMinutes: 15, cyclesUntilLongBreak: 4, autoStartNextPhase: false, todayGoalHours: 4, profileName: "Exam focus", activeExamId: null },
     exams: [],
     tasks: [],
     topics: [],

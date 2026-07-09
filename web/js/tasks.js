@@ -171,11 +171,11 @@ export function initTasks({ store, api }) {
   function rowChips(t) {
     const now = store.now();
     const today = dayKeyOf(now);
-    let h = `<button type="button" class="chip ${priorityClass(t.priority)}" data-act="cycle-prio" title="Priorität wechseln">${escapeHtml(priorityLabel(t.priority))}</button>`;
+    let h = `<button type="button" class="chip ${priorityClass(t.priority)}" data-act="cycle-prio" title="Change priority">${escapeHtml(priorityLabel(t.priority))}</button>`;
     // Überfällig/anders geplant sichtbar machen
     if (t.plannedDate && t.plannedDate < today) h += `<span class="chip chip--due-soon">⚠ ${escapeHtml(formatDayShort(t.plannedDate))}</span>`;
     else if (t.plannedDate && t.plannedDate > today) h += `<span class="chip chip--planned">📅 ${escapeHtml(formatDayShort(t.plannedDate))}</span>`;
-    if (t.scheduledMin != null) h += `<span class="chip chip--sched" title="Geplante Uhrzeit">🕒 ${minToClock(t.scheduledMin)}</span>`;
+    if (t.scheduledMin != null) h += `<span class="chip chip--sched" title="Scheduled time">🕒 ${minToClock(t.scheduledMin)}</span>`;
     const dl = dueLabel(t.dueDate, now);
     if (dl) h += `<span class="chip ${dl.soon ? "chip--due-soon" : "chip--due"}">${escapeHtml(dl.text)}</span>`;
     if (t.subject) h += `<span class="chip chip--subject">${escapeHtml(t.subject)}</span>`;
@@ -192,47 +192,47 @@ export function initTasks({ store, api }) {
     const subs = (t.subtasks || []).slice().sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
     const subRows = subs.map((st) => `
       <div class="subtask" data-sid="${escapeHtml(st.id)}">
-        <input type="checkbox" data-act="toggle-sub"${st.done ? " checked" : ""} aria-label="Subtask erledigt" />
+        <input type="checkbox" data-act="toggle-sub"${st.done ? " checked" : ""} aria-label="Subtask done" />
         <span class="subtask__text${st.done ? " is-done" : ""}">${escapeHtml(st.text)}</span>
-        <button type="button" class="icon-btn" data-act="del-sub" title="Subtask löschen">✕</button>
+        <button type="button" class="icon-btn" data-act="del-sub" title="Delete subtask">✕</button>
       </div>`).join("");
     const prioOpts = [1, 2, 3, 4].map((p) =>
       `<button type="button" class="prio-opt ${priorityClass(p)}${t.priority === p ? " is-active" : ""}" data-act="set-prio" data-prio="${p}">${escapeHtml(priorityLabel(p))}</button>`).join("");
     return `<div class="task__detail">
       <div class="subtasks">${subRows || `<div class="subtasks__empty">No subtasks yet</div>`}</div>
       <div class="subtask-add">
-        <input type="text" class="text-input" data-act-input="new-sub" data-guard="newsub-${escapeHtml(t.id)}" placeholder="Add a subtask… (Teilschritt)" maxlength="160" />
-        <button type="button" class="add-btn" data-act="add-sub" title="Subtask hinzufügen">+</button>
+        <input type="text" class="text-input" data-act-input="new-sub" data-guard="newsub-${escapeHtml(t.id)}" placeholder="Add a subtask…" maxlength="160" />
+        <button type="button" class="add-btn" data-act="add-sub" title="Add subtask">+</button>
       </div>
       <div class="detail-grid">
         <div class="detail-field detail-field--wide">
-          <span class="detail-label">Priority · Priorität</span>
+          <span class="detail-label">Priority</span>
           <div class="prio-opts">${prioOpts}</div>
         </div>
         <label class="detail-field">
-          <span class="detail-label">Estimate · Min</span>
+          <span class="detail-label">Estimate (min)</span>
           <input type="number" data-field="estMinutes" data-guard="est-${escapeHtml(t.id)}" min="0" step="5" value="${t.estMinutes || 0}" />
         </label>
         <label class="detail-field">
-          <span class="detail-label">Uhrzeit · Start</span>
+          <span class="detail-label">Time</span>
           <input type="time" data-field="scheduledMin" data-guard="sched-${escapeHtml(t.id)}" value="${t.scheduledMin != null ? minToClock(t.scheduledMin) : ""}" />
         </label>
         <label class="detail-field">
-          <span class="detail-label">Planned date · Tag</span>
+          <span class="detail-label">Planned date</span>
           <input type="date" data-field="plannedDate" data-guard="plan-${escapeHtml(t.id)}" value="${escapeHtml(t.plannedDate || "")}" />
         </label>
         <label class="detail-field">
-          <span class="detail-label">Due · Fällig</span>
+          <span class="detail-label">Due</span>
           <input type="datetime-local" data-field="dueDate" data-guard="due-${escapeHtml(t.id)}" value="${toDatetimeLocal(t.dueDate)}" />
         </label>
         <label class="detail-field detail-field--wide">
-          <span class="detail-label">Subject · Fach</span>
-          <input type="text" class="text-input" data-field="subject" data-guard="subj-${escapeHtml(t.id)}" value="${escapeHtml(t.subject || "")}" maxlength="60" placeholder="z. B. Anatomie" />
+          <span class="detail-label">Subject</span>
+          <input type="text" class="text-input" data-field="subject" data-guard="subj-${escapeHtml(t.id)}" value="${escapeHtml(t.subject || "")}" maxlength="60" placeholder="e.g. Anatomy" />
         </label>
       </div>
       <div class="detail-actions">
-        <button type="button" class="btn btn--soft" data-act="activate">▶ Activate in timer · Im Timer aktivieren</button>
-        <button type="button" class="btn btn--ghost btn--danger" data-act="del-task">🗑 Delete · Löschen</button>
+        <button type="button" class="btn btn--soft" data-act="activate">▶ Activate in timer</button>
+        <button type="button" class="btn btn--ghost btn--danger" data-act="del-task">🗑 Delete</button>
       </div>
     </div>`;
   }
@@ -242,8 +242,8 @@ export function initTasks({ store, api }) {
       const isExp = String(t.id) === String(expandedId);
       return `<div class="task${t.active ? " is-active" : ""}${isExp ? " is-expanded" : ""}" data-id="${escapeHtml(t.id)}">
         <div class="task__head">
-          <span class="task__grip" draggable="true" title="Auf den Zeitstrahl ziehen" aria-label="Auf den Zeitstrahl ziehen">⠿</span>
-          <input type="checkbox" class="task__check" data-act="toggle-done"${t.done ? " checked" : ""} aria-label="Aufgabe erledigt" />
+          <span class="task__grip" draggable="true" title="Drag onto the timeline" aria-label="Drag onto the timeline">⠿</span>
+          <input type="checkbox" class="task__check" data-act="toggle-done"${t.done ? " checked" : ""} aria-label="Task done" />
           <button type="button" class="task__text" data-act="expand">${escapeHtml(t.text)}</button>
         </div>
         <div class="task__chips">${rowChips(t)}</div>
@@ -255,10 +255,10 @@ export function initTasks({ store, api }) {
   function buildDone(done) {
     return done.map((t) => `<div class="task task--done" data-id="${escapeHtml(t.id)}">
       <div class="task__head">
-        <input type="checkbox" class="task__check" data-act="toggle-done" checked aria-label="Aufgabe erledigt" />
+        <input type="checkbox" class="task__check" data-act="toggle-done" checked aria-label="Task done" />
         <span class="task__text task__text--done">${escapeHtml(t.text)}</span>
         ${t.spentMs ? `<span class="chip chip--spent">⏱ ${formatDurationHM(t.spentMs)}</span>` : ""}
-        <button type="button" class="icon-btn" data-act="del-task" title="Löschen">✕</button>
+        <button type="button" class="icon-btn" data-act="del-task" title="Delete">✕</button>
       </div>
     </div>`).join("");
   }
@@ -269,19 +269,19 @@ export function initTasks({ store, api }) {
     if (!task) {
       currentTaskCard.classList.add("is-empty");
       currentTaskCard.classList.remove("is-break");
-      ctKicker.textContent = "JETZT FOKUS";
-      ctTitle.textContent = "Keine Aufgabe gewählt";
+      ctKicker.textContent = "FOCUS NOW";
+      ctTitle.textContent = "No task selected";
       ctChips.innerHTML = "";
       ctSub.textContent = "";
       return;
     }
     currentTaskCard.classList.remove("is-empty");
     currentTaskCard.classList.toggle("is-break", isBreak);
-    ctKicker.textContent = "JETZT FOKUS";
+    ctKicker.textContent = "FOCUS NOW";
     ctTitle.textContent = task.text;
     ctChips.innerHTML = readonlyChips(task, true);
     const subs = task.subtasks || [];
-    let sub = `Fokuszeit: ${formatDurationHM(task.spentMs || 0)}`;
+    let sub = `Focus time: ${formatDurationHM(task.spentMs || 0)}`;
     if (subs.length) sub += ` · Subtasks ${subs.filter((x) => x.done).length}/${subs.length}`;
     ctSub.textContent = sub;
   }

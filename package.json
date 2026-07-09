@@ -1,9 +1,9 @@
 {
-  "name": "adaptable",
+  "name": "kairos",
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Adaptable — adaptiver, evidenzbasierter Lernplaner mit Fokus-Timer, Tagesplan und Node/SQLite-Backend.",
+  "description": "Kairos — adaptiver, evidenzbasierter Lernplaner mit Fokus-Timer, Tagesplan und Node/SQLite-Backend.",
   "engines": {
     "node": ">=22.5.0"
   },

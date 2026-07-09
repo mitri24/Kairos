@@ -40,7 +40,7 @@ export function initExam({ store, api }) {
     try {
       const prevIds = new Set(store.state.exams.map((e) => e.id));
       store.applySnapshot(await api.exams.create({
-        name: "Neue Prüfung",
+        name: "New exam",
         date: store.now() + 14 * DAY_MS,
       }));
       const created = store.state.exams.find((e) => !prevIds.has(e.id));
@@ -92,8 +92,8 @@ export function initExam({ store, api }) {
       if (ex.id === settings.activeExamId) chip.classList.add("is-active");
       chip.dataset.id = String(ex.id);
       const days = ex.date ? daysUntil(ex.date, now) : null;
-      const daysHtml = days === null ? "" : `<span class="exam-chip__days">${days} T</span>`;
-      chip.innerHTML = `<span class="exam-chip__name">${escapeHtml(ex.name || "Prüfung")}</span>${daysHtml}`;
+      const daysHtml = days === null ? "" : `<span class="exam-chip__days">${days} d</span>`;
+      chip.innerHTML = `<span class="exam-chip__name">${escapeHtml(ex.name || "Exam")}</span>${daysHtml}`;
       examChips.appendChild(chip);
     }
   }
@@ -130,7 +130,7 @@ export function initExam({ store, api }) {
     const done = topics.filter((t) => t.done).length;
     const frac = total ? done / total : 0;
     examProgressBar.style.width = `${Math.round(frac * 100)}%`;
-    examRemainLabel.textContent = total ? `${done} von ${total} Themen` : "Noch keine Themen";
+    examRemainLabel.textContent = total ? `${done} of ${total} topics` : "No topics yet";
   }
 
   function render() {

@@ -86,7 +86,13 @@
 .tl-item.is-done .tl-item__check { background: var(--green); border-color: var(--green); }
 .tl-item.is-done .tl-item__name { text-decoration: line-through; color: var(--muted); }
 
-/* ── Chip „geplante Uhrzeit" in der Aufgabenliste rechts ── */
+/* ── Drag-Griff & Uhrzeit-Chip in der Aufgabenliste rechts ── */
+.task__grip {
+  flex: none; cursor: grab; color: var(--muted-2); font-size: 13px; line-height: 1;
+  padding: 2px 1px; user-select: none; letter-spacing: -2px;
+}
+.task__grip:hover { color: var(--accent); }
+.task__grip:active { cursor: grabbing; }
 .chip--sched { color: var(--accent); background: var(--accent-soft); font-variant-numeric: tabular-nums; }
 
 /* ── Nachfrage-Modal (überfällige Aufgabe) ──────────────── */

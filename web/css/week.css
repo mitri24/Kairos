@@ -58,3 +58,11 @@
 @media (max-width: 1080px) {
   .week-grid { grid-template-columns: repeat(7, minmax(150px, 1fr)); overflow-x: auto; }
 }
+
+/* Handy: Tage untereinander statt horizontal scrollen (steht NACH base.css,
+   damit es die 1080px-Regel oben überschreibt). */
+@media (max-width: 720px) {
+  .week-grid { grid-template-columns: 1fr; overflow-x: visible; }
+  .week-day { min-height: auto; }
+  .week-day__tasks { overflow: visible; flex: 0 0 auto; }
+}

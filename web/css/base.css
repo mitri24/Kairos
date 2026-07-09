@@ -96,11 +96,6 @@ input { font-family: inherit; }
 .today-col--timer { overflow-y: auto; }              /* Fallback-Scroll nur auf kleinen Screens */
 .today-col--tasks { min-height: 0; }
 
-/* Schmal: gestapelt (Seite scrollt als Fallback). */
-@media (max-width: 900px) {
-  .today-grid { grid-template-columns: 1fr; }
-  .main { overflow-y: auto; }
-}
 .today-col--tasks .tasks-card { flex: 1; min-height: 0; }
 
 /* Prüfungs-Grid */
@@ -187,15 +182,47 @@ input[type="number"]:focus, input[type="datetime-local"]:focus, input[type="date
 ::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
 
-/* Schmalere Screens: Ansichten dürfen als Fallback scrollen statt zu quetschen */
-@media (max-width: 1080px) {
+/* ══════════════ Responsive ══════════════════════════════════
+   Desktop (>1024): Sidebar links + mehrspaltige Grids.
+   Tablet (≤1024):  Sidebar links, Grids einspaltig, Woche scrollt horizontal.
+   Handy (≤720):    alles in EINER scrollenden Spalte. */
+
+@media (max-width: 1024px) {
   .today-grid { grid-template-columns: 1fr; }
-  .exam-grid { grid-template-columns: 1fr; }
+  .exam-grid  { grid-template-columns: 1fr; }
   .main { overflow-y: auto; }
+  .week-grid { grid-template-columns: repeat(7, minmax(150px, 1fr)); overflow-x: auto; }
 }
+
 @media (max-width: 720px) {
+  html, body { height: auto; }
+  body { overflow: auto; }               /* Seite scrollt jetzt vertikal */
+
   .shell { flex-direction: column; height: auto; }
-  .sidebar { width: 100%; flex-basis: auto; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; }
-  .mini-timer { margin: 0; }
-  body { overflow: auto; }
+
+  /* Sidebar wird zur vollbreiten Kopf-Sektion (Uhr, Navigation, Timer) */
+  .sidebar {
+    width: 100%; flex: 0 0 auto; height: auto;
+    flex-direction: column; gap: 12px;
+    padding: 14px 14px 18px;
+    border-right: none; border-bottom: 1.5px solid var(--line);
+  }
+  .wallclock { flex-direction: row; justify-content: center; align-items: center; gap: 12px; padding: 10px 14px; }
+  .wallclock__time { font-size: 24px; }
+
+  /* Navigation als Tab-Reihe, klebt oben beim Scrollen */
+  .nav { flex-direction: row; gap: 8px; position: sticky; top: 0; z-index: 20;
+         background: var(--paper); padding: 4px 0; }
+  .nav-item { flex: 1; justify-content: center; padding: 9px 8px; }
+
+  /* Timer: nicht mehr an den Boden gedrückt */
+  .timer-card--sidebar { margin-top: 0; }
+  .timer-card--sidebar .dial-wrap { max-width: 200px; }
+
+  .main { height: auto; overflow: visible; padding: 14px; }
+  .today-grid, .exam-grid { grid-template-columns: 1fr; }
+
+  /* Zeitstrahl nicht bildschirmfüllend */
+  .day-timeline { max-height: 58vh; }
+  /* Wochenkalender-Stapelung: siehe week.css (@media 720) */
 }
