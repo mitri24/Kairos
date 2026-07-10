@@ -78,6 +78,19 @@ CREATE TABLE IF NOT EXISTS topics (
   FOREIGN KEY (exam_id) REFERENCES exams(id) ON DELETE CASCADE
 );
 
+-- Freie Notizen (Zettelkasten): optional einem Fach/einer Prüfung zugeordnet,
+-- angepinnte zuerst. Beim Löschen der Prüfung bleibt die Notiz (exam_id → NULL).
+CREATE TABLE IF NOT EXISTS notes (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  text        TEXT NOT NULL,
+  subject     TEXT,
+  exam_id     INTEGER REFERENCES exams(id) ON DELETE SET NULL,
+  pinned      INTEGER NOT NULL DEFAULT 0,
+  sort_order  INTEGER NOT NULL DEFAULT 0,
+  created_at  INTEGER NOT NULL,
+  updated_at  INTEGER NOT NULL DEFAULT 0
+);
+
 -- Append-only Log abgeschlossener/abgebrochener Fokus-Sessions (Metriken)
 CREATE TABLE IF NOT EXISTS sessions (
   id         INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -192,6 +205,7 @@ CREATE TABLE IF NOT EXISTS push_subscriptions (
 CREATE INDEX IF NOT EXISTS idx_tasks_exam ON tasks(exam_id);
 CREATE INDEX IF NOT EXISTS idx_subtasks_task ON subtasks(task_id);
 CREATE INDEX IF NOT EXISTS idx_topics_exam ON topics(exam_id);
+CREATE INDEX IF NOT EXISTS idx_notes_exam ON notes(exam_id);
 CREATE INDEX IF NOT EXISTS idx_sessions_task ON sessions(task_id);
 CREATE INDEX IF NOT EXISTS idx_health_daily_day ON health_daily(day_key);
 CREATE INDEX IF NOT EXISTS idx_health_samples_metric ON health_samples(metric, t);

@@ -14,6 +14,12 @@ const ROOT = join(__dirname, "..");
 const WEB_DIR = join(ROOT, "web");
 const SHARED_DIR = join(ROOT, "shared");
 const PORT = Number(process.env.PORT || 4321);
+// Bind-Adresse: Default 0.0.0.0 (Docker-Port-Mapping, bisheriges Verhalten). Für
+// einen lokalen Einzelnutzer-Betrieb mit sensiblen Health-Daten HOST=127.0.0.1 setzen.
+const HOST = process.env.HOST || "0.0.0.0";
+// CORS-Origin: Default "*" (Extension/PWA-Kompatibilität). Auf die eigene Origin
+// setzen (oder leer lassen), um Cross-Origin-Lesen der API zu unterbinden.
+const CORS_ORIGIN = process.env.CORS_ORIGIN ?? "*";
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
@@ -29,13 +35,20 @@ const MIME = {
   ".woff2": "font/woff2",
 };
 
+// CORS-Header nur, wenn eine Origin konfiguriert ist (CORS_ORIGIN="" schaltet ab).
+const CORS_HEADERS = CORS_ORIGIN
+  ? {
+      "Access-Control-Allow-Origin": CORS_ORIGIN,
+      "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+    }
+  : {};
+
 function sendJson(res, status, obj) {
   const body = JSON.stringify(obj);
   res.writeHead(status, {
     "Content-Type": "application/json; charset=utf-8",
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
+    ...CORS_HEADERS,
     "Cache-Control": "no-store",
   });
   res.end(body);
@@ -69,11 +82,7 @@ const server = http.createServer(async (req, res) => {
 
   // CORS-Preflight
   if (req.method === "OPTIONS") {
-    res.writeHead(204, {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
-    });
+    res.writeHead(204, CORS_HEADERS);
     res.end();
     return;
   }
@@ -116,7 +125,7 @@ const tickInterval = setInterval(() => {
 }, 1000);
 tickInterval.unref?.();
 
-server.listen(PORT, () => {
+server.listen(PORT, HOST, () => {
   console.log(`\n  ⏱  ADHD Lernuhr läuft auf  http://localhost:${PORT}\n`);
 });
 

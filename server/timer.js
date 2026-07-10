@@ -61,7 +61,7 @@ export function getSnapshot(now = nowMs()) {
 
   // Persönliches Profil + abgeleiteter Health-Kontext (Brücke zu KI/Planung).
   const profile = repo.getProfile();
-  const contextSource = repo.resolveContextSource();
+  const contextSource = repo.resolveContextSource(profile);
   const health = computeHealthContext(repo.recentDaily(contextSource, 14), profile, now);
 
   return {
@@ -81,6 +81,7 @@ export function getSnapshot(now = nowMs()) {
     exams: repo.listExams(),
     tasks,
     topics: repo.listTopics(),
+    notes: repo.listNotes(),
     today: {
       dayKey: daily.dayKey,
       focusMs: daily.focusMs + live,

@@ -1,6 +1,6 @@
 // Datenzugriff: mappt SQLite-Zeilen (snake_case) auf JS-Objekte (camelCase).
 import { getDb } from "./db.js";
-import { nowMs } from "./lib/util.js";
+import { nowMs, toBool, httpErr } from "./lib/util.js";
 import { DAILY_FIELDS, DAILY_COLS } from "./health/fields.js";
 
 // ── Mapper ───────────────────────────────────────
@@ -22,6 +22,11 @@ const mapSubtask = (r) => r && ({
 const mapTopic = (r) => r && ({
   id: r.id, examId: r.exam_id, text: r.text, done: !!r.done,
   sortOrder: r.sort_order, createdAt: r.created_at,
+});
+const mapNote = (r) => r && ({
+  id: r.id, text: r.text, subject: r.subject, examId: r.exam_id,
+  pinned: !!r.pinned, sortOrder: r.sort_order,
+  createdAt: r.created_at, updatedAt: r.updated_at,
 });
 
 // ── Settings (Singleton) ─────────────────────────
@@ -225,6 +230,38 @@ export function deleteTopic(id) {
   getDb().prepare("DELETE FROM topics WHERE id = ?").run(id);
 }
 
+// ── Notes (Notizen) ──────────────────────────────
+export function listNotes() {
+  return getDb().prepare("SELECT * FROM notes ORDER BY pinned DESC, sort_order DESC, created_at DESC")
+    .all().map(mapNote);
+}
+export function getNote(id) {
+  return mapNote(getDb().prepare("SELECT * FROM notes WHERE id = ?").get(id));
+}
+export function createNote(p = {}) {
+  const max = getDb().prepare("SELECT COALESCE(MAX(sort_order), -1) AS m FROM notes").get().m;
+  const now = nowMs();
+  const info = getDb().prepare(`
+    INSERT INTO notes (text, subject, exam_id, pinned, sort_order, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `).run(p.text, p.subject ?? null, p.examId ?? null, p.pinned ? 1 : 0, max + 1, now, now);
+  return getNote(Number(info.lastInsertRowid));
+}
+export function updateNote(id, patch) {
+  const cur = getNote(id);
+  if (!cur) return null;
+  const text = patch.text !== undefined ? patch.text : cur.text;
+  const subject = patch.subject !== undefined ? patch.subject : cur.subject;
+  const examId = patch.examId !== undefined ? patch.examId : cur.examId;
+  const pinned = patch.pinned !== undefined ? patch.pinned : cur.pinned;
+  getDb().prepare("UPDATE notes SET text=?, subject=?, exam_id=?, pinned=?, updated_at=? WHERE id=?")
+    .run(text, subject, examId, pinned ? 1 : 0, nowMs(), id);
+  return getNote(id);
+}
+export function deleteNote(id) {
+  getDb().prepare("DELETE FROM notes WHERE id = ?").run(id);
+}
+
 // ── Sessions & Tages-Metriken ────────────────────
 export function logSession({ taskId = null, phase, startedAt, endedAt, focusMs, completed }) {
   getDb().prepare(`
@@ -299,15 +336,19 @@ export function saveProfile(patch = {}) {
   for (const [key, col, kind] of PROFILE_FIELDS) {
     if (patch[key] === undefined) continue;
     let v = patch[key];
-    if (kind === "bool") v = v ? 1 : 0;
+    // Bool robust coercen: "false"/"0"/0/"" ⇒ false (nicht JS-truthy), damit ein
+    // Widerruf (aiEnabled:"false") die Einwilligung wirklich deaktiviert.
+    if (kind === "bool") v = toBool(v) ? 1 : 0;
     else if (kind === "num") v = v === null || v === "" ? null : Number(v);
     else v = v === null ? null : String(v);
     if (kind === "num" && v !== null && !Number.isFinite(v)) continue;
     sets.push(`${col} = ?`);
     vals.push(v);
   }
-  // Consent-Zeitstempel setzen, sobald KI erstmals aktiviert wird.
-  if (patch.aiEnabled) { sets.push("data_consent_at = COALESCE(data_consent_at, ?)"); vals.push(nowMs()); }
+  // Consent-Zeitstempel setzen, sobald KI erstmals AKTIV eingewilligt wird.
+  if (patch.aiEnabled !== undefined && toBool(patch.aiEnabled)) {
+    sets.push("data_consent_at = COALESCE(data_consent_at, ?)"); vals.push(nowMs());
+  }
   sets.push("updated_at = ?");
   vals.push(nowMs());
   getDb().prepare(`UPDATE profile SET ${sets.join(", ")} WHERE id = 1`).run(...vals);
@@ -348,18 +389,20 @@ export function upsertDaily({ dayKey, source, cols = {}, raw = null, recordedAt 
     recordedAt ?? null, now, now,
   ];
   getDb().prepare(DAILY_INSERT_SQL).run(...vals);
-  return getDaily(dayKey, source);
+  return getDaily(dayKey, source, true); // Echo inkl. raw an den Aufrufer (hat er selbst geschickt)
 }
 
-export function getDaily(dayKey, source) {
+// includeRaw defaultet auf false: raw_json (sensible Rohdaten) nur auf explizite
+// Anforderung ausliefern (Datensparsamkeit).
+export function getDaily(dayKey, source, includeRaw = false) {
   const r = getDb().prepare("SELECT * FROM health_daily WHERE day_key = ? AND source = ?").get(dayKey, source);
-  return mapDaily(r, true);
+  return mapDaily(r, includeRaw);
 }
 
 // Alle Quellen eines Tages (z. B. RingConn + WHOOP parallel).
-export function getDayAllSources(dayKey) {
+export function getDayAllSources(dayKey, includeRaw = false) {
   return getDb().prepare("SELECT * FROM health_daily WHERE day_key = ? ORDER BY source")
-    .all(dayKey).map((r) => mapDaily(r, true));
+    .all(dayKey).map((r) => mapDaily(r, includeRaw));
 }
 
 // Bereichsabfrage (ohne raw_json, um große Antworten zu vermeiden).
@@ -375,12 +418,12 @@ export function listDaily({ from = null, to = null, source = null, limit = 400 }
 }
 
 // Jüngster Tagesdatensatz — optional auf eine Quelle beschränkt.
-export function latestDaily(source = null) {
+export function latestDaily(source = null, includeRaw = false) {
   const sql = source
     ? "SELECT * FROM health_daily WHERE source = ? ORDER BY day_key DESC LIMIT 1"
     : "SELECT * FROM health_daily ORDER BY day_key DESC LIMIT 1";
   const r = source ? getDb().prepare(sql).get(source) : getDb().prepare(sql).get();
-  return mapDaily(r, true);
+  return mapDaily(r, includeRaw);
 }
 
 // Letzte `n` Tage einer Quelle, absteigend — Eingabe für den Health-Kontext.
@@ -390,9 +433,10 @@ export function recentDaily(source, n = 14) {
 }
 
 // Welche Quelle liefert die Kontextbasis? Bevorzugt profile.primaryDevice,
-// fällt sonst auf die Quelle mit den jüngsten Daten zurück.
-export function resolveContextSource() {
-  const prof = getProfile();
+// fällt sonst auf die Quelle mit den jüngsten Daten zurück. Das Profil kann
+// durchgereicht werden, um einen doppelten getProfile()-Query zu sparen.
+export function resolveContextSource(profile = null) {
+  const prof = profile || getProfile();
   const preferred = prof?.primaryDevice || "ringconn";
   const hasPreferred = getDb().prepare("SELECT 1 FROM health_daily WHERE source = ? LIMIT 1").get(preferred);
   if (hasPreferred) return preferred;
@@ -406,14 +450,28 @@ export function deleteDaily(dayKey, source = null) {
 }
 
 // ── Health: Intraday-Samples ─────────────────────
+export const MAX_SAMPLES_PER_CALL = 20000;
+
 export function insertSamples(samples = []) {
   if (!samples.length) return 0;
-  const stmt = getDb().prepare(
+  if (samples.length > MAX_SAMPLES_PER_CALL) {
+    throw httpErr(413, `Zu viele Samples pro Anfrage (max. ${MAX_SAMPLES_PER_CALL})`);
+  }
+  const db = getDb();
+  const stmt = db.prepare(
     "INSERT INTO health_samples (source, metric, t, value, unit) VALUES (?, ?, ?, ?, ?)"
   );
-  let n = 0;
-  for (const s of samples) { stmt.run(s.source, s.metric, s.t, s.value, s.unit ?? null); n++; }
-  return n;
+  // Eine Transaktion: atomar und deutlich schneller als N Einzel-Commits.
+  db.exec("BEGIN");
+  try {
+    let n = 0;
+    for (const s of samples) { stmt.run(s.source, s.metric, s.t, s.value, s.unit ?? null); n++; }
+    db.exec("COMMIT");
+    return n;
+  } catch (err) {
+    db.exec("ROLLBACK");
+    throw err;
+  }
 }
 
 export function listSamples({ metric = null, from = null, to = null, limit = 2000 } = {}) {

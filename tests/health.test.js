@@ -100,7 +100,9 @@ test("normalizeDaily(whoop) rechnet ms→min und kJ→kcal um", () => {
   assert.equal(n.cols.recovery_score, 71);
   assert.equal(n.cols.strain_score, 12.4);
   assert.equal(n.cols.hrv_ms, 68);
-  assert.equal(Math.round(n.cols.active_calories), 2151); // 9000 kJ / 4.184
+  // WHOOP kilojoule = Gesamt-Energieumsatz → totalCalories (nicht activeCalories)
+  assert.equal(n.cols.active_calories, undefined);
+  assert.equal(Math.round(n.cols.total_calories), 2151); // 9000 kJ / 4.184
 });
 
 // ── Bereichs-Clamping ────────────────────────────
@@ -111,15 +113,33 @@ test("coerceDaily klemmt unplausible Werte statt sie zu verwerfen", () => {
   assert.equal(n.cols.resting_hr, 55);
 });
 
+// ── manual/generic akzeptiert ISO & Epoch-Sekunden (Fix) ─
+test("normalizeDaily(manual) versteht ISO-Strings und Epoch-Sekunden bei sleepStart/End", () => {
+  const iso = normalizeDaily("manual", { date: "2026-07-08", sleepStart: "2026-07-07T23:10:00Z", sleepEnd: "2026-07-08T06:40:00Z" });
+  assert.equal(iso.dayKey, "2026-07-08");
+  assert.ok(iso.cols.sleep_start > 1e12 && iso.cols.sleep_end > iso.cols.sleep_start);
+
+  // Epoch-Sekunden ohne explizites date → Tag korrekt aus sleepEnd abgeleitet (nicht 1970)
+  const secs = normalizeDaily("manual", { sleepEnd: 1751931000 });
+  assert.ok(!secs.dayKey.startsWith("1970"));
+  assert.ok(secs.cols.sleep_end > 1e12); // in ms hochskaliert
+});
+
+// ── Apple-Health-SpO2 als Bruch 0..1 (Fix) ───────
+test("normalizeDaily(apple_health) skaliert SpO2-Bruch 0..1 auf Prozent", () => {
+  const n = normalizeDaily("apple_health", { date: "2026-07-08", oxygenSaturation: 0.97, restingHr: 55 });
+  assert.equal(n.cols.spo2_avg, 97); // 0.97 → 97, nicht auf 50 geklemmt
+});
+
 // ── Upsert-Merge ─────────────────────────────────
 test("upsertDaily behält bestehende Felder bei Teil-Import", () => {
   repo.upsertDaily({ dayKey: "2026-06-01", source: "ringconn", cols: { sleep_total_min: 420, resting_hr: 55 }, raw: { a: 1 } });
   repo.upsertDaily({ dayKey: "2026-06-01", source: "ringconn", cols: { hrv_ms: 60 } });
-  const d = repo.getDaily("2026-06-01", "ringconn");
+  const d = repo.getDaily("2026-06-01", "ringconn", true); // raw explizit anfordern
   assert.equal(d.sleepTotalMin, 420); // erhalten
   assert.equal(d.restingHr, 55);      // erhalten
   assert.equal(d.hrvMs, 60);          // ergänzt
-  assert.deepEqual(d.raw, { a: 1 });  // raw erhalten
+  assert.deepEqual(d.raw, { a: 1 });  // raw erhalten (COALESCE-Merge)
 });
 
 // ── Listen / Latest / Kontextquelle ──────────────
@@ -155,6 +175,21 @@ test("saveProfile aktualisiert partiell und setzt Consent-Zeitstempel", () => {
   const p2 = repo.saveProfile({ chronotype: "late" });
   assert.equal(p2.displayName, "Mira");
   assert.equal(p2.chronotype, "late");
+});
+
+test("saveProfile: aiEnabled als String \"false\" widerruft die Einwilligung", () => {
+  repo.saveProfile({ aiEnabled: true });
+  assert.equal(repo.getProfile().aiEnabled, true);
+  // String "false" (z. B. aus Formular-Serialisierung) darf NICHT aktivieren
+  const p = repo.saveProfile({ aiEnabled: "false" });
+  assert.equal(p.aiEnabled, false);
+  assert.equal(repo.saveProfile({ aiEnabled: 0 }).aiEnabled, false);
+});
+
+test("getDaily liefert raw nur auf Anforderung (includeRaw)", () => {
+  repo.upsertDaily({ dayKey: "2026-05-01", source: "ringconn", cols: { hrv_ms: 60 }, raw: { secret: 1 } });
+  assert.equal(repo.getDaily("2026-05-01", "ringconn").raw, undefined);       // Default: kein raw
+  assert.deepEqual(repo.getDaily("2026-05-01", "ringconn", true).raw, { secret: 1 });
 });
 
 // ── Readiness-Kontext: Reduzieren ────────────────
@@ -211,6 +246,15 @@ test("normalizeSamples akzeptiert beide Formen; insert/list funktioniert", () =>
   assert.equal(n, 3);
   const hr = repo.listSamples({ metric: "heart_rate" });
   assert.ok(hr.some((s) => s.value === 72));
+});
+
+test("insertSamples lehnt über der Obergrenze ab (413) ohne Teil-Schreibvorgang", () => {
+  const before = repo.listSamples({ metric: "cap_probe" }).length;
+  const tooMany = Array.from({ length: repo.MAX_SAMPLES_PER_CALL + 1 }, (_, i) =>
+    ({ source: "ringconn", metric: "cap_probe", t: 1_751_931_000_000 + i, value: 70 }));
+  assert.throws(() => repo.insertSamples(tooMany), (e) => e.status === 413);
+  // Transaktion → nichts persistiert
+  assert.equal(repo.listSamples({ metric: "cap_probe" }).length, before);
 });
 
 // ── HTTP-Schicht: Import + Query-Parsing ─────────

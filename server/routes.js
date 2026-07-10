@@ -128,6 +128,27 @@ add("PUT", /^\/api\/topics\/(\d+)$/, (p, b) => {
 });
 add("DELETE", /^\/api\/topics\/(\d+)$/, (p) => { repo.deleteTopic(Number(p[0])); return timer.getSnapshot(); });
 
+// ── Notes (Notizen) ──────────────────────────────
+add("POST", /^\/api\/notes$/, (_p, b) => {
+  const text = str(b.text).trim();
+  if (!text) throw httpError(400, "text fehlt");
+  repo.createNote({
+    text, subject: b.subject != null ? str(b.subject) : null,
+    examId: toInt(b.examId, null), pinned: !!b.pinned,
+  });
+  return timer.getSnapshot();
+});
+add("PUT", /^\/api\/notes\/(\d+)$/, (p, b) => {
+  const patch = {};
+  if (b.text !== undefined) patch.text = str(b.text);
+  if (b.subject !== undefined) patch.subject = b.subject != null ? str(b.subject) : null;
+  if (b.examId !== undefined) patch.examId = toInt(b.examId, null);
+  if (b.pinned !== undefined) patch.pinned = !!b.pinned;
+  repo.updateNote(Number(p[0]), patch);
+  return timer.getSnapshot();
+});
+add("DELETE", /^\/api\/notes\/(\d+)$/, (p) => { repo.deleteNote(Number(p[0])); return timer.getSnapshot(); });
+
 // ── Profil (persönliche Informationen) ───────────
 add("GET", /^\/api\/profile$/, () => repo.getProfile());
 add("PUT", /^\/api\/profile$/, (_p, b) => repo.saveProfile(b || {}));
@@ -135,10 +156,12 @@ add("PUT", /^\/api\/profile$/, (_p, b) => repo.saveProfile(b || {}));
 // ── Health: Import & Abfrage ─────────────────────
 // Abgeleiteter Readiness-/Kapazitäts-Kontext (Brücke zu KI + Planung).
 function healthContext() {
-  const source = repo.resolveContextSource();
-  const rows = repo.recentDaily(source, 14);
-  return computeHealthContext(rows, repo.getProfile(), nowMs());
+  const profile = repo.getProfile();
+  const source = repo.resolveContextSource(profile);
+  return computeHealthContext(repo.recentDaily(source, 14), profile, nowMs());
 }
+// raw_json (sensible Rohdaten) nur bei ?raw=1/true ausliefern.
+const wantsRaw = (q) => q.raw === "1" || q.raw === "true";
 
 // Einen Rohtag einer Quelle normalisieren und schreiben. Ohne auflösbaren
 // Tagesschlüssel wird der Datensatz übersprungen (statt Fehler zu werfen).
@@ -195,7 +218,7 @@ add("GET", /^\/api\/health\/context$/, () => healthContext());
 
 add("GET", /^\/api\/health\/latest$/, (_p, _b, q) => {
   const source = q.source ? normalizeSource(q.source) : repo.resolveContextSource();
-  return { source, day: repo.latestDaily(source) };
+  return { source, day: repo.latestDaily(source, wantsRaw(q)) };
 });
 
 add("GET", /^\/api\/health\/daily$/, (_p, _b, q) => ({
@@ -207,8 +230,9 @@ add("GET", /^\/api\/health\/daily$/, (_p, _b, q) => ({
 }));
 
 add("GET", /^\/api\/health\/daily\/(\d{4}-\d{2}-\d{2})$/, (p, _b, q) => {
-  if (q.source) return { dayKey: p[0], sources: [repo.getDaily(p[0], normalizeSource(q.source))].filter(Boolean) };
-  return { dayKey: p[0], sources: repo.getDayAllSources(p[0]) };
+  const raw = wantsRaw(q);
+  if (q.source) return { dayKey: p[0], sources: [repo.getDaily(p[0], normalizeSource(q.source), raw)].filter(Boolean) };
+  return { dayKey: p[0], sources: repo.getDayAllSources(p[0], raw) };
 });
 
 add("DELETE", /^\/api\/health\/daily\/(\d{4}-\d{2}-\d{2})$/, (p, _b, q) => {

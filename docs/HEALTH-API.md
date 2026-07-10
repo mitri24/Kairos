@@ -70,7 +70,7 @@ Antwort (gekürzt):
 
 ```json
 { "source": "ringconn", "imported": 1, "skipped": 0, "days": ["2026-07-08"],
-  "samples": 0, "context": { "readiness": 78, "capacityMultiplier": 1, "recommendation": "maintain", … } }
+  "samples": 0, "context": { "readiness": 78, "capacityMultiplier": 1.05, "recommendation": "increase", … } }
 ```
 
 Jeder Import liefert direkt den aktualisierten **Health-Kontext** zurück.
@@ -109,10 +109,12 @@ Alle Antworten sind JSON. Zeitangaben in **Epoch-Millisekunden**, Tage als
 | `GET` | `/api/health/schema` | Maschinenlesbare Feld-/Quellen-Referenz |
 | `DELETE` | `/api/health/daily/:day?source=` | Tag löschen (Korrektur) |
 
-`from`/`to` sind Tagesschlüssel, `source` eine der unterstützten Quellen
-(`ringconn`, `whoop`, `apple_health`, `google_fit`, `manual`, `generic`). Der
-`source`-Wert ist tolerant — `"RingConn"`, `"ring-conn"`, `"WHOOP 4.0"` werden
-erkannt.
+Bei den **`/daily`**-Endpunkten sind `from`/`to` **Tagesschlüssel**
+(`YYYY-MM-DD`); bei **`/api/health/samples`** sind `from`/`to` **Epoch-Millisekunden**.
+`source` ist eine der unterstützten Quellen (`ringconn`, `whoop`, `apple_health`,
+`google_fit`, `manual`, `generic`) und tolerant — `"RingConn"`, `"ring-conn"`,
+`"WHOOP 4.0"` werden erkannt. Die Read-Endpunkte `latest` und `daily/:day` liefern
+den **Originalexport (`raw`) nur mit `?raw=1`** (Datensparsamkeit).
 
 ---
 
@@ -134,7 +136,8 @@ abgelehnt. Live-Referenz: `GET /api/health/schema`.
 | `sleepEfficiency` | % | 0–100 | Schlafeffizienz |
 | `sleepScore` | 0–100 | 0–100 | Schlafqualität/-score |
 | `restingHr` | bpm | 20–220 | Ruhepuls |
-| `avgHr` / `minHr` / `maxHr` | bpm | 20–240 | Herzfrequenz Ø/Min/Max |
+| `avgHr` / `minHr` | bpm | 20–220 | Herzfrequenz Ø/Min |
+| `maxHr` | bpm | 20–240 | Herzfrequenz Max |
 | `hrvMs` | ms | 0–400 | HRV (RMSSD) — Erholungssignal |
 | `respiratoryRate` | brpm | 3–40 | Atemfrequenz |
 | `spo2Avg` / `spo2Min` | % | 50–100 | Blutsauerstoff Ø/Min |
@@ -203,7 +206,7 @@ du holst die JSON-Objekte dort ab und POSTest sie an Kairos.
 | `sleep.score.sleep_performance_percentage` | `sleepScore` | – |
 | `cycle.score.strain` | `strainScore` | – |
 | `cycle.score.average_heart_rate` / `max_heart_rate` | `avgHr` / `maxHr` | – |
-| `cycle.score.kilojoule` | `activeCalories` | **kJ → kcal** (÷4,184) |
+| `cycle.score.kilojoule` | `totalCalories` | **kJ → kcal** (÷4,184); WHOOP = Gesamt-Energieumsatz |
 
 `sleepTotalMin` = Summe der Phasen, falls nicht separat geliefert.
 
@@ -212,7 +215,8 @@ du holst die JSON-Objekte dort ab und POSTest sie an Kairos.
 `source: "apple_health"` bzw. `"google_fit"`. Akzeptiert aggregierte Tageswerte
 inkl. `HKQuantityTypeIdentifier…`-Schlüssel (z. B.
 `HKQuantityTypeIdentifierRestingHeartRate`, `…HeartRateVariabilitySDNN`,
-`…OxygenSaturation`, `…StepCount`).
+`…OxygenSaturation`, `…StepCount`). **SpO₂** liefert HealthKit als Bruch `0..1` —
+der Normalisierer erkennt Werte ≤ 1 und skaliert sie automatisch auf Prozent.
 
 ---
 
@@ -248,14 +252,17 @@ den abgeleiteten, **transparenten** Zustand:
   Tages-Lernlast skaliert wird. Schlafdefizit, Schlafschuld (7 Tage), HRV- und
   Ruhepuls-Abweichung von der Baseline sowie ein Geräte-Recovery/Readiness-Score
   gehen ein. **Schlaf bleibt hart** — der Faktor kürzt Lernlast, nie Schlaf.
-- **`recommendation`**: `reduce` (≤0,85) · `maintain` · `increase` (≥1,05).
+- **`recommendation`**: `reduce` (≤0,85) · `maintain` · `increase` (≥1,05) ·
+  `unknown` (wenn noch keine Wearable-Daten vorliegen, `hasData: false`).
 - **`readiness`**: bevorzugt WHOOP-Recovery → RingConn-Readiness → selbst
   abgeleitet.
 - **`reasons`**: menschenlesbare Begründung jeder Anpassung (für UI **und** als
   KI-Prompt-Kontext).
 
-Baselines (`restingHrBaseline`, `hrvBaselineMs`) und `sleepGoalHours` kommen aus
-dem Profil; fehlen sie, nutzt Kairos den 14-Tage-Durchschnitt der Daten.
+Die **Baselines** (`restingHrBaseline`, `hrvBaselineMs`) kommen aus dem Profil;
+fehlen sie, bildet Kairos sie aus dem 14-Tage-Durchschnitt der **Vortage** (nie
+des heutigen Werts). `sleepGoalHours` fällt bei fehlendem Profilwert auf den
+festen Default **8 h** zurück (kein Durchschnitt).
 
 ---
 
@@ -304,10 +311,17 @@ Gesundheitsdaten sind **besonders sensibel**. Kairos ist **local-first**: alle
 Daten liegen in der lokalen SQLite-Datei (`server/data/lernuhr.db`), es gibt
 keinen externen Upload. Empfehlungen für den Betrieb:
 
-- Health-Endpunkte nur **lokal** oder **hinter Authentifizierung / im eigenen
-  Netz** exponieren. Die eingebaute API hat (wie der Rest der App) offenes CORS
-  und keine Authentifizierung — für personenbezogene Daten hinter den in
-  [`DEPLOY.md`](DEPLOY.md) beschriebenen Reverse-Proxy stellen (Basic-Auth/mTLS).
+- **Nur lokal binden:** `HOST=127.0.0.1` setzen, damit der Server nicht im LAN
+  erreichbar ist (Default `0.0.0.0` bleibt für das Docker-Port-Mapping; das
+  Compose-Setup schränkt die Host-Freigabe ohnehin auf `127.0.0.1` ein).
+- **Cross-Origin einschränken:** `CORS_ORIGIN` auf die eigene Origin setzen (oder
+  leer lassen, `CORS_ORIGIN=`), damit keine fremde Webseite die API cross-origin
+  auslesen kann. Default bleibt `*` für PWA-/Extension-Kompatibilität.
+- **Authentifizierung:** Die eingebaute API hat keine Auth. Für personenbezogene
+  Daten hinter den in [`DEPLOY.md`](DEPLOY.md) beschriebenen Reverse-Proxy stellen
+  (Basic-Auth/mTLS). Ein Multi-Tenant-Auth-Layer ist separat in Arbeit.
+- **Datensparsamkeit:** Read-Endpunkte liefern den Rohexport (`raw`) nur mit
+  `?raw=1`. Ein Import ist auf max. 20 000 Samples/Anfrage und 1 MB Body begrenzt.
 - `conditions` und `aiNotes` sind Freitext — nur speichern, was nötig ist.
 - Einwilligung ist explizit (`aiEnabled` + `dataConsentAt`) und jederzeit
   widerrufbar (`PUT /api/profile { "aiEnabled": false }`).
