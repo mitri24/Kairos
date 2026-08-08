@@ -18,6 +18,16 @@ const repo = await import("../server/repo.js");
 const routes = await import("../server/routes.js");
 const { normalizeDaily, normalizeSamples, normalizeSource } = await import("../server/health/normalize.js");
 const { computeHealthContext } = await import("../server/health/context.js");
+const auth = await import("../server/auth.js");
+const { setDefaultUserId } = await import("../server/authctx.js");
+
+// Multi-Tenant: Test-Nutzer + Standardkontext (direkte repo-Aufrufe) UND eine
+// echte Sitzung, deren Cookie mkReq mitschickt (handleApi läuft dann authentifiziert).
+const __testUser = auth.findOrCreateUser("test@example.com");
+repo.ensureUser(__testUser.id);
+setDefaultUserId(__testUser.id);
+const __session = auth.createSession(__testUser.id);
+const __cookie = `${auth.COOKIE_NAME}=${__session.id}`;
 
 after(() => {
   for (const suffix of ["", "-wal", "-shm", "-journal"]) {
@@ -30,6 +40,8 @@ function mkReq(method, url, body) {
   const req = Readable.from(body != null ? [Buffer.from(JSON.stringify(body))] : []);
   req.method = method;
   req.url = url;
+  req.headers = { cookie: __cookie, host: "localhost" };
+  req.socket = { remoteAddress: "127.0.0.1" };
   return req;
 }
 const pathOf = (url) => url.split("?")[0];

@@ -34,6 +34,8 @@ CREATE TABLE IF NOT EXISTS exams (
   exam_date   INTEGER,                       -- epoch ms
   total_hours REAL    NOT NULL DEFAULT 0,     -- Pensum
   color       TEXT,
+  archived    INTEGER NOT NULL DEFAULT 0,     -- abgeschlossen/archiviert (aus den Chips ausgeblendet)
+  archived_at INTEGER,
   sort_order  INTEGER NOT NULL DEFAULT 0,
   created_at  INTEGER NOT NULL
 );
@@ -73,6 +75,7 @@ CREATE TABLE IF NOT EXISTS topics (
   exam_id    INTEGER,
   text       TEXT    NOT NULL,
   done       INTEGER NOT NULL DEFAULT 0,
+  confidence INTEGER NOT NULL DEFAULT 0,      -- 0=unbewertet · 1=wackelig · 2=okay · 3=sicher
   sort_order INTEGER NOT NULL DEFAULT 0,
   created_at INTEGER NOT NULL,
   FOREIGN KEY (exam_id) REFERENCES exams(id) ON DELETE CASCADE
@@ -89,6 +92,21 @@ CREATE TABLE IF NOT EXISTS notes (
   sort_order  INTEGER NOT NULL DEFAULT 0,
   created_at  INTEGER NOT NULL,
   updated_at  INTEGER NOT NULL DEFAULT 0
+);
+
+-- Lern-Ressourcen: externe Links (Skript, Anki, Video, PDF …) an ein Thema
+-- ODER eine Aufgabe. Der "Hand-off": Kairos plant & timet, gelernt wird auf der
+-- verlinkten Seite. Beim Löschen von Thema/Aufgabe verschwinden die Links mit.
+CREATE TABLE IF NOT EXISTS resources (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  topic_id   INTEGER REFERENCES topics(id) ON DELETE CASCADE,
+  task_id    INTEGER REFERENCES tasks(id)  ON DELETE CASCADE,
+  title      TEXT    NOT NULL,
+  url        TEXT    NOT NULL,
+  kind       TEXT,                          -- 'notebooklm'|'video'|'pdf'|'slides'|'anki'|'link'
+  is_primary INTEGER NOT NULL DEFAULT 0,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at INTEGER NOT NULL
 );
 
 -- Append-only Log abgeschlossener/abgebrochener Fokus-Sessions (Metriken)
@@ -206,6 +224,8 @@ CREATE INDEX IF NOT EXISTS idx_tasks_exam ON tasks(exam_id);
 CREATE INDEX IF NOT EXISTS idx_subtasks_task ON subtasks(task_id);
 CREATE INDEX IF NOT EXISTS idx_topics_exam ON topics(exam_id);
 CREATE INDEX IF NOT EXISTS idx_notes_exam ON notes(exam_id);
+CREATE INDEX IF NOT EXISTS idx_resources_topic ON resources(topic_id);
+CREATE INDEX IF NOT EXISTS idx_resources_task ON resources(task_id);
 CREATE INDEX IF NOT EXISTS idx_sessions_task ON sessions(task_id);
 CREATE INDEX IF NOT EXISTS idx_health_daily_day ON health_daily(day_key);
 CREATE INDEX IF NOT EXISTS idx_health_samples_metric ON health_samples(metric, t);

@@ -61,10 +61,10 @@
   border-radius: var(--r-btn);
   min-width: 2.35rem;
   padding: 0 0.78rem;
-  font-size: 1rem;
-  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  line-height: 1;
   transition: background-color 120ms ease, transform 120ms ease;
 }
 
@@ -124,15 +124,19 @@
   border-color: var(--accent);
 }
 
+/* Häkchen aus DEMSELBEN Pfad wie icon("check") in js/icons.js, als Maske —
+   ein <input type=checkbox> kann kein SVG-Kind aufnehmen. Keine Textglyphe
+   mehr: die rendert je Plattform anders und hängt am Font. In einer Maske
+   zählt nur die Deckkraft, sichtbar wird `background-color` — die Farbe kommt
+   also weiterhin aus dem Token. */
 .todo-check:checked::after {
-  content: "✓";
+  --check-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12.6 4.6 4.6L19 6.8'/%3E%3C/svg%3E") center / 0.7rem 0.7rem no-repeat;
+  content: "";
   position: absolute;
   inset: 0;
-  display: grid;
-  place-content: center;
-  font-size: 0.65rem;
-  color: var(--paper);
-  font-weight: 700;
+  background-color: var(--paper);
+  -webkit-mask: var(--check-mask);
+  mask: var(--check-mask);
 }
 
 /* ── Text & Delete ───────────────────────────── */
@@ -158,13 +162,12 @@
 .todo-priority-btn {
   border: none;
   background: transparent;
-  color: var(--accent);
-  font-size: 0.95rem;
-  line-height: 1;
+  color: var(--muted-2);
   width: 1.15rem;
   height: 1.15rem;
-  display: grid;
-  place-content: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 0;
   cursor: pointer;
   opacity: 0.7;
@@ -173,7 +176,6 @@
 
 .todo-priority-btn.active {
   color: var(--accent);
-  font-weight: 700;
   opacity: 1;
 }
 
@@ -233,8 +235,8 @@
 
 /* ── Drag-Griff & Zeit-Feld in der Liste ─────── */
 .todo-grip {
-  flex: none; cursor: grab; color: var(--muted-2); font-size: 0.8rem;
-  line-height: 1; letter-spacing: -2px; user-select: none;
+  flex: none; cursor: grab; color: var(--muted-2); user-select: none;
+  display: inline-flex; align-items: center; justify-content: center;
 }
 .todo-grip:hover { color: var(--accent); }
 .todo-grip:active { cursor: grabbing; }
@@ -277,8 +279,8 @@
 .tl-item__check {
   flex: none; width: 15px; height: 15px; margin-top: 1px; border-radius: 4px;
   border: 1.6px solid var(--line-strong); background: var(--paper-2);
-  color: var(--paper); font-size: 0.6rem; font-weight: 900; line-height: 1;
-  display: grid; place-content: center; cursor: pointer;
+  color: var(--paper); padding: 0;
+  display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
 }
 .tl-item__body { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
 .tl-item__name {
@@ -296,7 +298,7 @@
 }
 .tl-item.is-past .tl-item__name { color: var(--danger); }
 .tl-item.is-past .tl-item__check { border-color: var(--danger); }
-.tl-item.is-done { border-color: rgba(94,133,119,0.4); border-left-color: var(--green); background: var(--green-soft); opacity: 0.72; }
+.tl-item.is-done { border-color: rgba(62,125,94,0.4); border-left-color: var(--green); background: var(--green-soft); opacity: 0.72; }
 .tl-item.is-done .tl-item__check { background: var(--green); border-color: var(--green); }
 .tl-item.is-done .tl-item__name { text-decoration: line-through; color: var(--muted); }
 

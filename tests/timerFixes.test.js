@@ -12,6 +12,11 @@ let timer, repo;
 before(async () => {
   timer = await import("../server/timer.js");
   repo = await import("../server/repo.js");
+  const auth = await import("../server/auth.js");
+  const { setDefaultUserId } = await import("../server/authctx.js");
+  const u = auth.findOrCreateUser("test@example.com");
+  repo.ensureUser(u.id);
+  setDefaultUserId(u.id);
 });
 after(() => {
   for (const suf of ["", "-wal", "-shm"]) { try { rmSync(DB + suf); } catch {} }

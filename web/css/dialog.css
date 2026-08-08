@@ -1,0 +1,80 @@
+/* ═══ Geteilte schwere Dialog-Hülle (Post-Session Review, Exam Wrap-up) ═══════
+   Kräftiger als .modal-box: 22px Radius, tiefer Schatten, getönter Scrim. */
+.sheet-overlay { position: fixed; inset: 0; z-index: 82; display: grid; place-items: center; padding: 20px; animation: fade .16s ease; }
+.sheet-overlay[hidden] { display: none !important; }
+.sheet-overlay__scrim { position: absolute; inset: 0; background: linear-gradient(180deg, #F1EFE9, #EBE8E0); opacity: .6; }
+.sheet-overlay__scrim::after { content: ""; position: absolute; inset: 0; background: rgba(30, 33, 29, .28); }
+.sheet-overlay--green .sheet-overlay__scrim { background: linear-gradient(180deg, #EBF1EC, #e0ece3); opacity: .7; }
+.sheet-overlay--green .sheet-overlay__scrim::after { background: rgba(30, 33, 29, .24); }
+
+.sheet {
+  position: relative; background: var(--card); border-radius: 22px;
+  box-shadow: 0 40px 80px -30px rgba(30, 33, 29, .7);
+  padding: 30px; width: min(520px, 100%); max-height: 90dvh; overflow-y: auto; animation: pop .18s ease;
+}
+.sheet__head { display: flex; align-items: center; gap: 14px; }
+.sheet__head--center { flex-direction: column; align-items: center; text-align: center; gap: 0; }
+.sheet__head-ic { width: 56px; height: 56px; border-radius: 50%; background: var(--accent-tint); display: grid; place-items: center; color: var(--accent); flex: none; }
+.sheet__head-ic svg { width: 28px; height: 28px; }
+.sheet__head-ic--lg { width: 64px; height: 64px; }
+.sheet__head-ic--lg svg { width: 30px; height: 30px; }
+.sheet__head--center .sheet__title { margin-top: 16px; }
+.sheet__head--center .sheet__sub { margin-top: 4px; }
+.sheet__kicker { font: 600 11px var(--font); letter-spacing: .14em; text-transform: uppercase; color: var(--muted-3); }
+.sheet__title { font: 800 24px var(--font); letter-spacing: -.4px; color: var(--ink-strong); margin-top: 6px; }
+.sheet__sub { font: 500 13px var(--font); color: var(--muted-2); margin-top: 5px; }
+
+.sheet__tiles { display: flex; gap: 10px; margin-top: 22px; }
+.sheet-tile { flex: 1; background: var(--card-muted); border-radius: 13px; padding: 14px; text-align: center; }
+.sheet-tile__val { font: 800 22px var(--font); color: var(--ink-strong); letter-spacing: -.5px; }
+.sheet-tile__val.is-accent { color: var(--accent); }
+.sheet-tile__val.is-amber { color: var(--amber); }
+.sheet-tile__lbl { font: 600 10px var(--font); letter-spacing: .06em; text-transform: uppercase; color: var(--muted-3); margin-top: 3px; }
+
+.sheet__q { font: 600 13px var(--font); color: var(--ink); margin-top: 22px; }
+.sheet__rate { display: flex; gap: 9px; margin-top: 10px; }
+/* Icon über dem Text, Inhalt exakt zentriert (früher zentriertes Emoji-Glyph). */
+.sheet-rate { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; text-align: center; padding: 10px 0; border-radius: 11px; border: 1px solid var(--line); background: var(--card); font: 600 13px var(--font); color: var(--ink-2); cursor: pointer; transition: background .15s, border-color .15s, color .15s; }
+.sheet-rate .ico { color: var(--muted-2); transition: color .15s; }
+.sheet-rate.is-active .ico { color: var(--accent); }
+.sheet-rate:hover { border-color: var(--divider); }
+.sheet-rate.is-active { background: var(--accent-tint); border-color: var(--accent-chart-2); color: var(--accent-ink); }
+
+.sheet__note { background: #F6F5EF; border-radius: 12px; padding: 12px 14px; font: 500 12.5px var(--font); color: #6b6a60; line-height: 1.5; margin-top: 16px; }
+.sheet__note b { color: var(--accent); }
+
+.sheet__carry { background: var(--accent-tint); border-radius: 14px; padding: 15px; margin-top: 18px; }
+.sheet__carry-title { font: 700 13px var(--font); color: var(--accent-ink); }
+.sheet__carry ul { margin: 9px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 7px; }
+/* Haken kommt als SVG aus icons.js (exam.js baut die <li>) — kein Textglyph mehr. */
+.sheet__carry li { display: flex; align-items: center; gap: 8px; font: 500 12.5px var(--font); color: #3f7a5e; line-height: 1.4; }
+.sheet__carry li .ico { color: var(--accent); }
+
+.sheet__foot { display: flex; gap: 10px; margin-top: 18px; }
+.sheet__foot .btn { flex: 1; height: 46px; }
+
+/* Overdue-Prompt (Card B): „Missed block" */
+.overdue { position: relative; width: min(360px, 100%); background: var(--card); border-radius: 20px; padding: 24px; box-shadow: 0 40px 80px -30px rgba(30, 33, 29, .7); animation: pop .18s ease; }
+.overdue__head { display: flex; align-items: center; gap: 9px; }
+.overdue__dot { width: 9px; height: 9px; border-radius: 50%; background: var(--now); flex: none; }
+.overdue__eyebrow { font: 600 11px var(--font); letter-spacing: .12em; text-transform: uppercase; color: var(--now); }
+.overdue__title { font: 800 18px var(--font); color: var(--ink-strong); margin-top: 10px; }
+.overdue__sub { font: 500 12.5px var(--font); color: var(--muted-2); margin-top: 6px; line-height: 1.45; }
+.overdue__actions { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+.overdue__actions .btn--primary { height: 42px; border-radius: 11px; font-size: 13.5px; }
+.overdue__actions > .btn--ghost { height: 40px; border-radius: 11px; font-size: 13px; }
+.overdue__split { display: flex; gap: 8px; }
+.overdue__split .btn { flex: 1; height: 38px; border-radius: 11px; font-size: 12.5px; }
+.overdue__drop { color: var(--muted-3); }
+
+/* Scham-freie Abbruch-Optionen (Card A) */
+.cancel-opts { display: flex; flex-direction: column; gap: 9px; margin-top: 18px; }
+.cancel-opt { display: flex; align-items: center; gap: 12px; padding: 13px 15px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); cursor: pointer; text-align: left; transition: border-color .15s, background .15s; }
+.cancel-opt:hover { border-color: var(--divider); }
+.cancel-opt--done { border-color: var(--accent-chart-2); background: var(--accent-tint); }
+/* Icon-Slot: trägt nur noch SVGs aus icons.js (currentColor) — keine Textglyphen. */
+.cancel-opt__ic { width: 30px; height: 30px; border-radius: 9px; background: var(--card-inset); color: var(--muted-2); display: inline-flex; align-items: center; justify-content: center; flex: none; }
+.cancel-opt--done .cancel-opt__ic { background: var(--card); color: var(--accent); }
+.cancel-opt__title { font: 600 14px var(--font); color: var(--ink); display: block; }
+.cancel-opt--done .cancel-opt__title { color: var(--accent-ink); }
+.cancel-opt__sub { font: 500 11px var(--font); color: var(--muted-3); display: block; margin-top: 1px; }

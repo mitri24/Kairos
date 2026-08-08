@@ -1,0 +1,94 @@
+/* Sidebar-Gruppen (Wave 6): Planen · Lernen · Verstehen — einklappbar,
+   respektieren ausgeblendete Features. Basis-Styles der .nav-item in base.css. */
+.nav-group { margin-top: 10px; }
+.nav-group__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 4px 12px 4px 14px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--label);
+  font-family: var(--font);
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+.nav-group__head:hover { color: var(--ink-2); }
+.nav-group__chev {
+  width: 12px;
+  height: 12px;
+  transition: transform .18s ease;
+  opacity: .7;
+}
+.nav-group.is-collapsed .nav-group__chev { transform: rotate(-90deg); }
+
+/* Prüfungs-Zeile: Ansicht + Schalter für die Prüfungsliste (Markup in
+   index.html, Verhalten in nav.js). Ohne diese Regeln stand das Chevron-SVG
+   ohne Größenangabe neben dem Nav-Eintrag. */
+.nav-row { display: flex; align-items: center; gap: 2px; }
+.nav-row .nav-item { flex: 1; min-width: 0; }
+.nav-row__toggle {
+  flex: none;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; padding: 0;
+  border: 0; border-radius: 8px; background: none;
+  color: var(--muted-3); cursor: pointer;
+}
+.nav-row__toggle:hover { background: rgba(255,255,255,.55); color: var(--ink-2); }
+.nav-row__chev { width: 12px; height: 12px; transition: transform .18s ease; opacity: .7; }
+.nav-row__toggle.is-collapsed .nav-row__chev { transform: rotate(-90deg); }
+.nav-group__items { display: flex; flex-direction: column; }
+.nav-group.is-collapsed .nav-group__items { display: none; }
+/* Eingeklappt bleibt die aktive Ansicht sichtbar (Orientierung). */
+.nav-group.is-collapsed .nav-group__items .nav-item.is-active { display: flex; }
+.nav-group.is-collapsed:has(.nav-item.is-active) .nav-group__items { display: flex; }
+.nav-group.is-collapsed:has(.nav-item.is-active) .nav-group__items .nav-item:not(.is-active) { display: none; }
+
+/* Abruf-Badge am Journal (heute fällige Abrufe). */
+.nav-badge {
+  margin-left: auto;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: var(--r-pill);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 10.5px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.nav-item.is-active .nav-badge { background: var(--on-accent); color: var(--accent-strong); }
+
+/* Sicherheit: gewachsene Navigation scrollt, statt Timer-Pille zu verdrängen. */
+.nav { overflow-y: auto; min-height: 0; scrollbar-width: thin; }
+
+.nav-custom__head { display:flex; align-items:center; }
+.nav-custom__head .nav-group__head { flex:1; }
+.nav-custom__add, .nav-tree__add, .nav-tree__more {
+  border:0; background:transparent; color:var(--muted-3); cursor:pointer; border-radius:7px;
+}
+.nav-custom__add { width:27px; height:27px; margin-right:7px; font-size:18px; }
+.nav-custom__add:hover, .nav-tree__add:hover, .nav-tree__more:hover { background:rgba(255,255,255,.55); color:var(--ink); }
+.nav-tree__row { display:flex; align-items:center; min-height:29px; padding-left:calc(var(--depth, 0) * 13px + 7px); }
+.nav-tree__main { flex:1; min-width:0; display:flex; align-items:center; gap:7px; border:0; background:transparent; color:var(--ink-2); font:600 12.5px var(--font); text-align:left; cursor:pointer; padding:5px 4px; }
+.nav-tree__main span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.nav-tree__chev { width:12px; flex:none; transition:transform .15s; color:var(--muted-3); }
+.nav-tree__row.is-closed .nav-tree__chev { transform:rotate(-90deg); }
+.nav-tree__main:hover .nav-tree__chev { color:var(--accent); }
+.nav-tree__add,.nav-tree__more { width:23px;height:23px;opacity:0; }
+.nav-tree__row:hover .nav-tree__add,.nav-tree__row:hover .nav-tree__more { opacity:1; }
+.nav-tree__empty { padding:7px 14px; color:var(--muted-3); font-size:11.5px; }
+.nav-tree__row[draggable="true"] { cursor: grab; }
+.nav-tree__row.is-dragging { opacity: .42; cursor: grabbing; }
+.nav-tree__row.is-drop-target {
+  outline: 2px solid var(--accent, #3e7d5e);
+  outline-offset: -2px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--accent, #3e7d5e) 14%, transparent);
+}

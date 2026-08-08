@@ -1,0 +1,87 @@
+/* ═══ Health-Ansicht (Kairos Sage) ════════════════════════════════════════ */
+
+/* ── Quellen-Zeile ──────────────────────────────────────── */
+.health-source { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 16px; flex: none; }
+.health-source__chips { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.health-chip {
+  display: inline-flex; align-items: center; gap: 8px; padding: 8px 13px;
+  border-radius: 10px; border: 1px solid var(--line); background: var(--card);
+  color: var(--ink-2); font: 600 12.5px var(--font);
+}
+.health-chip.is-active { background: var(--accent-tint); border-color: transparent; color: var(--accent-ink); }
+.health-chip__dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex: none; }
+.health-chip--action { color: #8a8f82; cursor: pointer; gap: 7px; }
+.health-chip--action svg { width: 14px; height: 14px; flex: none; }
+.health-chip--action:hover { border-color: var(--divider); color: var(--ink-2); }
+.health-source__note { font: 500 12.5px var(--font); color: var(--muted-2); white-space: nowrap; }
+
+/* ── Kartenraster (3×2, füllt die Fläche) ──────────────── */
+.health-grid {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr;
+  gap: 14px; margin-top: 18px; flex: 1; min-height: 0;
+}
+@media (max-width: 1000px) { .health-grid { grid-template-columns: 1fr 1fr; grid-template-rows: none; overflow-y: auto; } }
+@media (max-width: 680px)  { .health-grid { grid-template-columns: 1fr; } }
+
+.health-card { display: flex; flex-direction: column; gap: 0; border-radius: 18px; padding: 16px; min-height: 0; }
+.health-card__head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.health-card__title { font: 700 14px var(--font); color: var(--ink); }
+.health-card__label { font: 500 11px var(--font); color: var(--muted-3); }
+.health-card__grow { margin: auto 0; }
+
+/* ── Layout innerhalb der Karten ────────────────────────── */
+.health-row { display: flex; align-items: center; gap: 16px; margin-top: 14px; }
+.health-col { flex: 1; min-width: 0; }
+.health-col--grow { display: flex; align-items: center; }
+.health-sub { font: 500 11.5px var(--font); color: var(--ink-2); margin-top: 8px; }
+.health-muted { font: 500 11px var(--font); color: var(--muted-3); margin-top: 6px; }
+.health-foot { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-top: auto; padding-top: 12px; }
+.health-foot__l { font: 500 11.5px var(--font); color: var(--ink-2); }
+.health-foot__r { font: 500 11.5px var(--font); color: var(--muted-2); }
+.health-foot__cat { color: var(--muted-3); }
+
+/* ── Ring ───────────────────────────────────────────────── */
+.health-ring { width: 74px; height: 74px; flex: none; }
+.health-ring .ring__hole { width: 58px; height: 58px; }
+.health-ring__val { font: 800 20px var(--font); color: var(--ink); line-height: .9; }
+.health-ring__unit { font: 600 8px var(--font); letter-spacing: .08em; text-transform: uppercase; color: var(--muted-3); margin-top: 2px; }
+.health-ring--cycle { background: conic-gradient(#e5dfd6 100%, #e5dfd6 0); }
+.health-ring--cycle .health-ring__val { color: var(--muted-3); }
+
+/* ── Schlafphasen-Balken (Legende = reiner Text) ────────── */
+.health-stages { display: flex; height: 12px; gap: 2px; border-radius: 4px; overflow: hidden; }
+.health-stage { display: block; }
+.health-stage--deep  { background: var(--accent-strong); }
+.health-stage--rem   { background: var(--accent); }
+.health-stage--light { background: #bcd3c4; }
+.health-legend { display: flex; gap: 10px; margin-top: 8px; }
+.health-legend span { font: 500 10px var(--font); color: var(--muted-2); }
+
+/* ── Badge (Ready / Rest / Steady) ─────────────────────── */
+.health-badge { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 20px; font: 600 11px var(--font); }
+.health-badge--increase { background: var(--accent-tint); color: var(--accent-ink); }
+.health-badge--reduce   { background: var(--amber-tint); color: var(--amber-ink); }
+.health-badge--maintain, .health-badge--unknown { background: var(--card-muted); color: var(--muted-2); }
+
+/* ── Linien-Diagramm (Recovery / Body) ─────────────────── */
+.health-line { width: 100%; flex: 1; min-height: 46px; display: block; margin-top: 14px; }
+
+/* ── Aktivitäts-Balken ─────────────────────────────────── */
+.health-bars { display: flex; align-items: flex-end; gap: 5px; height: 52px; margin-top: 14px; }
+.health-bars i { flex: 1; border-radius: 3px; display: block; background: var(--accent-chart-2); }
+
+/* ── Cycle-Phase ────────────────────────────────────────── */
+.health-cycle__phase { font: 700 14px var(--font); color: var(--pink-ink); }
+
+/* ── Wellness-Orbs ──────────────────────────────────────── */
+.health-wellness { display: flex; justify-content: space-around; margin-top: 16px; text-align: center; }
+.health-orb__ring { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto; }
+.health-orb__hole { width: 38px; height: 38px; border-radius: 50%; background: var(--card); }
+.health-orb__label { font: 600 11px var(--font); color: var(--ink-2); margin-top: 8px; }
+
+/* ── Manuelles Eingabe-Modal ────────────────────────────── */
+.health-form { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.health-field { display: flex; flex-direction: column; gap: 5px; font: 600 12px var(--font); color: var(--muted-2); }
+.health-field:first-child { grid-column: 1 / -1; }
+.health-field input { width: 100%; }
+@media (max-width: 460px) { .health-form { grid-template-columns: 1fr; } }

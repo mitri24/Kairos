@@ -16,6 +16,14 @@ process.env.LERNUHR_DB = DB_FILE;
 // Dynamischer Import NACH dem Setzen von LERNUHR_DB (node:sqlite ist experimentell — Warnung ok).
 const timer = await import("../server/timer.js");
 const repo = await import("../server/repo.js");
+const auth = await import("../server/auth.js");
+const { setDefaultUserId } = await import("../server/authctx.js");
+
+// Multi-Tenant: einen Test-Nutzer anlegen und als Standardkontext setzen, damit
+// die direkten repo/timer-Aufrufe (ohne HTTP/Session) korrekt skopiert laufen.
+const __testUser = auth.findOrCreateUser("test@example.com");
+repo.ensureUser(__testUser.id);
+setDefaultUserId(__testUser.id);
 
 // Temporäre DB (inkl. WAL-Begleitdateien) am Ende aufräumen.
 after(() => {
@@ -63,6 +71,19 @@ test("scheduledMin wird gespeichert, geändert und entfernt", () => {
   // Erscheint im Snapshot
   const snap = timer.getSnapshot(3_000_000);
   assert.equal(snap.tasks.find((x) => x.id === t.id).scheduledMin, 0);
+});
+
+test("Task-Ort, Raum und Maps-Link werden gespeichert und bearbeitet", () => {
+  const t = repo.createTask({
+    text: "Seminar", room: "B 2.14", location: "Campus Nord",
+    mapsUrl: "https://maps.example.test/campus-nord",
+  });
+  assert.equal(t.room, "B 2.14");
+  assert.equal(t.location, "Campus Nord");
+  assert.equal(t.mapsUrl, "https://maps.example.test/campus-nord");
+  const edited = repo.updateTask(t.id, { room: "C 1.03", location: "Campus Süd" });
+  assert.equal(edited.room, "C 1.03");
+  assert.equal(edited.location, "Campus Süd");
 });
 
 // ── timer.start: running + endsAt ────────────────
@@ -170,6 +191,30 @@ test("topics CRUD: create/update/list/remove", () => {
   assert.ok(!repo.listTopics().some((x) => x.id === tp.id));
 });
 
+// ── Notes CRUD ───────────────────────────────────
+test("notes CRUD: create/update/list/remove + Snapshot", () => {
+  const n = repo.createNote({ text: "Formel merken", subject: "Bio", pinned: true });
+  assert.ok(n.id > 0);
+  assert.equal(n.text, "Formel merken");
+  assert.equal(n.subject, "Bio");
+  assert.equal(n.pinned, true);
+  assert.equal(n.examId, null);
+  assert.ok(n.createdAt > 0);
+
+  const upd = repo.updateNote(n.id, { text: "Formel gemerkt", pinned: false });
+  assert.equal(upd.text, "Formel gemerkt");
+  assert.equal(upd.pinned, false);
+  assert.equal(upd.subject, "Bio"); // nicht mitgeschickte Felder bleiben erhalten
+
+  // Erscheint im Snapshot
+  const snap = timer.getSnapshot(4_000_000);
+  assert.ok(Array.isArray(snap.notes));
+  assert.ok(snap.notes.some((x) => x.id === n.id));
+
+  repo.deleteNote(n.id);
+  assert.ok(!repo.listNotes().some((x) => x.id === n.id));
+});
+
 // ── Subtasks CRUD ────────────────────────────────
 test("subtasks CRUD: create/update/list-via-task/remove", () => {
   const task = repo.createTask({ text: "Task mit Subtasks" });
@@ -188,4 +233,52 @@ test("subtasks CRUD: create/update/list-via-task/remove", () => {
   repo.deleteSubtask(sub.id);
   const after = repo.getTask(task.id);
   assert.ok(!after.subtasks.some((s) => s.id === sub.id));
+});
+
+// ── Erledigte aktive Aufgabe entkoppelt den laufenden Fokus (Welle 3 #7) ──
+test("erledigte aktive Aufgabe wird vom laufenden Fokus entkoppelt", () => {
+  const t0 = 12_000_000;
+  timer.reset(t0);
+  const task = repo.createTask({ text: "Aktive Aufgabe" });
+  timer.setActiveTask(task.id, t0);
+  timer.start(t0); // 25-Min-Fokus läuft
+
+  // Nach 10 Min als erledigt melden → entkoppeln
+  const tenMin = 10 * 60_000;
+  const snap = timer.updateTask(task.id, { done: true }, t0 + tenMin);
+  assert.equal(snap.timer.activeTaskId, null);          // Zeiger geräumt
+  const done = snap.tasks.find((x) => x.id === task.id);
+  assert.equal(done.done, true);
+  assert.equal(done.active, false);                     // active-Flag geräumt
+  assert.equal(done.spentMs, tenMin);                   // 10 Min fair gutgeschrieben
+
+  // Weiterer Fokus zählt NICHT mehr auf die fertige Aufgabe
+  const later = timer.getSnapshot(t0 + 20 * 60_000);
+  assert.equal(later.tasks.find((x) => x.id === task.id).spentMs, tenMin); // unverändert
+});
+
+// ── Post-Session: lastSession trägt die Ist-Dauer bei Skip (Welle 3 #8) ──
+test("Snapshot lastSession spiegelt die tatsächliche Fokusdauer bei Skip", () => {
+  const t0 = 13_000_000;
+  timer.reset(t0);
+  const task = repo.createTask({ text: "Skip-Aufgabe" });
+  timer.setActiveTask(task.id, t0);
+  timer.start(t0); // 25-Min-Block
+
+  const eightMin = 8 * 60_000;
+  const snap = timer.skip(t0 + eightMin); // früh abbrechen
+  assert.ok(snap.lastSession, "lastSession vorhanden");
+  assert.equal(snap.lastSession.focusMs, eightMin);   // Ist = 8 Min, nicht Soll 25
+  assert.equal(snap.lastSession.completed, false);    // abgebrochen
+  assert.equal(snap.lastSession.taskId, task.id);
+});
+
+// ── Readiness fließt in die Planung: effectiveGoalHours im Snapshot (Welle 3 #13) ──
+test("today.effectiveGoalHours ist im Snapshot vorhanden und plausibel", () => {
+  const snap = timer.getSnapshot(14_000_000);
+  assert.equal(typeof snap.today.effectiveGoalHours, "number");
+  assert.equal(typeof snap.today.capacityMultiplier, "number");
+  // Ohne Wearable-Daten: Multiplikator 1 → effektives == gesetztes Ziel.
+  assert.equal(snap.today.capacityMultiplier, 1);
+  assert.equal(snap.today.effectiveGoalHours, snap.today.goalHours);
 });

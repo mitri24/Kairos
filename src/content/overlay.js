@@ -3,7 +3,8 @@
 //
 // Blendet auf JEDER Website oben rechts ein aus-/einfahrbares Widget ein, das
 //   • immer die aktuelle Aufgabe zeigt (adhdCurrentTask),
-//   • den Timer 1:1 wie die Extension darstellt (ablaufendes Dial, Focus, ▶⏭↺).
+//   • den Timer 1:1 wie die Extension darstellt (ablaufendes Dial, Focus,
+//     Start/Pause, Skip, Reset).
 //
 // Datenfluss (berechtigungsarm, ohne Fetch auf Fremdseiten):
 //   • Timer:   chrome.runtime.sendMessage({type:"GET_STATE"|"START"|…}) → Background.
@@ -59,6 +60,30 @@
     return clamp(Number(settings.focusMinutes) || 25, DIAL_MIN, DIAL_MAX) * 60000;
   }
 
+  // ── Icons (Strich-SVGs im Stil des restlichen UIs) ─────────────────────────
+  // Kanonische Quelle ist src/presentation/js/icons.js — MV3-Content-Scripts
+  // sind klassische Skripte ohne `import`, deshalb steht hier eine wortgleiche
+  // Kopie der benötigten Pfade. Wird dort etwas geändert, hier mitziehen.
+  // Format wie dort: 24er-Raster, fill:none, stroke:currentColor,
+  // stroke-width 1.8, runde Enden — erbt damit Textfarbe und Hover-Zustände.
+  const ICON_PATHS = {
+    play:   '<path d="M7.8 5.2 18.6 12 7.8 18.8z"/>',
+    pause:  '<path d="M9.2 5.5v13M14.8 5.5v13"/>',
+    skip:   '<path d="M6.5 5.5v13L15.5 12z"/><path d="M18 5.5v13"/>',
+    reset:  '<path d="M3.5 12a8.5 8.5 0 1 0 8.5-8.5A9.2 9.2 0 0 0 5.6 6.1L3.5 8.1"/><path d="M3.5 3.6v4.7h4.7"/>',
+    minus:  '<path d="M6 12h12"/>',
+    expand: '<path d="M14.5 4.5h5v5"/><path d="m19.5 4.5-6 6"/><path d="M9.5 19.5h-5v-5"/><path d="m4.5 19.5 6-6"/>',
+  };
+
+  // Die Icons sind rein dekorativ — die Bedeutung tragen title/aria-label am Button.
+  function ico(name, size = 20) {
+    return (
+      `<svg class="ico" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" ` +
+      `stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" ` +
+      `aria-hidden="true">${ICON_PATHS[name] || ""}</svg>`
+    );
+  }
+
   // ── Styles (Extension-Tokens 1:1, im Shadow-DOM isoliert) ──────────────────
   const CSS = `
   :host { all: initial; }
@@ -96,6 +121,7 @@
   @keyframes ov-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
 
   button { font-family: inherit; cursor: pointer; }
+  .ico { flex: none; display: block; }
 
   /* ── Eingefahren: kompakte Pille ── */
   .collapsed {
@@ -119,7 +145,7 @@
     font-size: 12px; color: var(--muted); flex: 1 1 auto; min-width: 0;
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
-  .grip { font-size: 12px; color: var(--muted); flex: 0 0 auto; }
+  .grip { color: var(--muted); flex: 0 0 auto; display: inline-flex; align-items: center; }
 
   /* ── Ausgefahren: Timer-Karte (1:1 Extension) ── */
   .card {
@@ -134,10 +160,12 @@
   .card.is-break         { border-color: var(--green); background: var(--paper-2); }
 
   .head { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-  .brand { font-size: 13px; font-weight: 800; letter-spacing: .4px; }
+  .brand { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 800; letter-spacing: .4px; }
+  .brand__mark { width: 16px; height: 16px; flex: none; }
   .mini-icon {
     width: 26px; height: 26px; border: none; background: transparent; color: var(--muted);
-    border-radius: 8px; font-size: 17px; line-height: 1; display: grid; place-content: center;
+    border-radius: 8px; padding: 0;
+    display: inline-flex; align-items: center; justify-content: center;
   }
   .mini-icon:hover { background: var(--accent-soft); color: var(--accent); }
 
@@ -181,7 +209,7 @@
   .controls { display: flex; gap: 8px; width: 100%; }
   .btn {
     flex: 1 1 0; height: 42px; border: 1.5px solid var(--line); background: var(--paper-2);
-    color: var(--ink); border-radius: var(--r-btn); font-size: 19px; line-height: 1;
+    color: var(--ink); border-radius: var(--r-btn); line-height: 1;
     display: inline-flex; align-items: center; justify-content: center;
     transition: background .14s, border-color .14s, transform .08s, filter .12s;
   }
@@ -206,13 +234,20 @@
       <span class="dot" id="ov-dot"></span>
       <span class="mini-time" id="ov-miniTime">25:00</span>
       <span class="mini-task" id="ov-miniTask">No task</span>
-      <span class="grip" aria-hidden="true">⤢</span>
+      <span class="grip" aria-hidden="true">${ico("expand", 14)}</span>
     </div>
 
     <div class="card" id="ov-card">
       <div class="head">
-        <span class="brand">ADHD Pomodoro</span>
-        <button class="mini-icon" id="ov-collapse" title="Collapse" aria-label="Collapse">–</button>
+        <span class="brand">
+          <svg class="brand__mark" viewBox="0 0 256 256" aria-hidden="true" focusable="false">
+            <g transform="translate(8 0)" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M 158 34 C 101 25, 45 63, 32 119 C 17 183, 68 223, 128 221 C 190 219, 226 172, 220 117 C 216 84, 205 66, 194 56" stroke-width="20"/>
+              <path d="M 112 69 C 108 94, 108 124, 110 171 M 111 122 C 132 105, 151 88, 169 72 M 112 123 C 133 137, 150 155, 164 173 C 170 181, 178 178, 183 166" stroke-width="18"/>
+              <circle cx="179" cy="42" r="7.5" fill="currentColor" stroke="none"/>
+            </g>
+          </svg>Kairos</span>
+        <button class="mini-icon" id="ov-collapse" title="Collapse" aria-label="Collapse">${ico("minus", 16)}</button>
       </div>
 
       <div class="dial-wrap">
@@ -232,9 +267,9 @@
       </div>
 
       <div class="controls">
-        <button class="btn primary" id="ov-toggle" title="Start" aria-label="Start/Pause">▶</button>
-        <button class="btn" id="ov-skip" title="Skip" aria-label="Skip">⏭</button>
-        <button class="btn danger" id="ov-reset" title="Reset" aria-label="Reset">↺</button>
+        <button class="btn primary" id="ov-toggle" title="Start" aria-label="Start/Pause">${ico("play")}</button>
+        <button class="btn" id="ov-skip" title="Skip" aria-label="Skip">${ico("skip")}</button>
+        <button class="btn danger" id="ov-reset" title="Reset" aria-label="Reset">${ico("reset")}</button>
       </div>
     </div>
   </div>`;
@@ -272,6 +307,14 @@
   let payload = null;              // { state, settings }
   let currentTask = null;          // { text, id } | null
   let expanded = false;
+  let toggleIcon = "play";         // aktuell im Start/Pause-Button gezeichnetes Icon
+
+  // Tauscht das Icon des Start/Pause-Buttons nur, wenn es sich wirklich ändert.
+  function setToggleIcon(name) {
+    if (toggleIcon === name) return;
+    toggleIcon = name;
+    toggleBtn.innerHTML = ico(name);
+  }
 
   // ── Kommunikation mit dem Background ───────────────────────────────────────
   async function send(type) {
@@ -327,10 +370,10 @@
     }
     toggleBtn.classList.toggle("is-running", running);
 
-    // Start/Pause-Button
-    if (running) { toggleBtn.textContent = "⏸"; toggleBtn.title = "Pause"; }
-    else if (paused) { toggleBtn.textContent = "▶"; toggleBtn.title = "Resume"; }
-    else { toggleBtn.textContent = "▶"; toggleBtn.title = "Start"; }
+    // Start/Pause-Button — Icon nur bei Wechsel neu setzen (render() läuft sekündlich).
+    if (running) { setToggleIcon("pause"); toggleBtn.title = "Pause"; }
+    else if (paused) { setToggleIcon("play"); toggleBtn.title = "Resume"; }
+    else { setToggleIcon("play"); toggleBtn.title = "Start"; }
 
     // Aktuelle Aufgabe (immer sichtbar)
     const text = currentTask?.text?.trim();

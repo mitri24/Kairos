@@ -1,0 +1,102 @@
+/* Lernroute: Serpentinen-Weg mit Stationen. */
+.path-sub { margin: 6px 0 0; color: var(--muted); }
+.path-progress {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--accent-ink);
+  background: var(--accent-tint);
+  border-radius: var(--r-pill);
+  padding: 6px 12px;
+  white-space: nowrap;
+}
+.path-card { padding: 18px 10px; max-width: 780px; }
+.path-empty { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 40px 20px; }
+.path-svg { width: 100%; height: auto; display: block; }
+
+.path-road {
+  fill: none;
+  stroke: var(--track);
+  stroke-width: 10;
+  stroke-linecap: round;
+}
+.path-road--dash {
+  stroke: var(--app);
+  stroke-width: 2.5;
+  stroke-dasharray: 1 14;
+}
+
+.path-node { cursor: pointer; outline: none; }
+.path-node__circle {
+  fill: var(--card);
+  stroke: var(--line-strong);
+  stroke-width: 2.5;
+  transition: transform .15s ease;
+}
+.path-node:hover .path-node__circle,
+.path-node:focus-visible .path-node__circle { stroke: var(--accent); }
+.path-node__mark {
+  font-family: var(--font);
+  font-size: 17px;
+  font-weight: 800;
+  fill: var(--muted);
+}
+.path-node__label {
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 650;
+  fill: var(--ink-2);
+}
+/* Erledigte Station: statt eines Haken-Zeichens der Pfad des "check"-Icons —
+   Strich statt Fläche, damit er wie die übrigen Icons wirkt. */
+.path-node__check {
+  fill: none;
+  stroke: var(--on-accent);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.path-node.is-done .path-node__circle { fill: var(--accent); stroke: var(--accent-strong); }
+.path-node.is-okay .path-node__circle { fill: var(--accent-tint); stroke: var(--accent); }
+.path-node.is-okay .path-node__mark { fill: var(--accent-ink); }
+.path-node.is-shaky .path-node__circle { fill: var(--amber-tint); stroke: var(--amber); }
+.path-node.is-shaky .path-node__mark { fill: var(--amber-ink); }
+
+.path-node__pulse {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  opacity: .55;
+  animation: pathPulse 1.8s ease-out infinite;
+  transform-origin: center;
+  transform-box: fill-box;
+}
+@keyframes pathPulse {
+  0% { transform: scale(.82); opacity: .6; }
+  70% { transform: scale(1.12); opacity: 0; }
+  100% { transform: scale(1.12); opacity: 0; }
+}
+.path-here rect { fill: var(--accent); }
+.path-here text {
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 800;
+  fill: var(--on-accent);
+}
+
+.path-goal__circle { fill: var(--note-pin); stroke: var(--amber); stroke-width: 2.5; }
+/* Zielflagge ist jetzt ein Icon-Pfad (kein Glyph) — Strichstärke 1.7 mal
+   scale(1.5) ergibt optisch dieselben 2.5 wie der Ring darum. */
+.path-goal__flag {
+  fill: none;
+  stroke: var(--amber-ink);
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.path-goal__name { font-weight: 800; fill: var(--ink-strong); }
+.path-goal__days {
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 700;
+  fill: var(--amber-ink);
+}

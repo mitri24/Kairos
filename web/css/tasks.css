@@ -1,113 +1,182 @@
-/* ── Aufgaben-Modul ──────────────────────────────────────── */
+/* ═══ Aufgaben: Fach-Chip, Eingabe-Pille, Task-Detail-Modal ═══════════════ */
 
-/* „Als Nächstes“-Karte */
-.next-task {
-  background: var(--accent-soft); border: 1.5px solid var(--accent-border);
-  border-radius: var(--r-inner); padding: 14px 16px;
-  display: flex; flex-direction: column; gap: 10px;
-}
-.next-task__kicker { font-size: 10.5px; font-weight: 800; letter-spacing: 1px; color: var(--accent); }
-.next-task__text { font-size: 16px; font-weight: 800; color: var(--ink); line-height: 1.25; }
-.next-task__chips { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-
-/* Liste */
-.task-list {
-  display: flex; flex-direction: column; gap: 8px;
-  max-height: min(52vh, 560px); overflow-y: auto; padding-right: 2px;
-}
-.task-list--done { max-height: min(30vh, 320px); }
-
-/* Zeile */
-.task {
-  background: var(--paper-2); border: 1.5px solid var(--line);
-  border-radius: var(--r-inner); padding: 10px 12px;
-  display: flex; flex-direction: column; gap: 8px;
-  transition: border-color .15s, background .15s;
-}
-.task:hover { border-color: var(--line-strong); }
-.task.is-active { border-color: var(--accent-border); background: var(--accent-soft); }
-.task.is-expanded { border-color: var(--accent-border); box-shadow: var(--shadow-soft); }
-.task--done { opacity: .7; padding: 8px 12px; }
-
-.task__head { display: flex; align-items: center; gap: 10px; }
-.task__check {
-  appearance: none; -webkit-appearance: none; flex: none;
-  width: 18px; height: 18px; border-radius: 6px;
-  border: 1.8px solid var(--line-strong); background: var(--paper);
-  cursor: pointer; display: grid; place-content: center; transition: background .12s, border-color .12s;
-}
-.task__check:hover { border-color: var(--accent); }
-.task__check:checked { background: var(--green); border-color: var(--green); }
-.task__check:checked::after { content: "✓"; color: #FDF6EE; font-size: 12px; font-weight: 900; line-height: 1; }
-
-.task__text {
-  flex: 1; min-width: 0; text-align: left;
-  border: none; background: transparent; color: var(--ink);
-  font-size: 14px; font-weight: 700; line-height: 1.35; padding: 2px 0;
-}
-.task__text:hover { color: var(--accent); }
-.task__text--done { flex: 1; text-decoration: line-through; color: var(--muted); font-weight: 600; }
-
-.task__chips { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.task__chips .chip[data-act="cycle-prio"] { border: none; cursor: pointer; }
-
-/* Modul-eigene Chips */
-.chip--spent { color: var(--ink-soft); background: var(--warm-2); font-variant-numeric: tabular-nums; }
-.chip--active { color: #FDF6EE; background: var(--accent); }
-
-/* Aufgeklapptes Detail */
-.task__detail {
-  display: flex; flex-direction: column; gap: 12px;
-  border-top: 1px solid var(--line-soft); padding-top: 12px; margin-top: 2px;
+/* Fach-getönter Chip (Unscheduled-Meta, geteilt) */
+.task__subj {
+  font: 600 10px var(--font); padding: 2px 7px; border-radius: 12px; white-space: nowrap;
+  background: var(--sc-tint, var(--accent-tint)); color: var(--sc-ink, var(--accent-ink));
 }
 
-.subtasks { display: flex; flex-direction: column; gap: 4px; }
-.subtasks__empty { font-size: 12px; color: var(--muted); padding: 2px 2px; }
-.subtask { display: flex; align-items: center; gap: 8px; padding: 3px 2px; }
+/* Eingabe-Pille: randloses Feld, EIN gefüllter Knopf (anlegen) und ein stiller
+   (diktieren). Rangfolge über Füllung statt zwei gleich lauten Farbflächen. */
+.task-input-row {
+  display: flex; align-items: center; gap: 4px; height: 42px; flex: none;
+  background: var(--card); border: 1px solid var(--line-strong); border-radius: var(--r-pill);
+  padding: 0 5px 0 15px;
+  transition: border-color .15s, box-shadow .15s;
+}
+.task-input-row:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-tint); }
+.task-input-row.is-error { border-color: var(--now); background: color-mix(in srgb, var(--now) 6%, var(--card)); }
+.task-input-row__field {
+  flex: 1; min-width: 0; border: 0; background: none; padding: 0; height: 100%;
+  font: 500 13.5px var(--font); color: var(--ink); outline: none;
+}
+.task-input-row__field::placeholder { color: var(--placeholder); }
+
+/* Sekundär: Diktat — nur Kontur, gewinnt erst beim Hover an Farbe. */
+.task-input-row__mic {
+  width: 32px; height: 32px; flex: none; border: 0; border-radius: 50%;
+  background: none; color: var(--muted-2); display: grid; place-items: center;
+  cursor: pointer; transition: background .15s, color .15s;
+}
+.task-input-row__mic svg { width: 16px; height: 16px; }
+.task-input-row__mic:hover { background: var(--card-inset); color: var(--accent); }
+.task-input-row__mic.is-listening { color: var(--accent); animation: micpulse 1.1s ease-in-out infinite; }
+@keyframes micpulse { 50% { box-shadow: 0 0 0 5px var(--accent-tint); } }
+
+/* Primär: anlegen. */
+.task-input-row__go {
+  width: 32px; height: 32px; flex: none; border: 0; border-radius: 50%;
+  background: var(--accent); color: var(--on-accent);
+  display: grid; place-items: center; cursor: pointer; transition: background .15s;
+}
+.task-input-row__go svg { width: 16px; height: 16px; }
+.task-input-row__go:hover { background: var(--accent-strong); }
+
+/* ── Task-Detail-Modal (zentriert, 560px) ─────────────────────────────── */
+.task-modal { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; padding: 20px; animation: fade .14s ease; }
+.task-modal[hidden] { display: none !important; }
+.task-modal__scrim { position: absolute; inset: 0; background: linear-gradient(180deg, #F1EFE9, #EBE8E0); opacity: .6; }
+.task-modal__scrim::after { content: ""; position: absolute; inset: 0; background: rgba(30, 33, 29, .28); }
+.task-modal__card {
+  position: relative; background: var(--card); width: min(560px, 100%);
+  border-radius: 20px; box-shadow: 0 40px 80px -30px rgba(30, 33, 29, .7);
+  max-height: 90dvh; display: flex; flex-direction: column; animation: pop .16s ease;
+}
+.task-modal__bar { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px 14px; border-bottom: 1px solid var(--line-soft); flex: none; }
+.task-modal__eyebrow { font: 600 11px var(--font); letter-spacing: .14em; text-transform: uppercase; color: var(--muted-3); }
+.task-modal__close { width: 28px; height: 28px; border: 0; border-radius: 8px; background: var(--card-inset); color: var(--muted-2); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+.task-modal__close:hover { background: var(--divider); color: var(--ink-2); }
+.task-modal__body { padding: 18px 24px; overflow-y: auto; flex: 1; min-height: 0; }
+.task-modal__name {
+  width: 100%; font: 700 20px var(--font); color: var(--ink-strong); letter-spacing: -.3px;
+  border: 1px solid transparent; border-radius: 10px; padding: 8px 10px; background: transparent;
+}
+.task-modal__name:focus { border-color: var(--accent); background: var(--card); box-shadow: 0 0 0 3px var(--accent-tint); }
+.task-modal__exam { display: flex; align-items: center; gap: 8px; margin-top: 10px; padding: 0 2px; flex-wrap: wrap; }
+.task-modal__foot { display: flex; align-items: center; gap: 10px; padding: 14px 24px 20px; border-top: 1px solid var(--line-soft); flex: none; }
+.task-modal__spacer { flex: 1; }
+.task-modal__foot .btn { flex: none; }
+
+/* Exam-Chips im Modal */
+.chip--exam { background: var(--amber-tint); color: var(--amber-ink); }
+.chip--exam .chip__dot { width: 8px; height: 8px; border-radius: 50%; background: var(--amber); flex: none; }
+.chip--exam-none { background: var(--card-inset); color: var(--muted-2); }
+.chip--exam-change { background: var(--card-inset); color: var(--muted-2); cursor: default; }
+
+/* Subtasks (im Modal) */
+.subtasks-block { margin-top: 18px; }
+.subtasks__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.subtasks__head > span:first-child { font: 700 13px var(--font); color: var(--ink); }
+.subtasks__count { font: 500 11px var(--font); color: var(--muted-3); }
+.subtasks { display: flex; flex-direction: column; gap: 6px; }
+.subtask { display: flex; align-items: center; gap: 9px; }
 .subtask input[type="checkbox"] {
-  appearance: none; -webkit-appearance: none; flex: none;
-  width: 16px; height: 16px; border-radius: 5px;
-  border: 1.6px solid var(--line-strong); background: var(--paper); cursor: pointer;
-  display: grid; place-content: center;
+  width: 19px; height: 19px; flex: none; margin: 0; cursor: pointer;
+  appearance: none; -webkit-appearance: none;
+  border: 2px solid var(--divider); border-radius: 6px; background: var(--card);
+  display: grid; place-items: center;
 }
-.subtask input[type="checkbox"]:checked { background: var(--green); border-color: var(--green); }
-.subtask input[type="checkbox"]:checked::after { content: "✓"; color: #FDF6EE; font-size: 10px; font-weight: 900; }
-.subtask__text { flex: 1; min-width: 0; font-size: 13px; color: var(--ink-soft); }
-.subtask__text.is-done { text-decoration: line-through; color: var(--muted); }
-.subtask .icon-btn { flex: none; width: 26px; height: 26px; font-size: 12px; }
+.subtask input[type="checkbox"]:checked { background: var(--accent); border-color: var(--accent); }
+/* Häkchen aus DEMSELBEN Pfad wie icon("check") in js/icons.js, als Maske —
+   ein <input type=checkbox> kann kein SVG-Kind aufnehmen. Keine Textglyphe
+   mehr: die rendert je Plattform anders und hängt am Font. In der Maske zählt
+   nur die Deckkraft, sichtbar wird `background-color` — die Farbe kommt also
+   weiterhin aus dem Token. (Gleiches Muster: src/presentation/css/todo.css) */
+.subtask input[type="checkbox"]:checked::after {
+  --check-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12.6 4.6 4.6L19 6.8'/%3E%3C/svg%3E") center / 11px 11px no-repeat;
+  content: "";
+  width: 11px; height: 11px;
+  background-color: var(--on-accent);
+  -webkit-mask: var(--check-mask);
+  mask: var(--check-mask);
+}
+.subtask__text { flex: 1; font: 500 13px var(--font); color: var(--ink-2); }
+.subtask__text.is-done { color: var(--muted-3); text-decoration: line-through; }
+.subtasks__empty { font: 500 12px var(--font); color: var(--muted-3); }
+.subtask-add { display: flex; gap: 8px; margin-top: 8px; }
+.subtask-add .text-input { flex: 1; }
 
-.subtask-add { display: flex; gap: 8px; }
-.subtask-add .text-input { padding: 8px 12px; font-size: 13px; }
-.subtask-add .add-btn { min-width: 40px; height: 38px; font-size: 18px; }
+/* Detail-Felder */
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
+.detail-field { display: flex; flex-direction: column; gap: 4px; }
+.detail-field--wide { grid-column: 1 / -1; }
+.detail-label { font: 600 10.5px var(--font); letter-spacing: .04em; text-transform: uppercase; color: var(--muted-3); }
+.task-map-link { display:inline-flex; align-items:center; gap:5px; width:max-content; margin-top:5px; color:var(--accent); font:600 11px var(--font); text-decoration:none; }
+.task-map-link:hover { text-decoration:underline; }
+.detail-field input { padding: 8px 10px; font-size: 13px; }
 
-.detail-grid { display: flex; flex-wrap: wrap; gap: 10px; }
-.detail-field { display: flex; flex-direction: column; gap: 5px; flex: 1 1 130px; min-width: 120px; }
-.detail-field--wide { flex-basis: 100%; }
-.detail-field > input { width: 100%; }
-.detail-label { font-size: 10.5px; font-weight: 700; letter-spacing: .4px; color: var(--muted); }
-
-.prio-opts { display: flex; gap: 6px; flex-wrap: wrap; }
+/* Prioritäts-Segmente (High / Med / Low) */
+.prio-opts { display: flex; gap: 6px; background: transparent; padding: 0; border-radius: 0; }
 .prio-opt {
-  border: 1.5px solid var(--line); background: var(--paper-2); color: var(--muted);
-  border-radius: var(--r-chip); padding: 4px 10px; font-size: 11.5px; font-weight: 700;
-  opacity: .7; transition: opacity .12s, border-color .12s, transform .06s;
+  flex: 1; border: 1px solid var(--line); background: var(--card); border-radius: 9px;
+  padding: 7px 4px; font: 600 12px var(--font); cursor: pointer; color: var(--muted-2);
+  transition: background .15s, color .15s, border-color .15s;
 }
-.prio-opt:hover { opacity: 1; border-color: var(--accent-border); }
-.prio-opt:active { transform: translateY(1px); }
-.prio-opt.is-active { opacity: 1; border-color: currentColor; box-shadow: var(--shadow-soft); }
+.prio-opt:hover { border-color: var(--divider); }
+.prio-opt.chip--prio1.is-active { background: #fbeee9; color: var(--now); border-color: #f0d8ce; }
+.prio-opt.chip--prio2.is-active { background: var(--amber-tint); color: var(--amber-ink); border-color: #ecdfc4; }
+.prio-opt.chip--prio3.is-active { background: var(--accent-tint); color: var(--accent-ink); border-color: var(--accent-chart-2); }
 
-.detail-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.detail-actions .btn--soft { flex: 1; }
-.detail-actions .btn--danger { height: 38px; padding: 0 12px; font-size: 13px; }
+/* „Learn this"-Links einer Aufgabe (Hand-off zur externen Lern-Seite) */
+.task-res { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line-soft); }
+.task-res__head { display: flex; align-items: baseline; justify-content: space-between; }
+.task-res__head > span:first-child { font: 700 12px var(--font); color: var(--ink-2); }
+.task-res__count { font: 500 10.5px var(--font); color: var(--muted-3); }
+.task-res__list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.task-res__item { display: flex; align-items: center; gap: 3px; }
+/* EINE Quelle für alle vier Icons der Zeile (Ressourcen-Typ, „open", Stern,
+   Löschen): 14px hier im CSS — die Aufrufe in tasks.js setzen bewusst keine
+   eigene Größe mehr, sonst driften die Icons wieder auseinander. */
+.task-res__item svg { width: 14px; height: 14px; }
+.task-res__link { flex: 1; min-width: 0; display: flex; align-items: center; gap: 9px; background: var(--card-muted); border-radius: 9px; padding: 8px 10px; text-decoration: none; transition: background .15s; }
+.task-res__link:hover { background: var(--accent-tint); opacity: 1; }
+.task-res__icon { width: 22px; height: 22px; flex: none; color: var(--accent); display: grid; place-items: center; }
+.task-res__name { flex: 1; min-width: 0; font: 600 12.5px var(--font); color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.task-res__open { font: 600 10.5px var(--font); color: var(--accent); flex: none; display: inline-flex; align-items: center; gap: 4px; }
+.task-res__del { border: 0; background: none; color: var(--muted-3); cursor: pointer; padding: 4px 6px; border-radius: 7px; flex: none; display: inline-flex; align-items: center; justify-content: center; }
+.task-res__del:hover { color: var(--danger); background: rgba(194, 96, 63, .1); }
+.task-res__star { border: 0; background: none; color: var(--muted-3); cursor: pointer; padding: 4px 5px; border-radius: 7px; flex: none; display: grid; place-items: center; line-height: 1; transition: color .15s, transform .1s; }
+.task-res__star:hover { color: var(--accent); transform: scale(1.1); }
+.task-res__star.is-primary { color: var(--accent); }
+.task-res__star.is-primary svg { fill: currentColor; }
+.task-res__item.is-primary .task-res__link { background: var(--accent-tint); }
+.task-res__add { display: flex; gap: 8px; margin-top: 8px; }
+.task-res__add .text-input { flex: 1; padding: 8px 10px; font-size: 13px; }
 
-/* Erledigt-Bereich (details) */
-.done-wrap { margin-top: 2px; }
-.done-wrap > summary {
-  cursor: pointer; list-style: none; font-size: 12px; font-weight: 700; color: var(--muted);
-  padding: 6px 2px; user-select: none; display: flex; align-items: center; gap: 6px;
+/* Pace-Hinweis unter der Schätzung: „Plan rechnet mit ~X min (dein Tempo ×F)" */
+.detail-hint { font: 500 10.5px var(--font); color: var(--amber-ink); margin-top: 4px; line-height: 1.35; }
+
+/* Themen-Links unterhalb des Themen-Selects (Hand-off ohne Duplikate) */
+.task-topicres { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
+.task-topicres__link { display: inline-flex; align-items: center; gap: 7px; font: 600 12px var(--font); color: var(--accent-strong); text-decoration: none; padding: 3px 6px; border-radius: var(--r-xs); }
+.task-topicres__link:hover { background: var(--accent-tint); }
+.task-topicres__link svg { width: 13px; height: 13px; flex: none; }
+
+/* Abhängigkeiten: „Hängt ab von"-Chips + Auswahl */
+.task-deps { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line-soft); }
+.task-deps__head { font: 700 12px var(--font); color: var(--ink-2); }
+.task-deps__chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.dep-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: var(--card-inset); border: 1px solid var(--line);
+  border-radius: var(--r-pill); padding: 4px 6px 4px 10px;
+  font: 600 12px var(--font); color: var(--ink-2);
+  max-width: 100%;
 }
-.done-wrap > summary::-webkit-details-marker { display: none; }
-.done-wrap > summary::before { content: "▸"; font-size: 10px; transition: transform .15s; color: var(--muted-2); }
-.done-wrap[open] > summary::before { transform: rotate(90deg); }
-.done-wrap > summary:hover { color: var(--ink-soft); }
-.done-wrap .task-list--done { margin-top: 6px; }
+.dep-chip.is-done { color: var(--accent-ink); background: var(--accent-tint); border-color: var(--accent-chart-2); }
+.dep-chip__x { border: 0; background: none; color: var(--muted-3); cursor: pointer; padding: 1px 5px; border-radius: 7px; display: inline-flex; align-items: center; justify-content: center; }
+.dep-chip__x:hover { color: var(--danger); background: rgba(194, 96, 63, .1); }
+.task-deps__add { margin-top: 8px; width: 100%; padding: 8px 10px; font-size: 13px; }
+
+/* „wartet"-Badge in der Unscheduled-Liste (blockiert durch offene Grundlage) */
+.uns-item__blocked { font: 600 10.5px var(--font); color: var(--amber-ink); background: var(--amber-tint); border-radius: var(--r-pill); padding: 2px 8px; flex: none; display: inline-flex; align-items: center; gap: 4px; }

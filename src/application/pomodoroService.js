@@ -14,13 +14,12 @@ import {
 } from "../domain/pomodoroDomain.js";
 
 export class PomodoroService {
-  constructor({ storage, scheduler, notifier, broadcaster, badge, bookmarkTicker, soundPlayer, clock = () => Date.now() }) {
+  constructor({ storage, scheduler, notifier, broadcaster, badge, soundPlayer, clock = () => Date.now() }) {
     this.storage = storage;
     this.scheduler = scheduler;
     this.notifier = notifier;
     this.broadcaster = broadcaster;
     this.badge = badge;
-    this.bookmarkTicker = bookmarkTicker;
     this.soundPlayer = soundPlayer;
     this.clock = clock;
     this.settings = sanitizeSettings(DEFAULT_SETTINGS);
@@ -160,9 +159,6 @@ export class PomodoroService {
     if (this.badge) {
       await this.badge.render(payload, this.clock());
     }
-    if (this.bookmarkTicker) {
-      await this.bookmarkTicker.render(payload, this.clock());
-    }
   }
 
   _getResolvedState(now = this.clock()) {
@@ -213,9 +209,6 @@ export class PomodoroService {
     await this.broadcaster.sendState(payload);
     if (this.badge) {
       await this.badge.render(payload, this.clock());
-    }
-    if (this.bookmarkTicker) {
-      await this.bookmarkTicker.render(payload, this.clock());
     }
   }
 }

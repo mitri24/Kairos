@@ -54,7 +54,10 @@ CREATE TABLE IF NOT EXISTS settings (
   auto_start_next_phase   INTEGER NOT NULL DEFAULT 0,
   today_goal_hours        REAL    NOT NULL DEFAULT 4,
   profile_name            TEXT    NOT NULL DEFAULT 'Prüfungsfokus',
-  active_exam_id          INTEGER
+  active_exam_id          INTEGER,
+  dnd_enabled             INTEGER NOT NULL DEFAULT 0,   -- Ruhezeiten (kein Push im Fenster)
+  dnd_start_min           INTEGER,                       -- Fensterbeginn (Minuten ab Mitternacht, lokal)
+  dnd_end_min             INTEGER                        -- Fensterende (Umschlag über Mitternacht erlaubt)
 );
 
 CREATE TABLE IF NOT EXISTS timer_state (
@@ -66,7 +69,9 @@ CREATE TABLE IF NOT EXISTS timer_state (
   ends_at          INTEGER,
   active_task_id   INTEGER,
   phase_started_at INTEGER,
-  updated_at       INTEGER NOT NULL DEFAULT 0
+  updated_at       INTEGER NOT NULL DEFAULT 0,
+  break_over_since INTEGER,                              -- Pause endete, Fokus pausiert → Overrun-Uhr
+  break_over_notified INTEGER NOT NULL DEFAULT 0         -- Anzahl bereits gesendeter Overrun-Erinnerungen
 );
 
 CREATE TABLE IF NOT EXISTS profile (
@@ -100,6 +105,8 @@ CREATE TABLE IF NOT EXISTS exams (
   exam_date   INTEGER,
   total_hours REAL    NOT NULL DEFAULT 0,
   color       TEXT,
+  archived    INTEGER NOT NULL DEFAULT 0,
+  archived_at INTEGER,
   sort_order  INTEGER NOT NULL DEFAULT 0,
   created_at  INTEGER NOT NULL
 );
@@ -121,6 +128,9 @@ CREATE TABLE IF NOT EXISTS tasks (
   active       INTEGER NOT NULL DEFAULT 0,
   sort_order   INTEGER NOT NULL DEFAULT 0,
   created_at   INTEGER NOT NULL,
+  recurrence      TEXT,                                  -- ""/null | daily | weekdays | weekly | every:N
+  recur_parent_id INTEGER,                               -- Ursprungs-Aufgabe der Serie (Verkettung)
+  postpone_count  INTEGER NOT NULL DEFAULT 0,            -- wie oft verschoben (ADHS-Signal „aufteilen?")
   FOREIGN KEY (exam_id) REFERENCES exams(id) ON DELETE SET NULL
 );
 
@@ -141,9 +151,37 @@ CREATE TABLE IF NOT EXISTS topics (
   exam_id    INTEGER,
   text       TEXT    NOT NULL,
   done       INTEGER NOT NULL DEFAULT 0,
+  confidence INTEGER NOT NULL DEFAULT 0,
   sort_order INTEGER NOT NULL DEFAULT 0,
   created_at INTEGER NOT NULL,
   FOREIGN KEY (exam_id) REFERENCES exams(id) ON DELETE CASCADE
+);
+
+-- Freie Notizen (optional Fach/Prüfung), angepinnte zuerst.
+CREATE TABLE IF NOT EXISTS notes (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  text        TEXT NOT NULL,
+  subject     TEXT,
+  exam_id     INTEGER REFERENCES exams(id) ON DELETE SET NULL,
+  pinned      INTEGER NOT NULL DEFAULT 0,
+  sort_order  INTEGER NOT NULL DEFAULT 0,
+  created_at  INTEGER NOT NULL,
+  updated_at  INTEGER NOT NULL DEFAULT 0
+);
+
+-- Lern-Ressourcen (Hand-off-Links) an Thema ODER Aufgabe.
+CREATE TABLE IF NOT EXISTS resources (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  topic_id   INTEGER REFERENCES topics(id) ON DELETE CASCADE,
+  task_id    INTEGER REFERENCES tasks(id)  ON DELETE CASCADE,
+  title      TEXT    NOT NULL,
+  url        TEXT    NOT NULL,
+  kind       TEXT,
+  is_primary INTEGER NOT NULL DEFAULT 0,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at INTEGER NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS sessions (
@@ -239,6 +277,11 @@ CREATE INDEX IF NOT EXISTS idx_subtasks_user   ON subtasks(user_id);
 CREATE INDEX IF NOT EXISTS idx_subtasks_task   ON subtasks(task_id);
 CREATE INDEX IF NOT EXISTS idx_topics_user     ON topics(user_id);
 CREATE INDEX IF NOT EXISTS idx_topics_exam     ON topics(exam_id);
+CREATE INDEX IF NOT EXISTS idx_notes_user      ON notes(user_id);
+CREATE INDEX IF NOT EXISTS idx_notes_exam      ON notes(exam_id);
+CREATE INDEX IF NOT EXISTS idx_resources_user  ON resources(user_id);
+CREATE INDEX IF NOT EXISTS idx_resources_topic ON resources(topic_id);
+CREATE INDEX IF NOT EXISTS idx_resources_task  ON resources(task_id);
 CREATE INDEX IF NOT EXISTS idx_sessions_user   ON sessions(user_id);
 CREATE INDEX IF NOT EXISTS idx_sessions_task   ON sessions(task_id);
 CREATE INDEX IF NOT EXISTS idx_health_daily_user ON health_daily(user_id, day_key);
@@ -264,14 +307,18 @@ const COPY_SPECS = [
            "target_wake_time", "resting_hr_baseline", "hrv_baseline_ms", "ai_enabled", "ai_notes",
            "data_consent_at", "updated_at"] },
   { table: "exams",
-    cols: ["id", "name", "exam_date", "total_hours", "color", "sort_order", "created_at"] },
+    cols: ["id", "name", "exam_date", "total_hours", "color", "archived", "archived_at", "sort_order", "created_at"] },
   { table: "tasks",
     cols: ["id", "exam_id", "text", "subject", "priority", "due_date", "planned_date", "est_minutes",
            "scheduled_min", "done", "done_at", "spent_ms", "active", "sort_order", "created_at"] },
   { table: "subtasks",
     cols: ["id", "task_id", "text", "done", "sort_order", "created_at"] },
   { table: "topics",
-    cols: ["id", "exam_id", "text", "done", "sort_order", "created_at"] },
+    cols: ["id", "exam_id", "text", "done", "confidence", "sort_order", "created_at"] },
+  { table: "notes",
+    cols: ["id", "text", "subject", "exam_id", "pinned", "sort_order", "created_at", "updated_at"] },
+  { table: "resources",
+    cols: ["id", "topic_id", "task_id", "title", "url", "kind", "is_primary", "sort_order", "created_at"] },
   { table: "sessions",
     cols: ["id", "task_id", "phase", "started_at", "ended_at", "focus_ms", "completed", "created_at"] },
   { table: "daily_metrics",

@@ -406,7 +406,7 @@ Dependency Injection wie in `PomodoroService` (Adapter werden injiziert) → Dom
 Gepflegte Implementierung (Swift-Port von `rs-fsrs`/`ts-fsrs` oder via Rust-Lib `fsrs-rs` eingebunden). *Eine* Version, Kurve+Intervall gematcht. Optimizer auf Nutzer-Log ab ~300 Reviews. Nicht selbst neu erfinden.
 
 ### 12.6 Wiederverwendung des bestehenden Pomodoro-Timers
-Die vorhandene Domänenlogik (`src/domain/pomodoroDomain.js`: `startPhase`/`pausePhase`/`advanceToNextPhase`/`computeRemainingMs`, immutable State-Updates, Sleep-Recovery in `pomodoroService.js`) ist **rein und sauber** — sie portiert 1:1 als Swift-Struct-Domäne der Fokus-Engine. Die Adapter-Idee (`badge`, `bookmarkTicker`, `soundPlayer`, `scheduler` injiziert) wird zu `MenuBarTicker`, `NotificationScheduler`, `SoundPlayer`. **Konzepte & Tests wandern mit; nur die Sprache wechselt.** Die Chrome-Extension kann als Leichtgewicht-Companion bestehen bleiben, ist aber nicht der Mac-Kern.
+Die vorhandene Domänenlogik (`src/domain/pomodoroDomain.js`: `startPhase`/`pausePhase`/`advanceToNextPhase`/`computeRemainingMs`, immutable State-Updates, Sleep-Recovery in `pomodoroService.js`) ist **rein und sauber** — sie portiert 1:1 als Swift-Struct-Domäne der Fokus-Engine. Die Adapter-Idee (`badge`, `soundPlayer`, `scheduler` injiziert) wird zu `MenuBarTicker`, `NotificationScheduler`, `SoundPlayer`. **Konzepte & Tests wandern mit; nur die Sprache wechselt.** Die Chrome-Extension kann als Leichtgewicht-Companion bestehen bleiben, ist aber nicht der Mac-Kern.
 
 ### 12.7 Hintergrund-Betrieb
 Menübar-App (`LSUIElement`/`MenuBarExtra`), läuft persistent für Timer + `.EKEventStoreChanged`-Beobachtung; lokale Notifications für Transition-Warnungen und fällige Reviews.

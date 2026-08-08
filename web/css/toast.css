@@ -1,0 +1,43 @@
+/* ═══ Toast / Feedback (freundlich, ehrlich, wiederherstellbar) ═══════════════ */
+.toast-stack {
+  position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
+  z-index: 90; display: flex; flex-direction: column; gap: 10px;
+  width: min(400px, calc(100vw - 32px)); pointer-events: none;
+}
+.toast {
+  pointer-events: auto; display: flex; align-items: center; gap: 13px;
+  border-radius: 14px; padding: 14px 16px; cursor: pointer;
+  opacity: 0; transform: translateY(12px);
+  transition: opacity .2s ease, transform .2s ease;
+}
+.toast.is-in { opacity: 1; transform: translateY(0); }
+.toast.is-out { opacity: 0; transform: translateY(12px); }
+.toast__ic { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; flex: none; }
+.toast__ic svg { width: 16px; height: 16px; }
+.toast__body { flex: 1; min-width: 0; }
+.toast__title { font: 600 14px var(--font); }
+.toast__sub { font: 500 11.5px var(--font); margin-top: 2px; }
+.toast__action { border: 0; background: none; cursor: pointer; flex: none; font: 600 12px var(--font); padding: 4px 6px; border-radius: 7px; }
+
+/* Erfolg = dunkel */
+.toast--success { background: var(--ink); box-shadow: 0 16px 34px -20px rgba(30, 33, 29, .8); }
+.toast--success .toast__ic { background: var(--accent-strong); color: #fff; }
+.toast--success .toast__title { color: #fff; }
+.toast--success .toast__sub { color: #9aa694; }
+.toast--success .toast__action { color: #9fc0ff; }
+
+/* Offline/Hinweis = Bernstein */
+.toast--warn { background: var(--card); border: 1px solid var(--note-pin-bd); box-shadow: var(--shadow-pop); }
+.toast--warn .toast__ic { background: var(--amber-tint-2); color: var(--amber); }
+.toast--warn .toast__title { color: var(--amber-strong); }
+.toast--warn .toast__sub { color: #a08a5e; }
+.toast--warn .toast__action { color: var(--amber-strong); }
+
+/* Fehler = Terrakotta */
+.toast--error { background: var(--card); border: 1px solid #f0d8ce; box-shadow: var(--shadow-pop); }
+.toast--error .toast__ic { background: #fbeee9; color: var(--now); }
+.toast--error .toast__title { color: #b5573f; }
+.toast--error .toast__sub { color: #c07f6c; }
+.toast--error .toast__action { color: #fff; background: var(--now); padding: 6px 13px; }
+
+@media (max-width: 900px) { .toast-stack { bottom: calc(84px + env(safe-area-inset-bottom)); } }

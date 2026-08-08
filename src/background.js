@@ -4,8 +4,8 @@ import { ChromeAlarmScheduler } from "./infrastructure/chromeAlarmScheduler.js";
 import { ChromeNotificationService } from "./infrastructure/chromeNotificationService.js";
 import { ChromeBroadcaster } from "./infrastructure/chromeBroadcaster.js";
 import { ChromeActionBadge } from "./infrastructure/chromeActionBadge.js";
-import { ChromeBookmarkBarTicker } from "./infrastructure/chromeBookmarkBarTicker.js";
 import { ChromeSoundPlayer } from "./infrastructure/chromeSoundPlayer.js";
+import { cleanupLegacyBookmarkTicker } from "./infrastructure/legacyBookmarkCleanup.js";
 
 const service = new PomodoroService({
   storage: new ChromeStorageRepository(),
@@ -20,7 +20,6 @@ const service = new PomodoroService({
   notifier: new ChromeNotificationService(),
   broadcaster: new ChromeBroadcaster(),
   badge: new ChromeActionBadge(),
-  bookmarkTicker: new ChromeBookmarkBarTicker(),
   soundPlayer: new ChromeSoundPlayer()
 });
 
@@ -38,11 +37,24 @@ if (chrome.sidePanel?.setPanelBehavior) {
 
 chrome.runtime.onInstalled.addListener(async () => {
   await service.init();
+  await removeLegacyBookmarks();
 });
 
 chrome.runtime.onStartup.addListener(async () => {
   await service.init();
+  await removeLegacyBookmarks();
 });
+
+// Altlast: der frühere Lesezeichen-Ticker hat ungefragt Lesezeichen angelegt.
+// Einmal löschen, dann entwaffnet sich der Aufräumer selbst.
+async function removeLegacyBookmarks() {
+  try {
+    const { removed } = await cleanupLegacyBookmarkTicker();
+    if (removed) console.info(`[Kairos] ${removed} Alt-Lesezeichen entfernt.`);
+  } catch (error) {
+    console.warn("[Kairos] Lesezeichen-Aufräumen fehlgeschlagen:", error.message);
+  }
+}
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   handleMessage(message)

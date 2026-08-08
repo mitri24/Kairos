@@ -1,119 +1,109 @@
-/* ── Tages-Zeitstrahl (Heute, linke Spalte) ──────────────── */
-.plan-card { flex: 1; min-height: 0; }
-.plan-card .card__head { flex: 0 0 auto; }
-.plan-hint {
-  flex: 0 0 auto; font-size: 11px; color: var(--muted); line-height: 1.4;
-  margin-top: 2px;
-}
-
-/* Scroll-Viewport */
+/* ═══ Tages-Zeitstrahl (Today, linke Spalte) ══════════════════════════════ */
 .day-timeline {
-  position: relative; flex: 1; min-height: 0; overflow-y: auto;
-  border: 1.5px solid var(--line); border-radius: var(--r-inner);
-  background: var(--paper-2); margin-top: 8px;
+  flex: 1; min-height: 0; margin-top: 14px;
+  overflow-y: auto; overflow-x: hidden; position: relative;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%);
 }
-.day-timeline.is-drop { border-color: var(--accent); box-shadow: inset 0 0 0 2px var(--accent-soft2); }
+.day-timeline.is-drop { outline: 2px dashed var(--accent); outline-offset: -2px; border-radius: var(--r-md); }
+.day-timeline__inner { position: relative; padding: 8px 0; }
 
-/* Inhalt in voller Tageshöhe (Höhe wird per JS gesetzt) */
-.day-timeline__inner { position: relative; width: 100%; }
-
-/* Stundenlinien + Labels */
-.tl-hour {
-  position: absolute; left: 0; right: 0; height: 0;
-  border-top: 1px dashed var(--line-soft); pointer-events: none;
-}
+/* Vertikale Achse + Stundenlabels (keine Querlinien) */
+.tl-axis { position: absolute; left: 47px; top: 0; bottom: 0; width: 1px; background: var(--line-3); }
+.tl-hour { position: absolute; left: 0; right: 0; height: 0; }
 .tl-hour__lbl {
-  position: absolute; left: 6px; top: -8px;
-  font-size: 10.5px; font-weight: 700; color: var(--muted-2);
-  font-variant-numeric: tabular-nums; background: var(--paper-2); padding: 0 2px;
+  position: absolute; left: 0; top: -7px; width: 40px; text-align: right;
+  font: 500 11px var(--font); color: var(--faint); background: var(--app); padding-right: 4px;
 }
 
-/* Now-Linie — läuft mit der Systemuhr mit */
-.tl-now {
-  position: absolute; left: 0; right: 0; height: 0;
-  border-top: 2px solid var(--accent); pointer-events: none; z-index: 4;
-}
-.tl-now__dot {
-  position: absolute; left: 44px; top: -4px; width: 8px; height: 8px;
-  border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft);
-}
+/* Spur rechts der Achse: Blöcke setzen darin ihr left/width in Prozent, damit
+   sich Gleichzeitiges die Breite teilt statt sich zu verdecken. */
+.tl-lanes { position: absolute; left: 60px; right: 2px; top: 0; bottom: 0; }
 
-/* Aufgaben-Block */
+/* Task-Block (Spaltenlayout: Name-Zeile + Sub-Zeile).
+   Farbe kommt aus der Fach-Klasse subj-N (tokens.css) — dieselbe Zuordnung wie
+   im Wochen-Board; ohne Fach greift der neutrale Fallback. */
 .tl-item {
-  position: absolute; left: 48px; right: 8px; z-index: 2;
-  display: flex; align-items: flex-start; gap: 8px; overflow: hidden;
-  padding: 5px 8px; border-radius: 10px; cursor: grab;
-  border: 1.5px solid var(--line); border-left: 3px solid var(--line-strong);
-  background: var(--paper);
-  transition: border-color .12s, background .12s, opacity .12s, box-shadow .12s;
+  position: absolute; min-height: 26px;
+  background: var(--sc-tint, var(--card-muted)); border-left: 3px solid var(--sc, var(--divider));
+  border-radius: 0 12px 12px 0; padding: 9px 13px;
+  display: flex; flex-direction: column; justify-content: space-between; overflow: hidden;
+  cursor: pointer; transition: box-shadow .15s;
 }
-.tl-item:hover { box-shadow: var(--shadow-soft); }
-.tl-item.is-dragging { opacity: .45; cursor: grabbing; }
-.tl-item.is-active { box-shadow: 0 0 0 2px var(--accent-soft2); }
+/* Kurzer Block → einzeilig und enger, damit der Titel wirklich sichtbar bleibt. */
+.tl-item.is-compact { padding: 4px 11px; justify-content: center; }
+.tl-item.is-compact .tl-item__name { font-size: 12.5px; }
+.tl-item.is-compact .tl-item__body { justify-content: center; }
+.tl-item:hover { box-shadow: var(--shadow-card); }
+.tl-item.is-dragging { opacity: .5; }
+.tl-item__body { min-width: 0; display: flex; flex-direction: column; justify-content: space-between; height: 100%; }
+.tl-item__row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.tl-item__name { font: 600 14px var(--font); color: var(--sc-ink, var(--ink)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tl-item__sub { font: 500 11.5px var(--font); color: var(--muted-3); margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Geteilte Breite → nur der Titel, dafür ohne Abschneiden mitten im Wort. */
+.tl-item.is-narrow { padding-inline: 9px; }
+.tl-item.is-narrow .tl-item__name { font-size: 12.5px; }
+.tl-item__dur { font: 500 11px var(--font); color: var(--muted-3); flex: none; }
+.tl-item__focus {
+  width:25px; height:25px; flex:none; display:grid; place-items:center;
+  border:0; border-radius:8px; padding:0; cursor:pointer;
+  color:var(--sc-ink,var(--accent-ink)); background:color-mix(in srgb,var(--sc,var(--accent)) 16%,transparent);
+  opacity:.76; transition:opacity .15s,background .15s,transform .15s;
+}
+.tl-item__focus:hover { opacity:1; background:color-mix(in srgb,var(--sc,var(--accent)) 25%,transparent); transform:scale(1.05); }
+.tl-item__focus:focus-visible { outline:2px solid var(--accent); outline-offset:1px; }
+.tl-item__focus:disabled { opacity:.35; cursor:wait; }
+.tl-item.is-compact .tl-item__focus { width:22px; height:22px; }
 
-.tl-item__check {
-  flex: none; width: 17px; height: 17px; margin-top: 1px; border-radius: 5px;
-  border: 1.7px solid var(--line-strong); background: var(--paper-2);
-  color: #FDF6EE; font-size: 11px; font-weight: 900; line-height: 1;
-  display: grid; place-content: center;
-}
-.tl-item__body { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
-.tl-item__name {
-  font-size: 12.5px; font-weight: 700; color: var(--ink); line-height: 1.2;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.tl-item__range { font-size: 10.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+/* Der Status ändert die Fachfarbe nicht mehr, er MODULIERT sie: laufend bekommt
+   einen inneren Akzentrahmen, Vergangenes/Erledigtes tritt zurück. Sonst würde
+   der Status die Farbcodierung überschreiben und alles sähe wieder gleich aus. */
+.tl-item.is-now { padding: 7px 13px; box-shadow: inset 0 0 0 1.5px var(--accent), 0 6px 16px -12px rgba(62, 125, 94, .9); }
+.tl-item.is-now .tl-item__sub { color: var(--accent); }
+.tl-item.is-past { opacity: .55; }
+.tl-item.is-done { opacity: .6; }
+.tl-item.is-done .tl-item__name { text-decoration: line-through; }
+.tl-item.is-active { box-shadow: 0 0 0 2px var(--accent); }
 
-/* Status-Farben */
-.tl-item.is-future { border-left-color: var(--muted-2); }
-.tl-item.is-now {
-  border-color: var(--accent-border); border-left-color: var(--accent);
-  background: var(--accent-soft);
-}
-.tl-item.is-now .tl-item__check { border-color: var(--accent); }
-/* Vorbei & offen → Warnfarbe + Nachfrage */
-.tl-item.is-past {
-  border-color: var(--danger); border-left-color: var(--danger);
-  background: color-mix(in srgb, var(--danger) 10%, var(--paper));
-}
-.tl-item.is-past .tl-item__name { color: var(--danger); }
-.tl-item.is-past .tl-item__check { border-color: var(--danger); }
-/* Erledigt → grün, durchgestrichen, gedämpft */
-.tl-item.is-done {
-  border-color: rgba(94,133,119,.4); border-left-color: var(--green);
-  background: var(--green-soft); opacity: .75;
-}
-.tl-item.is-done .tl-item__check { background: var(--green); border-color: var(--green); }
-.tl-item.is-done .tl-item__name { text-decoration: line-through; color: var(--muted); }
+/* Now-Linie: Terrakotta mit Uhrzeit-Label */
+.tl-now { position: absolute; left: 34px; right: 0; display: flex; align-items: center; pointer-events: none; z-index: 4; }
+.tl-now__time { font: 700 10px var(--font); color: var(--now); background: var(--app); padding-right: 4px; }
+.tl-now__dot { width: 8px; height: 8px; border-radius: 50%; background: var(--now); flex: none; }
+.tl-now__line { flex: 1; height: 2px; background: var(--now); }
 
-/* ── Drag-Griff & Uhrzeit-Chip in der Aufgabenliste rechts ── */
-.task__grip {
-  flex: none; cursor: grab; color: var(--muted-2); font-size: 13px; line-height: 1;
-  padding: 2px 1px; user-select: none; letter-spacing: -2px;
+/* Kalender-Termine (synchronisiert): ruhige Blöcke unter den Aufgaben.
+   Nicht interaktiv — der Tag gehört den Aufgaben, Termine sind Kontext.
+   --cal trägt die Farbe des QUELL-Kalenders (dayTimeline.js calColor): getönte
+   Fläche + kräftige Kante links, wie in Apple Kalender. Vorher war jeder Termin
+   dieselbe graue Schraffur — man sah nicht, aus welchem Kalender er stammt. */
+.tl-busy {
+  --cal: var(--line-strong);
+  position: absolute; min-height: 24px;
+  background: color-mix(in srgb, var(--cal) 11%, var(--card));
+  border: 1px solid color-mix(in srgb, var(--cal) 24%, transparent);
+  border-left: 3px solid var(--cal);
+  border-radius: 4px 10px 10px 4px; padding: 6px 12px;
+  display: flex; flex-direction: column; justify-content: center; overflow: hidden;
+  pointer-events: none; z-index: 0;
 }
-.task__grip:hover { color: var(--accent); }
-.task__grip:active { cursor: grabbing; }
-.chip--sched { color: var(--accent); background: var(--accent-soft); font-variant-numeric: tabular-nums; }
+.tl-busy.is-compact { padding: 2px 10px; }
+.tl-busy.is-compact .tl-busy__name { font-size: 11.5px; }
+.tl-busy__name { font: 600 12.5px var(--font); color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tl-busy__sub { font: 500 10.5px var(--font); color: var(--muted-2); margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Herkunftspunkt für Ganztags-Chips */
+.tl-cal__dot { width: 7px; height: 7px; border-radius: 50%; background: var(--cal, var(--line-strong)); flex: none; }
+.tl-busy.is-narrow { padding-inline: 9px; }
+.tl-busy.is-narrow .tl-busy__name { font-size: 11.5px; }
+.tl-item { z-index: 1; }
 
-/* ── Nachfrage-Modal (überfällige Aufgabe) ──────────────── */
-.plan-modal {
-  position: fixed; inset: 0; z-index: 50;
-  display: grid; place-content: center; padding: 20px;
-  background: rgba(38,34,29,.42); backdrop-filter: blur(2px);
+/* Ganztägige Termine als Chip-Zeile über dem Zeitstrahl */
+.tl-allday { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+/* Ganztägige Termine tragen denselben Herkunftspunkt wie die Blöcke. */
+.tl-allday__chip {
+  --cal: var(--line-strong);
+  display: inline-flex; align-items: center; gap: 6px;
+  font: 600 11.5px var(--font); color: var(--ink-2);
+  background: color-mix(in srgb, var(--cal) 10%, var(--card));
+  border: 1px solid color-mix(in srgb, var(--cal) 22%, transparent);
+  border-radius: var(--r-pill); padding: 4px 11px;
 }
-.plan-modal[hidden] { display: none; }
-.plan-modal__box {
-  width: min(360px, 92vw); background: var(--paper);
-  border: 1.5px solid var(--line); border-radius: var(--r-card);
-  box-shadow: var(--shadow-card); padding: 20px; text-align: center;
-  display: flex; flex-direction: column; gap: 12px;
-}
-.plan-modal__title { font-size: 16px; font-weight: 800; color: var(--ink); }
-.plan-modal__msg { font-size: 13.5px; color: var(--ink-soft); line-height: 1.5; }
-.plan-modal__actions { display: flex; gap: 10px; }
-.plan-modal__actions .btn { flex: 1; }
-.plan-modal__later {
-  border: none; background: transparent; color: var(--muted);
-  font-size: 12px; font-weight: 600; text-decoration: underline; padding: 2px;
-}
-.plan-modal__later:hover { color: var(--ink-soft); }

@@ -1,0 +1,424 @@
+/* ═══ Study Session — Fokusmodus: Timer-Rail + Dokument-Tabs ═══════════════════
+   Zwei Dinge, die dieses Modul von der alten Fassung unterscheiden:
+
+   1) KEINE hartcodierten Farben mehr. Der Fokusmodus öffnet einen eigenen
+      Token-Scope (--ses-*), der vollständig aus den globalen Tokens abgeleitet
+      wird. Akzentfarbe, Hell/Dunkel, Hochkontrast, Schriftgröße, Dichte und
+      „weniger Animationen" greifen damit hier genauso wie überall sonst.
+
+      Zwei Flächen-Modi, gesteuert über :root[data-focus-surface] (adapt.js):
+        dim   (Standard) — bewusst abgesenkte, ruhige Fläche („do not disturb"),
+                           aber aus DEINER Akzentfarbe getönt.
+        match            — exakt die App-Tokens; hell bleibt hell.
+
+   2) Split-Layout: links die Timer-Rail (läuft immer weiter), rechts die
+      Arbeitsfläche mit Tabs über allen Dateien/Links/Karten der Aufgabe. */
+
+/* ── Token-Scope: gedämpft (Standard) ─────────────────────────────────────────
+   Bewusst an <body class="session-open"> statt an das Overlay: die Dialoge und
+   Toasts, die ÜBER dem Fokusmodus liegen (Beenden-Sheet, In-App-Viewer), sind
+   Geschwister des Overlays — nur so erben auch sie die Fokusfarben. */
+body.session-open {
+  /* Warm-neutrale Tiefe als Basis; der Akzent mischt sich in jede Fläche ein,
+     damit Violett/Terrakotta/Petrol den Fokusmodus wirklich einfärben. */
+  --ses-ground:    #141610;
+  --ses-bg:        color-mix(in srgb, var(--accent)  9%, var(--ses-ground));
+  --ses-bar:       color-mix(in srgb, var(--accent)  7%, #0F110B);
+  --ses-panel:     color-mix(in srgb, var(--accent) 14%, var(--ses-ground));
+  --ses-panel-2:   color-mix(in srgb, var(--accent) 20%, var(--ses-ground));
+  --ses-line:      color-mix(in srgb, var(--accent) 24%, var(--ses-ground));
+  --ses-line-soft: color-mix(in srgb, var(--accent) 16%, var(--ses-ground));
+
+  --ses-ink:       color-mix(in srgb, var(--accent)  7%, #F1F2EC);
+  --ses-ink-2:     color-mix(in srgb, var(--accent) 14%, #C2C6BA);
+  --ses-muted:     color-mix(in srgb, var(--accent) 16%, #878C7F);
+
+  --ses-accent:    color-mix(in srgb, var(--accent) 70%, #FFFFFF);
+  /* Auf dunkler Fläche zeigt „hervorheben“ nach HELL … */
+  --ses-accent-hi: color-mix(in srgb, var(--accent) 84%, #FFFFFF);
+  --ses-on-accent: color-mix(in srgb, var(--accent) 22%, #0B0D08);
+  --ses-track:     color-mix(in srgb, var(--accent) 18%, #2B2F28);
+  --ses-break:     color-mix(in srgb, var(--amber)  62%, #FFFFFF);
+  --ses-danger:    color-mix(in srgb, var(--danger) 55%, #FFFFFF);
+  --ses-shadow:    0 24px 60px -30px rgba(0, 0, 0, .85);
+}
+
+/* ── Token-Scope: „wie App" ───────────────────────────────────────────────── */
+:root[data-focus-surface="match"] body.session-open {
+  --ses-bg:        var(--app);
+  --ses-bar:       var(--sidebar);
+  --ses-panel:     var(--card);
+  /* NICHT --card-inset: das ist dieselbe Farbe wie --sidebar, aktive und
+     überfahrene Flächen wären auf der Leiste unsichtbar. */
+  --ses-panel-2:   var(--accent-tint);
+  --ses-line:      var(--line-strong);
+  --ses-line-soft: var(--line);
+
+  --ses-ink:       var(--ink-strong);
+  --ses-ink-2:     var(--ink-2);
+  --ses-muted:     var(--muted-2);
+
+  --ses-accent:    var(--accent);
+  /* … auf heller Fläche nach DUNKEL. Dafür hat die App bereits ein Token. */
+  --ses-accent-hi: var(--accent-strong);
+  --ses-on-accent: var(--on-accent);
+  --ses-track:     var(--track);
+  --ses-break:     var(--amber);
+  --ses-danger:    var(--danger);
+  --ses-shadow:    var(--shadow-pop);
+}
+
+/* Hoher Kontrast: Tinte und Linien anheben — in beiden Flächen-Modi. */
+:root[data-contrast="high"] body.session-open {
+  --ses-ink:       #FFFFFF;
+  --ses-ink-2:     #E7E9E1;
+  --ses-muted:     #C8CCBF;
+  --ses-line:      color-mix(in srgb, var(--accent) 45%, #6A6F62);
+  --ses-line-soft: color-mix(in srgb, var(--accent) 32%, #565B50);
+}
+:root[data-focus-surface="match"][data-contrast="high"]:not([data-theme="dark"]) body.session-open {
+  --ses-ink:       #000000;
+  --ses-ink-2:     #2C2F2A;
+  --ses-muted:     #474B44;
+}
+
+/* Alles, was ÜBER dem Fokusmodus liegt, spricht dieselbe Farbsprache: statt
+   jede fremde Komponente einzeln nachzubauen, biegen wir für sie die globalen
+   Token-Namen auf die Fokus-Tokens um — Sheet, Viewer und Toasts folgen dann
+   von selbst. (Die --ses-* sind an dieser Stelle bereits aufgelöst, das
+   Umbiegen von --accent erzeugt also keinen Zirkelbezug.) */
+body.session-open .sheet-overlay,
+body.session-open .webview-overlay,
+body.session-open .toast-wrap {
+  --app:         var(--ses-bg);
+  --card:        var(--ses-panel);
+  --card-muted:  var(--ses-panel);
+  --card-inset:  var(--ses-panel-2);
+  --sidebar:     var(--ses-bar);
+  --ink:         var(--ses-ink);
+  --ink-strong:  var(--ses-ink);
+  --ink-2:       var(--ses-ink-2);
+  --muted:       var(--ses-muted);
+  --muted-2:     var(--ses-muted);
+  --muted-3:     var(--ses-muted);
+  --label:       var(--ses-muted);
+  --line:        var(--ses-line-soft);
+  --line-2:      var(--ses-line-soft);
+  --line-3:      var(--ses-line-soft);
+  --line-strong: var(--ses-line);
+  --divider:     var(--ses-line);
+  --track:       var(--ses-track);
+  --accent:      var(--ses-accent);
+  --accent-ink:  var(--ses-accent);
+  --on-accent:   var(--ses-on-accent);
+  --amber:       var(--ses-break);
+  --danger:      var(--ses-danger);
+}
+
+/* ── Rahmen ───────────────────────────────────────────────────────────────── */
+.session-overlay {
+  position: fixed; inset: 0; z-index: 80;
+  background: var(--ses-bg); color: var(--ses-ink);
+  display: flex; flex-direction: column;
+  font-family: var(--font);
+  animation: sessionfade .16s ease;
+}
+.session-overlay[hidden] { display: none !important; }
+@keyframes sessionfade { from { opacity: 0; } }
+
+/* Fokusmodus heißt Fokusmodus: schwebende Nebenbauten aus dem Weg. */
+body.session-open .refpanel-wrap,
+body.session-open .aibot-fab { display: none !important; }
+
+/* ── Kopfleiste ───────────────────────────────────────────────────────────── */
+.session-topbar {
+  height: 44px; flex: none; background: var(--ses-bar);
+  border-bottom: 1px solid var(--ses-line-soft);
+  display: flex; align-items: center; gap: 12px; padding: 0 12px 0 16px;
+  font: 600 12.5px var(--font); color: var(--ses-muted); letter-spacing: .02em;
+}
+.session-topbar__dot {
+  width: 7px; height: 7px; border-radius: 50%; flex: none;
+  background: var(--ses-accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ses-accent) 22%, transparent);
+}
+.session-topbar__label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.session-topbar__r { display: flex; align-items: center; gap: 8px; flex: none; }
+.session-btn {
+  height: 32px; border: 1px solid transparent; border-radius: var(--r-xs);
+  background: var(--ses-panel); color: var(--ses-ink-2);
+  padding: 0 12px; font: 600 12.5px var(--font); cursor: pointer;
+  display: inline-flex; align-items: center; gap: 7px; transition: background .15s, color .15s;
+}
+.session-btn:hover { background: var(--ses-panel-2); color: var(--ses-ink); }
+.session-btn svg { width: 15px; height: 15px; }
+.session-btn[hidden] { display: none; }   /* inline-flex würde [hidden] sonst schlagen */
+.session-btn--icon { width: 32px; padding: 0; justify-content: center; }
+.session-btn--end:hover { color: var(--ses-danger); }
+/* Uhrzeit in der Kopfleiste — nur sichtbar, wenn die Rail eingeklappt ist. */
+.session-btn--time {
+  cursor: default; background: none; color: var(--ses-ink);
+  font: 800 14px var(--font); font-variant-numeric: tabular-nums; padding: 0 4px;
+}
+.session-btn--time:hover { background: none; }
+.session-overlay :focus-visible {
+  outline: 2px solid var(--ses-accent); outline-offset: 2px; border-radius: var(--r-xs);
+}
+
+/* ── Körper: Rail + Arbeitsfläche ─────────────────────────────────────────── */
+.session-body { flex: 1; min-height: 0; display: flex; }
+
+.session-rail {
+  width: 304px; flex: none; min-height: 0;
+  border-right: 1px solid var(--ses-line-soft);
+  display: flex; flex-direction: column; gap: 16px;
+  padding: 20px 18px; overflow-y: auto;
+}
+:root[data-density="compact"] .session-rail { width: 268px; padding: 16px 14px; gap: 13px; }
+.session-overlay.is-railhidden .session-rail { display: none; }
+
+/* Ring + Transport */
+.session-focus { display: flex; flex-direction: column; align-items: center; flex: none; }
+.session-ring {
+  --ring-color: var(--ses-accent); --ring-track: var(--ses-track);
+  width: 152px; height: 152px;
+}
+.session-ring.is-break { --ring-color: var(--ses-break); }
+.session-ring .ring__hole { width: 128px; height: 128px; background: var(--ses-bg); }
+.session-time {
+  font: 800 34px var(--font); letter-spacing: -.5px; line-height: 1;
+  color: var(--ses-ink); font-variant-numeric: tabular-nums;
+}
+.session-sub {
+  font: 600 9.5px var(--font); letter-spacing: .14em; text-transform: uppercase;
+  color: var(--ses-muted); margin-top: 6px;
+}
+.session-controls { display: flex; gap: 8px; margin-top: 16px; }
+.session-ctl {
+  width: 40px; height: 40px; border: 0; border-radius: var(--r-xs);
+  background: var(--ses-panel); color: var(--ses-ink-2);
+  display: grid; place-items: center; cursor: pointer; transition: background .15s;
+}
+.session-ctl:hover { background: var(--ses-panel-2); color: var(--ses-ink); }
+.session-ctl svg { width: 17px; height: 17px; }
+.session-ctl--primary {
+  width: 112px; gap: 8px; background: var(--ses-accent); color: var(--ses-on-accent);
+  display: flex; align-items: center; justify-content: center; font: 700 13.5px var(--font);
+}
+.session-ctl--primary:hover { background: var(--ses-accent-hi); color: var(--ses-on-accent); }
+.session-ctl--primary svg { width: 17px; height: 17px; }
+
+/* Aufgabe + Teilaufgaben */
+.session-task { border-top: 1px solid var(--ses-line-soft); padding-top: 14px; }
+.session-task__kicker {
+  font: 600 9.5px var(--font); letter-spacing: .14em; text-transform: uppercase; color: var(--ses-muted);
+}
+.session-task__title { font: 700 16px var(--font); color: var(--ses-ink); margin-top: 5px; line-height: 1.3; }
+.session-task__sub { font: 500 12.5px var(--font); color: var(--ses-accent); margin-top: 4px; }
+
+.session-subs { display: flex; flex-direction: column; gap: 2px; margin-top: 12px; }
+.session-sub-row {
+  display: flex; align-items: flex-start; gap: 9px; width: 100%;
+  background: none; border: 0; padding: 6px 6px 6px 0; cursor: pointer; text-align: left;
+  font: 500 13px var(--font); color: var(--ses-ink-2); border-radius: var(--r-xs);
+}
+.session-sub-row:hover { background: var(--ses-panel); }
+.session-sub-row__box {
+  width: 16px; height: 16px; flex: none; margin-top: 1px; border-radius: 5px;
+  border: 1.6px solid var(--ses-line); display: grid; place-items: center; color: transparent;
+}
+.session-sub-row.is-done .session-sub-row__box {
+  background: var(--ses-accent); border-color: var(--ses-accent); color: var(--ses-on-accent);
+}
+.session-sub-row__box svg { width: 11px; height: 11px; }
+.session-sub-row.is-done .session-sub-row__text { text-decoration: line-through; color: var(--ses-muted); }
+
+/* Quick-Capture */
+.session-capture {
+  margin-top: auto; display: flex; align-items: center; gap: 9px; height: 42px;
+  background: var(--ses-panel); border-radius: var(--r-xs); padding: 0 6px 0 13px;
+  flex: none; color: var(--ses-muted);
+}
+.session-capture svg.mic { width: 15px; height: 15px; flex: none; }
+.session-capture input {
+  flex: 1; min-width: 0; border: 0; background: none; outline: none;
+  font: 500 12.5px var(--font); color: var(--ses-ink);
+}
+.session-capture input::placeholder { color: var(--ses-muted); }
+.session-capture__go {
+  width: 30px; height: 30px; flex: none; border: 0; border-radius: 8px;
+  background: var(--ses-accent); color: var(--ses-on-accent);
+  display: grid; place-items: center; cursor: pointer;
+}
+.session-capture__go svg { width: 14px; height: 14px; }
+
+/* ── Arbeitsfläche: Tabs + Dokument ───────────────────────────────────────── */
+.session-work { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+/* Der Tab-Streifen scrollt, der Quellen-Knopf darf das NICHT — er bleibt
+   rechts stehen, sonst schiebt ihn das zehnte Dokument aus dem Bild. */
+.session-tabsbar {
+  flex: none; position: relative; display: flex; align-items: stretch;
+  background: var(--ses-bar); border-bottom: 1px solid var(--ses-line-soft);
+  padding: 8px 8px 8px 10px; gap: 6px;
+}
+.session-tabs {
+  flex: 1; min-width: 0; display: flex; align-items: stretch; gap: 4px;
+  overflow-x: auto; overflow-y: hidden; scrollbar-width: thin;
+}
+
+.session-srcbtn {
+  position: relative; flex: none; width: 34px; border: 0; border-radius: var(--r-xs);
+  background: transparent; color: var(--ses-muted); cursor: pointer;
+  display: grid; place-items: center; transition: background .15s, color .15s;
+}
+.session-srcbtn:hover, .session-srcbtn[aria-expanded="true"] { background: var(--ses-panel); color: var(--ses-ink); }
+.session-srcbtn__dot {
+  position: absolute; top: 5px; right: 5px; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--ses-accent); box-shadow: 0 0 0 2px var(--ses-bar);
+}
+.session-srcbtn__dot[hidden] { display: none; }
+
+.session-srcmenu {
+  position: absolute; top: calc(100% + 6px); right: 8px; z-index: 3;
+  width: 306px; max-width: calc(100vw - 24px);
+  background: var(--ses-panel); border: 1px solid var(--ses-line);
+  border-radius: var(--r-md); box-shadow: var(--ses-shadow); padding: 12px;
+}
+.session-srcmenu[hidden] { display: none; }
+.session-srcmenu__head { font: 700 13.5px var(--font); color: var(--ses-ink); }
+.session-srcmenu__hint { margin: 4px 0 10px; font: 500 12px/1.45 var(--font); color: var(--ses-muted); }
+.session-srcmenu__warn { margin: 8px 0 0; font: 600 12px/1.45 var(--font); color: var(--ses-break); }
+
+.session-srcrow {
+  display: flex; align-items: center; gap: 10px; padding: 7px 8px;
+  border-radius: var(--r-xs); cursor: pointer; transition: background .15s;
+}
+.session-srcrow:hover { background: var(--ses-panel-2); }
+.session-srcrow input { accent-color: var(--ses-accent); width: 15px; height: 15px; flex: none; cursor: pointer; }
+.session-srcrow__text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.session-srcrow__name { font: 600 13px var(--font); color: var(--ses-ink-2); }
+.session-srcrow.is-on .session-srcrow__name { color: var(--ses-ink); }
+.session-srcrow__hint { font: 500 11.5px var(--font); color: var(--ses-muted); }
+/* Die Zahl sagt, was diese Quelle beisteuert — sonst schaltet man blind. */
+.session-srcrow__n {
+  flex: none; min-width: 22px; height: 20px; padding: 0 6px; border-radius: var(--r-pill);
+  background: var(--ses-panel-2); color: var(--ses-muted);
+  display: grid; place-items: center; font: 700 11px var(--font); font-variant-numeric: tabular-nums;
+}
+.session-srcrow.is-on .session-srcrow__n {
+  background: color-mix(in srgb, var(--ses-accent) 22%, var(--ses-bg)); color: var(--ses-ink);
+}
+.session-tab {
+  flex: none; max-width: 230px; height: 34px; border: 0; border-radius: var(--r-xs);
+  background: transparent; color: var(--ses-muted); cursor: pointer;
+  display: inline-flex; align-items: center; gap: 7px; padding: 0 11px;
+  font: 600 12.5px var(--font); transition: background .15s, color .15s;
+}
+.session-tab:hover { background: var(--ses-panel); color: var(--ses-ink-2); }
+/* Der offene Tab trägt eine Akzent-Tönung statt einer festen Fläche — so bleibt
+   er in JEDEM Flächen-Modus und bei jeder Akzentfarbe klar erkennbar. */
+.session-tab.is-active {
+  background: color-mix(in srgb, var(--ses-accent) 18%, var(--ses-bg));
+  color: var(--ses-ink);
+}
+.session-tab.is-active .session-tab__ic { color: var(--ses-accent); }
+.session-tab__ic { flex: none; display: grid; place-items: center; color: inherit; }
+.session-tab__ic svg { width: 14px; height: 14px; }
+.session-tab__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.session-tab__ext { flex: none; opacity: .55; }
+.session-tab__ext svg { width: 11px; height: 11px; }
+.session-tab--add { color: var(--ses-muted); padding: 0 10px; }
+.session-tab--add svg { width: 15px; height: 15px; }
+
+/* Link-Feld, das der „+"-Knopf aufklappt */
+.session-addbar {
+  flex: none; display: flex; align-items: center; gap: 8px;
+  padding: 9px 12px; background: var(--ses-bar);
+  border-bottom: 1px solid var(--ses-line-soft);
+}
+.session-addbar[hidden] { display: none; }
+.session-addbar input {
+  flex: 1; min-width: 0; height: 34px; border: 1px solid var(--ses-line);
+  border-radius: var(--r-xs); background: var(--ses-panel); color: var(--ses-ink);
+  padding: 0 11px; font: 500 12.5px var(--font); outline: none;
+}
+.session-addbar input::placeholder { color: var(--ses-muted); }
+
+.session-doc { flex: 1; min-height: 0; position: relative; background: var(--ses-panel); }
+/* transparent, NICHT weiß: bleibt der Frame leer (Seite verbietet das
+   Einbetten), muss der Ausweg dahinter durchscheinen können. */
+.session-doc__frame {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  border: 0; background: transparent; z-index: 1;
+}
+.session-doc__img {
+  position: absolute; inset: 0; margin: auto; max-width: 100%; max-height: 100%;
+  object-fit: contain; z-index: 1;
+}
+/* Karten (Formeln, Regeln, Merksätze) werden direkt gesetzt — kein Frame. */
+.session-doc__card {
+  position: absolute; inset: 0; overflow-y: auto; z-index: 1;
+  padding: clamp(22px, 4vw, 46px); background: var(--ses-panel);
+}
+.session-doc__card-inner { max-width: 68ch; margin: 0 auto; }
+.session-doc__card h2 { font: 700 21px var(--font); color: var(--ses-ink); margin: 0 0 14px; }
+.session-doc__card pre {
+  margin: 0; font: 500 15px/1.65 var(--font); color: var(--ses-ink-2);
+  white-space: pre-wrap; word-break: break-word;
+}
+
+/* Hinter dem (evtl. geblockten) Frame: ehrlicher Ausweg — wie im In-App-Viewer. */
+.session-doc__fallback {
+  position: absolute; inset: 0; display: grid; place-items: center; z-index: 0;
+  padding: 24px; text-align: center;
+  background: radial-gradient(circle at 50% 40%, var(--ses-panel-2) 0, transparent 58%), var(--ses-panel);
+}
+.session-doc__fallback-inner { max-width: 380px; }
+.session-doc__fallback p { margin: 0 0 6px; font: 500 14px var(--font); color: var(--ses-ink-2); }
+.session-doc__fallback-sub { font-size: 12.5px !important; color: var(--ses-muted) !important; margin-bottom: 16px !important; }
+.session-doc__ext {
+  display: inline-flex; align-items: center; gap: 7px; height: 36px; padding: 0 15px;
+  border-radius: var(--r-xs); background: var(--ses-accent); color: var(--ses-on-accent);
+  font: 700 13px var(--font); text-decoration: none;
+}
+.session-doc__ext:hover { opacity: .92; }
+.session-doc__ext svg { width: 13px; height: 13px; }
+
+/* Leerzustand / Ablagefläche */
+.session-doc__empty {
+  position: absolute; inset: 0; display: grid; place-items: center; z-index: 2;
+  padding: 26px; text-align: center; background: var(--ses-panel);
+}
+.session-doc__empty-inner { max-width: 400px; }
+.session-doc__empty-ic { color: var(--ses-muted); opacity: .5; }
+.session-doc__empty-ic svg { width: 34px; height: 34px; }
+.session-doc__empty h2 { font: 700 17px var(--font); color: var(--ses-ink); margin: 12px 0 6px; }
+.session-doc__empty p { margin: 0; font: 500 13px/1.6 var(--font); color: var(--ses-muted); }
+
+.session-doc.is-dropping::after {
+  content: ""; position: absolute; inset: 10px; z-index: 5; pointer-events: none;
+  border: 2px dashed var(--ses-accent); border-radius: var(--r-md);
+  background: color-mix(in srgb, var(--ses-accent) 10%, transparent);
+}
+
+/* ── Schmale Fenster: Rail wird zur Kopfzeile ─────────────────────────────── */
+@media (max-width: 900px) {
+  .session-body { flex-direction: column; }
+  .session-rail {
+    width: 100%; flex: none; border-right: 0;
+    border-bottom: 1px solid var(--ses-line-soft);
+    flex-direction: row; align-items: center; gap: 14px;
+    padding: 12px 14px; overflow-x: auto; overflow-y: hidden;
+  }
+  .session-focus { flex-direction: row; align-items: center; gap: 14px; }
+  .session-ring { width: 64px; height: 64px; }
+  .session-ring .ring__hole { width: 54px; height: 54px; }
+  .session-time { font-size: 17px; }
+  .session-sub { display: none; }
+  .session-controls { margin-top: 0; }
+  .session-ctl--primary { width: 96px; }
+  .session-task { border-top: 0; padding-top: 0; min-width: 150px; }
+  .session-subs, .session-task__kicker { display: none; }
+  .session-capture { margin-top: 0; min-width: 210px; }
+  .session-work { flex: 1; min-height: 0; }
+}

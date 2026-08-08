@@ -8,12 +8,12 @@
   "scope": "/",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#F3EEE6",
-  "theme_color": "#a9524a",
+  "background_color": "#F7F7F2",
+  "theme_color": "#DDDBD3",
   "categories": ["productivity", "education", "utilities"],
   "icons": [
     {
-      "src": "/icons/icon.svg",
+      "src": "/icons/favicon.svg",
       "type": "image/svg+xml",
       "sizes": "any",
       "purpose": "any"
@@ -22,13 +22,31 @@
       "src": "/icons/icon-192.png",
       "type": "image/png",
       "sizes": "192x192",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-512.png",
       "type": "image/png",
       "sizes": "512x512",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/apple-touch-icon.png",
+      "type": "image/png",
+      "sizes": "180x180",
+      "purpose": "any"
     }
   ]
 }

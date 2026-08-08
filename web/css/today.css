@@ -1,28 +1,583 @@
-/* ── Heute-Ziel-Karte (Today's study) ───────────────────────── */
-.today-card { gap: 12px; }
+/* ═══ Today ═══════════════════════════════════════════════════════════════
+   Lesereihenfolge = Entscheidungsreihenfolge:
+     Kopf (Datum + eine Aktion)
+     → Zone 1  „Was brennt?"      (.attention — nur wenn es etwas zu sagen gibt)
+     → Zone 2  „Was jetzt?"       (.today-now — ein Held + Tageslast)
+     → Zone 3  „Wie sieht der Tag aus / was ist offen?" (.today-zone2)
 
-/* Ziel-Eingabe im Karten-Kopf: "Goal [ 4 ] h" */
-.today-goal {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-size: 12px; font-weight: 700; color: var(--muted); white-space: nowrap;
-}
-.today-goal__input {
-  width: 62px; text-align: center;
-  font-variant-numeric: tabular-nums; color: var(--ink);
-}
-.today-goal__input:focus { border-color: var(--accent); }
+   Alle Farben kommen aus tokens.css bzw. adapt.css. Hier stehen bewusst KEINE
+   Hex-Werte mehr: die alten (#F6F5EF, #3f7a5e, #cdd2c6 …) waren im Dunkelmodus
+   unlesbar und ignorierten den gewählten Akzent.
+   ═══════════════════════════════════════════════════════════════════════ */
 
-/* Fußzeile: Fortschritts-Label links, Schnellstart-Button rechts */
-.today-foot {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 12px; flex-wrap: wrap;
+/* ── Kopf: Datum + Tages-Messstreifen ────────────────────── */
+/* Die Tageslast ist KEINE eigene Karte mehr. Sie gehört zur Identität des Tages
+   und steht als dünner Streifen unter dem Datum — eine Widget-Kachel weniger,
+   und die Zahl steht dort, wo man ohnehin hinschaut. */
+.today-head { align-items: flex-end; }
+.today-head__id { min-width: 0; }
+
+.daymeter { display: flex; align-items: center; flex-wrap: wrap; gap: 0 10px; margin-top: 11px; }
+.daymeter__bar {
+  display: flex; width: 132px; height: 6px; flex: none; border-radius: var(--r-pill);
+  background: var(--track); overflow: hidden;
 }
-#todayDoneLabel {
-  font-size: 13px; font-weight: 700; color: var(--ink-soft);
-  font-variant-numeric: tabular-nums;
+.daymeter__seg { height: 100%; width: 0; transition: width .4s ease; }
+/* Gemessene Fokuszeit: Vollton. */
+.daymeter__seg--done { background: var(--accent); }
+/* Geplante Restzeit: Schraffur — Schätzungen dürfen nicht so massiv aussehen
+   wie gemessene Zeit (estMinutes hat serverseitig oft nur den Default 25). */
+.daymeter__seg--planned {
+  background: repeating-linear-gradient(
+    -45deg,
+    color-mix(in srgb, var(--accent) 42%, transparent) 0 3px,
+    transparent 3px 6px
+  );
 }
-#todayRemainLabel {
-  font-size: 11.5px; font-weight: 600; color: var(--muted);
-  font-variant-numeric: tabular-nums;
+.daymeter.is-over .daymeter__bar { box-shadow: inset 0 0 0 1.5px var(--now); }
+.daymeter__val { font: 700 13px var(--font); color: var(--ink-2); flex: none; }
+.daymeter__legend, .daymeter__note { font: 500 12.5px var(--font); color: var(--muted-2); }
+.daymeter__note::before { content: "· "; }
+
+/* ── Empathischer Tages-Check-in ─────────────────────────── */
+.day-intent {
+  display: grid; grid-template-columns: minmax(220px, .85fr) minmax(390px, 1.35fr);
+  align-items: center; gap: 18px 34px; margin-top: 18px; padding: 20px 22px;
+  border: 1px solid var(--line); border-radius: var(--r-lg);
+  background: linear-gradient(120deg, var(--card), color-mix(in srgb, var(--accent-tint) 38%, var(--card)));
 }
-.today-foot .btn--soft { flex: 0 0 auto; }
+.day-intent__eyebrow { display:block; color:var(--accent); font:700 10.5px var(--font); letter-spacing:.1em; text-transform:uppercase; }
+.day-intent__title { margin:5px 0 0; color:var(--ink-strong); font:750 19px/1.2 var(--font); letter-spacing:-.25px; }
+.day-intent__hint { margin:6px 0 0; color:var(--muted-2); font:500 12.5px/1.45 var(--font); }
+.day-intent__choices { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.day-intent__choice {
+  min-width:0; display:flex; align-items:center; gap:9px; padding:10px 11px;
+  border:1px solid var(--line); border-radius:var(--r-sm); background:color-mix(in srgb,var(--card) 84%,transparent);
+  color:var(--ink-2); text-align:left; cursor:pointer; font-family:var(--font); transition:border-color .15s,background .15s,transform .15s;
+}
+.day-intent__choice:hover { border-color:var(--divider); transform:translateY(-1px); }
+.day-intent__choice.is-active { border-color:var(--accent); background:var(--accent-tint); box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 10%,transparent); }
+.day-intent__icon { width:25px;height:25px;flex:none;display:grid;place-items:center;border-radius:50%;background:var(--card);color:var(--accent);font-weight:800; }
+.day-intent__choice b,.day-intent__choice small { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.day-intent__choice b { font-size:12.5px; }
+.day-intent__choice small { margin-top:2px;color:var(--muted-3);font-size:10.5px;font-weight:500; }
+.day-intent__response { grid-column:2; min-height:15px; color:var(--accent-ink); font:600 11.5px/1.35 var(--font); }
+.day-intent:not(.has-answer) .day-intent__response { display:none; }
+
+/* ── ZONE 1 · Aufmerksamkeits-Leiste ─────────────────────── */
+/* Erscheint nur mit Inhalt (JS setzt [hidden]) — es gibt bewusst keine
+   „0 überfällig"-Kachel: eine Null ist keine Information, nur Dauerlast. */
+.attention { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 16px; flex: none; }
+.attention__chip {
+  display: inline-flex; align-items: center; gap: 7px;
+  height: 30px; padding: 0 12px; border-radius: var(--r-pill);
+  border: 1px solid var(--line-strong); background: var(--card);
+  font: 600 12.5px var(--font); color: var(--ink-2);
+  cursor: pointer; white-space: nowrap;
+}
+.attention__chip:hover { border-color: var(--divider); background: var(--card-inset); }
+.attention__chip svg { width: 14px; height: 14px; flex: none; }
+.attention__chip b { font-weight: 800; }
+/* Dringend (überfällig) — Terrakotta ist in dieser App „jetzt/dringend". */
+.attention__chip--urgent {
+  border-color: color-mix(in srgb, var(--now) 32%, transparent);
+  background: color-mix(in srgb, var(--now) 10%, var(--card));
+  color: var(--now);
+}
+.attention__chip--urgent:hover { background: color-mix(in srgb, var(--now) 16%, var(--card)); }
+/* Terminiert/anstehend — Bernstein */
+.attention__chip--soon {
+  border-color: color-mix(in srgb, var(--amber) 34%, transparent);
+  background: var(--amber-tint-2); color: var(--amber-ink);
+}
+.attention__chip--soon:hover { background: var(--amber-tint); }
+/* Neutral-informativ — Akzent */
+.attention__chip--info { border-color: transparent; background: var(--accent-tint); color: var(--accent-ink); }
+.attention__chip--info:hover { background: var(--accent-tint-2); }
+
+/* ── ZONE 2 · „Was jetzt" — der eine Held, volle Breite ──── */
+.today-now { display: flex; margin-top: 18px; flex: none; }
+
+/* Kein Karten-Rahmen: der Held ist die Bühne, keine Kachel neben anderen.
+   Getönte Fläche + kräftige Akzentkante links = eindeutig „hier startest du". */
+.next-task {
+  flex: 1; min-width: 0; padding: 17px 22px;
+  display: flex; align-items: center; gap: 24px;
+  background: linear-gradient(100deg, var(--accent-tint), color-mix(in srgb, var(--accent-tint) 45%, var(--card)));
+  border-left: 3px solid var(--accent);
+  border-radius: 5px var(--r-md) var(--r-md) 5px;
+}
+/* Ein Vorschlag ist keine Verpflichtung — er bekommt keine Akzentbühne. */
+.next-task.is-suggested {
+  background: var(--card); border: 1px solid var(--line); border-left: 3px solid var(--divider);
+}
+.next-task__main { flex: 1; min-width: 0; }
+.next-task__head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+/* Kicker sagt, WOHER die Aufgabe kommt (laufend / geplant / Vorschlag) —
+   ein Vorschlag darf nicht aussehen wie eine Verpflichtung. */
+.next-task .kicker { color: var(--accent); }
+.next-task.is-suggested .kicker { color: var(--muted-2); }
+.next-task__pill {
+  font: 600 10px var(--font); color: var(--accent); background: var(--accent-tint);
+  padding: 3px 9px; border-radius: var(--r-pill);
+}
+.next-task__text { font: 800 24px var(--font); letter-spacing: -.4px; color: var(--ink-strong); margin-top: 6px; overflow: hidden; text-overflow: ellipsis; }
+.next-task__res {
+  display: inline-flex; align-items: center; gap: 8px; max-width: 100%;
+  margin-top: 9px; padding: 6px 10px; background: var(--card-inset); border-radius: var(--r-xs);
+}
+.next-task__res:hover { background: var(--accent-tint); }
+.next-task__res-ic { width: 13px; height: 13px; color: var(--accent); flex: none; display: grid; place-items: center; }
+.next-task__res-ic svg { width: 13px; height: 13px; }
+.next-task__res-name { font: 600 12px var(--font); color: var(--accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.next-task__res-open { font: 600 11px var(--font); color: var(--muted-2); flex: none; }
+.next-task__side { flex: none; }
+.next-task__side .btn { height: 44px; font-size: 15px; padding: 0 22px; }
+
+/* Erstzustand: kein erfundener Held, ein Satz und der Weg dorthin */
+.next-empty {
+  flex: 1; min-width: 0; padding: 18px 22px;
+  background: var(--card); border: 1px solid var(--line);
+  border-left: 3px solid var(--divider); border-radius: 5px var(--r-md) var(--r-md) 5px;
+}
+.next-empty__title { font: 700 16px var(--font); color: var(--ink-strong); }
+.next-empty__body { font: 500 13.5px var(--font); color: var(--muted); line-height: 1.5; margin-top: 5px; }
+
+/* ── ZONE 3 · Der Tag + die offene Arbeit ────────────────── */
+.today-zone2 { display: flex; gap: 16px; margin-top: 16px; flex: 1; min-height: 0; }
+
+/* Plan-Karte (Zeitstrahl = der Tag) */
+.plan-card {
+  flex: 1; min-width: 0; background: var(--card); border: 1px solid var(--line);
+  border-radius: var(--r-md); padding: 16px 18px; display: flex; flex-direction: column; min-height: 0;
+}
+.plan-card__head { flex: none; }
+.plan-card__meta { display: flex; align-items: center; gap: 6px; }
+/* Akzentfarbe am Container, nicht am SVG — das Icon erbt sie über currentColor. */
+.plan-card__meta svg { width: 13px; height: 13px; color: var(--accent); }
+/* Zeitstrahl liegt in einer weißen Karte → Labels auf Kartenweiß */
+.plan-card .tl-hour__lbl, .plan-card .tl-now__time { background: var(--card); }
+
+/* Offene Arbeit (rechts) */
+.today-context { width: 340px; flex: none; display: flex; flex-direction: column; gap: 14px; min-height: 0; }
+
+.unscheduled-card {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md);
+  padding: 16px; flex: 1; min-height: 0; display: flex; flex-direction: column;
+}
+.unscheduled-card__title { font: 700 15px var(--font); color: var(--ink-strong); }
+.unscheduled-card__eyebrow { display:block; margin-bottom:3px; color:var(--muted-3); font:700 9.5px var(--font); letter-spacing:.11em; text-transform:uppercase; }
+.unscheduled-card__meta { font: 500 10px var(--font); letter-spacing: .06em; text-transform: uppercase; color: var(--muted-3); }
+.unscheduled-card .task-input-row { margin-top: 12px; flex: none; }
+
+.unscheduled-list { margin-top: 12px; flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 7px; overflow-y: auto; }
+
+/* Gruppenüberschrift — macht liegengebliebene Arbeit sichtbar, statt sie
+   ununterscheidbar unter die heutigen Aufgaben zu mischen. */
+.uns-group {
+  display: flex; align-items: center; gap: 8px;
+  font: 600 10px var(--font); letter-spacing: .08em; text-transform: uppercase;
+  color: var(--muted-3); margin-top: 4px;
+}
+.uns-group:first-child { margin-top: 0; }
+.uns-group--overdue { color: var(--now); }
+.uns-group__line { flex: 1; height: 1px; background: var(--line); }
+.uns-group--overdue .uns-group__line { background: color-mix(in srgb, var(--now) 22%, transparent); }
+
+.uns-item {
+  position: relative;
+  display: flex; align-items: center; gap: 10px;
+  background: var(--app); border: 1px solid var(--line); border-radius: var(--r-sm);
+  padding: 8px 12px 8px 15px; overflow: hidden;
+}
+.uns-item.is-active { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-tint); }
+.uns-item.is-dragging { opacity: .5; }
+/* Prioritätsbalken: die Liste war schon nach Priorität sortiert, zeigte sie
+   aber nirgends — eine unsichtbare Ordnung ist keine Ordnung. */
+.uns-item__prio { position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--faint); }
+.uns-item__prio--1 { background: var(--now); }
+.uns-item__prio--2 { background: var(--amber); }
+.uns-item__prio--3 { background: var(--blue); }
+.uns-item__grip { width: 16px; height: 16px; flex: none; color: var(--faint); cursor: grab; }
+.uns-item__grip svg { width: 16px; height: 16px; }
+.uns-item__check {
+  width: 18px; height: 18px; flex: none; margin: 0; cursor: pointer;
+  appearance: none; -webkit-appearance: none;
+  border: 2px solid var(--divider); border-radius: 6px; background: var(--card); position: relative;
+}
+.uns-item__check:checked { background: var(--accent); border-color: var(--accent); }
+.uns-item__check:checked::after { content: ""; position: absolute; left: 4px; top: 1px; width: 5px; height: 9px; border: solid var(--on-accent); border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.uns-item__body { flex: 1; min-width: 0; border: 0; background: none; text-align: left; cursor: pointer; padding: 0; }
+.uns-item__name { display: block; font: 600 13.5px var(--font); color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.uns-item__meta { display: flex; align-items: center; gap: 6px; margin-top: 3px; flex-wrap: wrap; }
+.uns-item__dur { font: 500 11px var(--font); color: var(--muted-3); }
+.uns-item__blocked { display: inline-flex; align-items: center; gap: 4px; font: 600 10.5px var(--font); color: var(--muted-2); }
+/* Fälligkeit — util.js dueLabel() lag bisher ungenutzt herum. */
+.uns-item__due { font: 600 10.5px var(--font); color: var(--muted-2); }
+.uns-item__due.is-soon { color: var(--now); }
+.uns-item__aged { font: 600 10.5px var(--font); color: var(--amber-ink); }
+
+.today-offscreen { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+/* ── Responsive ─────────────────────────────────────────── */
+@media (max-width: 1180px) {
+  .today-context { width: 300px; }
+}
+@media (max-width: 960px) {
+  .day-intent { grid-template-columns:1fr; }
+  .day-intent__response { grid-column:1; }
+  .today-zone2 { flex-direction: column; overflow-y: auto; }
+  .today-context { width: 100%; }
+  .plan-card { min-height: 420px; }
+  .unscheduled-card { min-height: 240px; }
+  .next-task { flex-wrap: wrap; }
+  .next-task__side { width: 100%; }
+}
+@media (max-width: 620px) {
+  .day-intent__choices { grid-template-columns:1fr; }
+}
+
+/* ── Persönliche Today-Ansicht ───────────────────────────── */
+.today-viewmenu { position:relative; }
+.today-viewmenu__trigger {
+  height:36px; padding-inline:10px; gap:7px; border:0 !important; border-radius:9px;
+  background:transparent !important; box-shadow:none !important; color:var(--muted-2);
+}
+.today-viewmenu__trigger:hover,.today-viewmenu__trigger[aria-expanded="true"] {
+  background:color-mix(in srgb,var(--ink) 5%,transparent) !important; color:var(--ink-2);
+}
+.today-viewmenu__trigger:focus-visible { outline:2px solid color-mix(in srgb,var(--accent) 38%,transparent); outline-offset:2px; }
+.today-viewmenu__panel {
+  position:absolute; z-index:30; top:calc(100% + 7px); right:0; width:340px; max-height:min(78vh,720px); overflow-y:auto;
+  padding:8px; border:0; border-radius:13px; background:var(--card);
+  box-shadow:0 18px 48px -18px color-mix(in srgb,var(--ink) 36%,transparent),0 1px 4px color-mix(in srgb,var(--ink) 9%,transparent);
+}
+.today-viewmenu__panel[hidden] { display:none; }
+.today-viewmenu__title { padding:7px 8px 8px; color:var(--muted-3); font:700 10px var(--font); letter-spacing:.08em; text-transform:uppercase; }
+.today-viewmenu__panelhead { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.today-viewmenu__bulk { display:flex; gap:3px; }
+.today-viewmenu__bulk button { border:0; border-radius:7px; padding:5px 7px; background:transparent; color:var(--accent); font:700 10.5px var(--font); cursor:pointer; }
+.today-viewmenu__bulk button:hover { background:var(--accent-tint); }
+.today-viewmenu__panel label { display:flex; align-items:center; gap:9px; padding:8px; border-radius:8px; color:var(--ink-2); font:600 12.5px var(--font); cursor:pointer; }
+.today-viewmenu__panel label:hover { background:var(--card-inset); }
+.today-viewmenu__panel input { width:15px; height:15px; accent-color:var(--accent); }
+.today-viewmenu__sizes { margin-top:7px; padding-top:7px; border-top:1px solid var(--line); }
+.today-viewmenu__sizetitle { padding:7px 8px; color:var(--muted-3); font:700 10px var(--font); letter-spacing:.08em; text-transform:uppercase; }
+.today-viewmenu__size { padding:8px; }
+.today-viewmenu__size + .today-viewmenu__size { border-top:1px solid var(--line); }
+.today-viewmenu__size strong { display:block; margin-bottom:4px; color:var(--ink-2); font:700 12px var(--font); }
+.today-viewmenu__panel .today-viewmenu__size label { display:grid; grid-template-columns:45px 1fr 42px; gap:6px; padding:3px 0; font-size:10.5px; cursor:default; }
+.today-viewmenu__size output { color:var(--muted-3); font:600 10.5px var(--font); font-variant-numeric:tabular-nums; text-align:right; }
+.today-viewmenu__panel .today-viewmenu__size input { width:100%; height:16px; cursor:pointer; }
+
+/* Sichtbarkeit per Klasse statt [hidden], weil die Feature-Module einzelne
+   Bereiche selbst ein-/ausblenden. !important ist hier die Workspace-Regel. */
+.view--today.tw-hide-checkin .day-intent,
+.view--today.tw-hide-attention .attention,
+.view--today.tw-hide-next .today-now,
+.view--today.tw-hide-capacity .daymeter,
+.view--today.tw-hide-timeline #todayPlanCard,
+.view--today.tw-hide-open .today-context { display:none !important; }
+.view--today.tw-no-workspace #todayPlanCard,.view--today.tw-no-workspace .today-context { display:none; }
+.view--today.tw-only-timeline .today-zone2 { display:block; }
+.view--today.tw-only-timeline #todayPlanCard { width:100%; min-height:520px; }
+.view--today.tw-only-open .today-zone2 { display:block; }
+.view--today.tw-only-open .today-context { width:100%; }
+.view--today.tw-only-open .unscheduled-card { min-height:360px; }
+
+/* ═══ Apple × Slack refinement ══════════════════════════════════════════
+   Apple: großzügige Fläche, Hairlines, Material und klare Typohierarchie.
+   Slack: kompakte Workspace-Steuerung, Segmente und schnelle Scanbarkeit. */
+.view--today { max-width: 1500px; margin-inline: auto; display:flex; flex-direction:column; }
+.view--today > .today-head { order:0 !important; }
+.view--today[data-today-split="plan"] .today-context { width:280px; }
+.view--today[data-today-split="tasks"] #todayPlanCard { flex:.7; }
+.view--today[data-today-split="tasks"] .today-context { width:min(46%,520px); }
+
+/* ── Frei sortierbares Today-Dashboard ───────────────────── */
+.view--today {
+  display:grid; grid-template-columns:repeat(12,minmax(0,1fr));
+  grid-auto-flow:row; grid-auto-rows:auto; gap:14px;
+  width:100%; min-width:0; min-height:0; align-content:start; overflow-y:auto; overflow-x:hidden;
+  isolation:isolate; padding-bottom:max(30px,env(safe-area-inset-bottom));
+}
+.view--today > .today-head {
+  grid-column:1 / -1; margin:0; padding:4px 2px 2px; min-height:40px;
+  position:sticky; top:0; z-index:20; align-items:center; background:var(--app);
+}
+.view--today > .today-head .view__head-actions { margin-left:auto; }
+.view--today.tw-hide-capacity .today-head__id { display:none; }
+.view--today .day-intent,.view--today .attention,.view--today .today-now { grid-column:1 / -1; margin-top:0; }
+.view--today #todayPlanCard { grid-column:span 8; min-height:520px; }
+.view--today .today-context { grid-column:span 4; width:auto; min-height:520px; }
+.today-grid-item { position:relative; z-index:0; min-width:0; max-width:100%; cursor:grab; }
+.today-grid-item:active { cursor:grabbing; }
+.today-grid-item::after {
+  content:""; position:absolute; z-index:8; top:8px; right:9px; width:16px; height:10px;
+  opacity:0; pointer-events:none;
+  background:radial-gradient(circle,var(--muted-3) 1px,transparent 1.5px) 0 0/5px 5px;
+  transition:opacity .15s;
+}
+.today-grid-item:hover::after { opacity:.55; }
+.today-grid-item.is-grid-dragging { opacity:.38; transform:scale(.99); }
+.today-grid-item.is-grid-over { z-index:1; outline:2px solid var(--accent); outline-offset:3px; border-radius:18px; }
+
+@media (max-width:960px) {
+  .view--today { display:grid; grid-template-columns:1fr; }
+  .view--today > .today-head,.view--today .day-intent,.view--today .attention,
+  .view--today .today-now,.view--today #todayPlanCard,.view--today .today-context {
+    grid-column:1 !important; width:auto !important;
+  }
+  .view--today #todayPlanCard,.view--today .today-context { min-height:380px; }
+}
+.today-head { padding: 2px 2px 0; }
+.today-head .view__title { font-size: clamp(30px, 3vw, 42px); letter-spacing: -.04em; }
+.today-head .view__eyebrow { letter-spacing: .08em; }
+.today-head .btn--soft {
+  height: 36px; border-radius: 10px; background: var(--card); border: 1px solid var(--line);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--ink) 5%, transparent);
+}
+
+/* Kein Dashboard-Widget: ein schmaler Workspace-Pulse unter dem Kopf. */
+.day-intent {
+  display: grid; grid-template-columns: minmax(260px, 1fr) auto;
+  gap: 4px 28px; margin-top: 22px; padding: 15px 16px 15px 18px;
+  border: 1px solid var(--line); border-radius: 14px;
+  background: color-mix(in srgb, var(--card) 88%, transparent);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--ink) 4%, transparent),
+              0 8px 28px -26px color-mix(in srgb, var(--ink) 32%, transparent);
+  backdrop-filter: blur(18px) saturate(1.15); -webkit-backdrop-filter: blur(18px) saturate(1.15);
+}
+.day-intent__copy { align-self:center; }
+.day-intent__eyebrow { color: var(--muted-3); font-size: 9.5px; letter-spacing: .11em; }
+.day-intent__title { margin-top: 3px; font-size: 15px; letter-spacing: -.01em; }
+.day-intent__hint { margin-top: 2px; font-size: 11.5px; }
+.day-intent__choices {
+  align-self:center; display:flex; gap:2px; padding:3px;
+  border:1px solid var(--line); border-radius:11px; background:var(--card-inset);
+}
+.day-intent__choice {
+  min-width: 104px; min-height: 44px; gap:7px; padding:6px 10px;
+  border:0; border-radius:8px; background:transparent; box-shadow:none; transform:none;
+}
+.day-intent__choice:hover { transform:none; border:0; background:color-mix(in srgb,var(--card) 65%,transparent); }
+.day-intent__choice.is-active {
+  border:0; background:var(--card); box-shadow:0 1px 3px color-mix(in srgb,var(--ink) 12%,transparent), 0 0 0 1px color-mix(in srgb,var(--ink) 5%,transparent);
+}
+.day-intent__icon {
+  width:20px; height:20px; display:flex; justify-content:center; gap:2px; align-items:flex-end; padding:5px 4px;
+  border-radius:6px; background:transparent;
+}
+.day-intent__icon i { display:block; width:3px; height:5px; border-radius:2px; background:currentColor; }
+.day-intent__icon i:nth-child(2) { height:8px; }
+.day-intent__icon i:nth-child(3) { height:11px; }
+.day-intent__choice b { font-size:11.5px; }
+.day-intent__choice small { font-size:9.5px; }
+.day-intent__response { grid-column:1 / -1; min-height:0; margin-top:4px; padding-top:8px; border-top:1px solid var(--line); font-size:11px; }
+
+.attention { margin:12px 2px 0; gap:6px; }
+.attention__chip { height:27px; padding-inline:10px; background:transparent; font-size:11.5px; }
+
+/* Hero wie eine fokussierte Slack-Message auf einer Apple-Materialfläche. */
+.today-now { margin-top:12px; }
+.next-task,.next-empty {
+  border:1px solid var(--line); border-left:1px solid var(--line); border-radius:18px;
+  background:var(--card); box-shadow:0 12px 34px -30px color-mix(in srgb,var(--ink) 42%,transparent);
+}
+.next-task { padding:20px 22px; }
+.next-task::before {
+  content:""; width:4px; height:42px; flex:none; border-radius:var(--r-pill); background:var(--accent);
+}
+.next-task.is-suggested { border-left:1px solid var(--line); }
+.next-task.is-suggested::before { background:var(--divider); }
+.next-task__text { font-size:22px; letter-spacing:-.025em; }
+.next-task__side .btn { border-radius:11px; box-shadow:0 5px 14px -10px var(--accent-strong); }
+
+.today-zone2 { gap:14px; margin-top:14px; }
+.plan-card,.unscheduled-card {
+  border-radius:18px; border-color:var(--line);
+  box-shadow:0 1px 2px color-mix(in srgb,var(--ink) 4%,transparent);
+}
+.plan-card { padding:18px 20px; }
+.unscheduled-card { padding:18px; }
+.uns-item { border-color:transparent; border-radius:10px; background:var(--card-inset); }
+.uns-item:hover { background:var(--accent-tint); }
+
+/* Open Work als Slack-Inbox auf einer Apple-Fläche: ruhig, breit, ohne
+   Rückstandsgruppen und ohne alarmierende Prioritätsbalken. */
+.unscheduled-card { padding:0; overflow:hidden; background:var(--card); }
+.unscheduled-card > .section-title { min-height:43px; padding:13px 16px 10px; border-bottom:1px solid var(--line); }
+.unscheduled-card__title { font:700 10px var(--font); letter-spacing:.11em; text-transform:uppercase; color:var(--muted-2); }
+.unscheduled-card__meta { text-transform:none; letter-spacing:0; font-size:10.5px; }
+.unscheduled-card .task-input-row {
+  margin:14px 14px 4px; height:46px; border-radius:12px; background:var(--card-inset); border-color:transparent;
+}
+.unscheduled-card .task-input-row:focus-within { background:var(--card); }
+.unscheduled-list { gap:0; margin:8px 0 0; padding:0 8px 10px; }
+.uns-item {
+  gap:9px; min-height:52px; padding:9px 10px; border:0; border-bottom:1px solid var(--line-soft);
+  border-radius:9px; background:transparent; overflow:visible;
+}
+.uns-item:last-child { border-bottom-color:transparent; }
+.uns-item:hover { background:var(--card-inset); }
+.uns-item__prio { display:none; }
+.uns-item__grip { opacity:0; width:13px; transition:opacity .15s; }
+.uns-item:hover .uns-item__grip { opacity:.65; }
+.uns-item__name { font-size:13.5px; font-weight:600; }
+.uns-item__meta { margin-top:4px; gap:7px; }
+.uns-item__check { width:20px; height:20px; border-width:1.5px; border-radius:7px; }
+.unscheduled-card > .empty { margin:auto 18px; padding:32px 12px; }
+
+/* ── Apple-Material und neue Farbhierarchie ─────────────────────────────
+   Außen: milchiges Systemmaterial. Innen: klare, helle Ebenen. Die vom Nutzer
+   gewählte Akzentfarbe ersetzt Apples Systemblau, statt ein Blau zu erzwingen. */
+.today-context {
+  --ow-surface: color-mix(in srgb, var(--card-inset) 76%, var(--card));
+  --ow-header: color-mix(in srgb, var(--card) 88%, var(--accent-tint));
+  --ow-row: color-mix(in srgb, var(--card) 94%, transparent);
+  --ow-row-hover: color-mix(in srgb, var(--accent) 7%, var(--card));
+  --ow-hairline: color-mix(in srgb, var(--ink) 8%, transparent);
+}
+.unscheduled-card {
+  background:var(--ow-surface);
+  border:1px solid color-mix(in srgb,var(--ink) 9%,transparent);
+  box-shadow:
+    0 1px 1px color-mix(in srgb,var(--ink) 5%,transparent),
+    0 16px 44px -34px color-mix(in srgb,var(--ink) 42%,transparent),
+    inset 0 1px 0 color-mix(in srgb,#fff 72%,transparent);
+  backdrop-filter:blur(22px) saturate(1.18);
+  -webkit-backdrop-filter:blur(22px) saturate(1.18);
+}
+.unscheduled-card > .section-title {
+  background:linear-gradient(180deg,var(--ow-header),color-mix(in srgb,var(--ow-header) 72%,var(--ow-surface)));
+  border-bottom-color:var(--ow-hairline);
+}
+.unscheduled-card__eyebrow { color:color-mix(in srgb,var(--accent) 72%,var(--muted-2)); }
+.unscheduled-card__title { color:var(--ink-strong); }
+.unscheduled-card__meta {
+  padding:4px 8px; border-radius:var(--r-pill);
+  background:color-mix(in srgb,var(--ink) 5%,transparent); color:var(--muted-2);
+}
+.unscheduled-card .task-input-row {
+  background:color-mix(in srgb,var(--card) 90%,transparent);
+  border:1px solid var(--ow-hairline);
+  box-shadow:inset 0 1px 2px color-mix(in srgb,var(--ink) 4%,transparent),0 1px 0 color-mix(in srgb,#fff 65%,transparent);
+}
+.unscheduled-card .task-input-row:focus-within {
+  border-color:color-mix(in srgb,var(--accent) 72%,transparent);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 16%,transparent),inset 0 1px 2px color-mix(in srgb,var(--ink) 3%,transparent);
+}
+.unscheduled-card .task-input-row__go {
+  border-radius:9px; background:var(--accent);
+  box-shadow:0 3px 9px -5px color-mix(in srgb,var(--accent) 85%,#000);
+}
+.unscheduled-list { padding-inline:10px; }
+.uns-item {
+  margin-top:5px; border:1px solid var(--ow-hairline); border-bottom-color:var(--ow-hairline);
+  background:var(--ow-row); box-shadow:0 1px 2px color-mix(in srgb,var(--ink) 4%,transparent);
+}
+.uns-item:last-child { border-bottom-color:var(--ow-hairline); }
+.uns-item:hover { background:var(--ow-row-hover); border-color:color-mix(in srgb,var(--accent) 18%,var(--ow-hairline)); }
+.uns-item.is-active {
+  border-color:color-mix(in srgb,var(--accent) 52%,transparent);
+  background:color-mix(in srgb,var(--accent) 9%,var(--card));
+  box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 10%,transparent);
+}
+.uns-item__check { border-color:color-mix(in srgb,var(--ink) 22%,transparent); background:var(--card); }
+.uns-item__check:hover { border-color:var(--accent); }
+.uns-item__dur,.uns-item__due { color:var(--muted-2); }
+.uns-item__due.is-soon { color:var(--muted-2); }
+
+/* Dunkles Apple-Material: keine aufgehellten weißen Karten, sondern gestaffelte
+   Graphitflächen mit derselben Akzentlogik. */
+:root[data-theme="dark"] .today-context {
+  --ow-surface:color-mix(in srgb,var(--card) 78%,#000);
+  --ow-header:color-mix(in srgb,var(--card) 92%,var(--accent) 8%);
+  --ow-row:color-mix(in srgb,var(--card) 92%,#fff 2%);
+  --ow-row-hover:color-mix(in srgb,var(--accent) 12%,var(--card));
+  --ow-hairline:color-mix(in srgb,#fff 10%,transparent);
+}
+:root[data-theme="dark"] .unscheduled-card { box-shadow:0 18px 44px -32px #000,inset 0 1px 0 color-mix(in srgb,#fff 7%,transparent); }
+:root[data-theme="dark"] .unscheduled-card .task-input-row { background:color-mix(in srgb,var(--card) 86%,#000); box-shadow:inset 0 1px 2px #000; }
+
+/* ── Open-Work Composer ────────────────────────────────────────────────
+   Eine einzelne ruhige Textebene wie Erinnerungen/Notizen auf macOS — keine
+   Formular-Pille, kein lauter Fokus-Ring, keine konkurrierenden Rundknöpfe. */
+.unscheduled-card .task-input-row {
+  height:54px; margin:14px 12px 7px; padding:0 7px 0 15px; gap:2px;
+  border:1px solid color-mix(in srgb,var(--ink) 10%,transparent);
+  border-radius:14px;
+  background:color-mix(in srgb,var(--card) 96%,transparent);
+  box-shadow:0 1px 2px color-mix(in srgb,var(--ink) 5%,transparent),inset 0 1px 0 color-mix(in srgb,#fff 72%,transparent);
+  transition:border-color .16s,box-shadow .16s,background .16s;
+}
+.unscheduled-card .task-input-row:hover { border-color:color-mix(in srgb,var(--ink) 16%,transparent); }
+.unscheduled-card .task-input-row:focus-within {
+  background:var(--card); border-color:color-mix(in srgb,var(--accent) 55%,transparent);
+  box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 10%,transparent),0 5px 18px -15px color-mix(in srgb,var(--accent) 65%,transparent);
+}
+.unscheduled-card .task-input-row__field {
+  padding:0 9px 0 0; font:500 14px/1.3 var(--font); letter-spacing:-.005em;
+  caret-color:var(--accent);
+}
+.unscheduled-card .task-input-row__field::placeholder { color:color-mix(in srgb,var(--muted-3) 78%,transparent); }
+.unscheduled-card .task-input-row__mic {
+  width:34px; height:30px; border-radius:8px; color:var(--muted-3);
+}
+.unscheduled-card .task-input-row__mic::after {
+  content:""; position:absolute; right:-2px; top:7px; bottom:7px; width:1px; background:var(--ow-hairline);
+}
+.unscheduled-card .task-input-row__mic { position:relative; margin-right:6px; }
+.unscheduled-card .task-input-row__mic:hover { background:color-mix(in srgb,var(--ink) 5%,transparent); color:var(--ink-2); }
+.unscheduled-card .task-input-row__go {
+  width:34px; height:34px; border-radius:10px;
+  background:var(--accent); color:var(--on-accent);
+  box-shadow:0 1px 2px color-mix(in srgb,var(--accent) 55%,#000 18%);
+  transform:none; transition:background .15s,transform .12s,box-shadow .15s;
+}
+.unscheduled-card .task-input-row__go:hover { background:var(--accent-strong); transform:scale(1.03); }
+.unscheduled-card .task-input-row__go:active { transform:scale(.96); box-shadow:none; }
+:root[data-theme="dark"] .unscheduled-card .task-input-row {
+  background:color-mix(in srgb,var(--card) 92%,#000); border-color:color-mix(in srgb,#fff 10%,transparent);
+  box-shadow:inset 0 1px 0 color-mix(in srgb,#fff 5%,transparent),0 1px 2px #000;
+}
+:root[data-theme="dark"] .unscheduled-card .task-input-row:focus-within { background:var(--card); border-color:color-mix(in srgb,var(--accent) 66%,transparent); }
+
+/* Neuer Quick-Add-Composer — strukturell unabhängig von .task-input-row. */
+.quick-compose {
+  display:grid; grid-template-columns:28px minmax(0,1fr) 34px auto; align-items:center; gap:5px;
+  min-height:58px; margin:14px 12px 8px; padding:7px 8px 7px 10px;
+  background:var(--card); border:0; border-radius:16px;
+  box-shadow:0 1px 2px color-mix(in srgb,var(--ink) 7%,transparent),0 8px 26px -24px color-mix(in srgb,var(--ink) 45%,transparent),inset 0 0 0 1px color-mix(in srgb,var(--ink) 7%,transparent);
+  transition:box-shadow .16s,transform .16s;
+}
+.quick-compose:focus-within {
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 13%,transparent),0 10px 28px -22px color-mix(in srgb,var(--accent) 55%,transparent),inset 0 0 0 1px color-mix(in srgb,var(--accent) 48%,transparent);
+}
+.quick-compose.is-error { animation:quick-compose-shake .22s ease; box-shadow:0 0 0 3px color-mix(in srgb,var(--now) 13%,transparent),inset 0 0 0 1px color-mix(in srgb,var(--now) 45%,transparent); }
+@keyframes quick-compose-shake { 35%{transform:translateX(-3px)} 70%{transform:translateX(3px)} }
+.quick-compose__lead { width:24px;height:24px;display:grid;place-items:center;border-radius:50%;background:var(--accent-tint);color:var(--accent); }
+.quick-compose__lead svg { width:13px;height:13px; }
+.quick-compose__input { width:100%;height:42px;min-width:0;padding:0 5px;border:0;outline:0;background:transparent;color:var(--ink-strong);font:500 14px var(--font);caret-color:var(--accent); }
+.quick-compose__input::placeholder { color:var(--muted-3); }
+.quick-compose__voice { width:32px;height:32px;display:grid;place-items:center;border:0;border-radius:9px;background:transparent;color:var(--muted-3);cursor:pointer; }
+.quick-compose__voice svg { width:16px;height:16px; }
+.quick-compose__voice:hover { background:var(--card-inset);color:var(--ink-2); }
+.quick-compose__voice.is-listening { color:var(--accent);background:var(--accent-tint); }
+.quick-compose__submit { height:34px;padding:0 13px;border:0;border-radius:10px;background:var(--accent);color:var(--on-accent);font:700 11.5px var(--font);cursor:pointer;box-shadow:0 3px 9px -6px var(--accent-strong); }
+.quick-compose__submit:hover { background:var(--accent-strong); }
+.quick-compose__submit:active { transform:scale(.97);box-shadow:none; }
+:root[data-theme="dark"] .quick-compose { background:color-mix(in srgb,var(--card) 94%,#000);box-shadow:0 8px 24px -18px #000,inset 0 0 0 1px color-mix(in srgb,#fff 9%,transparent); }
+@media(max-width:520px){.quick-compose{grid-template-columns:26px minmax(0,1fr) 32px 36px}.quick-compose__submit{width:34px;padding:0;font-size:0}.quick-compose__submit::after{content:"+";font-size:18px;font-weight:500}}
+
+@media (max-width: 1040px) {
+  .day-intent { grid-template-columns:1fr; }
+  .day-intent__choices { justify-self:start; margin-top:10px; }
+  .day-intent__response { grid-column:1; }
+}
+@media (max-width: 620px) {
+  .day-intent__choices { width:100%; display:grid; grid-template-columns:repeat(3,1fr); }
+  .day-intent__choice { min-width:0; justify-content:center; }
+  .day-intent__choice small { display:none; }
+  .next-task::before { display:none; }
+}

@@ -50,7 +50,7 @@ PomodoroTimer_Adhd/
     ├── domain/               pomodoroDomain.js (Spiegel von shared/pomodoro.js)
     ├── application/          pomodoroService.js
     ├── infrastructure/       chrome* Adapter (Alarme, Badge, Notifications, Sound,
-    │                         Bookmark-Bar-Ticker, Storage, Offscreen-Audio)
+    │                         Storage, Offscreen-Audio)
     └── presentation/         Popup-UI
 ```
 
@@ -221,6 +221,27 @@ Umgesetzte Anbindung:
 Serverseitig sendet `server/index.js` offene CORS-Header
 (`Access-Control-Allow-Origin: *`, Methoden `GET,POST,PUT,DELETE,OPTIONS`) inklusive
 Preflight-Behandlung, sodass die Cross-Origin-Requests aus der Extension funktionieren.
+
+### Entfernt: Lesezeichen-Ticker (Altlast)
+
+Frühere Versionen legten ungefragt ein Lesezeichen „Kairos MM:SS" in der Lesezeichenleiste
+an und schrieben dort im Sekundentakt die Restzeit hinein. **Das Feature ist entfernt.**
+
+`src/infrastructure/legacyBookmarkCleanup.js` löscht die bereits angelegten Lesezeichen
+einmalig beim nächsten `onInstalled`/`onStartup` (per gespeicherter ID *und* per Suche nach
+der alten Ticker-URL `https://pomodoro.local/timer`) und setzt danach ein Flag im Storage —
+danach fasst die Extension Lesezeichen nie wieder an.
+
+**Aufräum-Reihenfolge beachten:** Die Berechtigung `"bookmarks"` in `manifest.json` wird
+*nur noch* für diesen einen Löschlauf gebraucht. Sobald die Extension einmal mit der neuen
+Version gestartet ist (Konsole meldet „N Alt-Lesezeichen entfernt"), können ersatzlos
+gestrichen werden:
+
+- `"bookmarks"` aus `permissions` in `manifest.json`
+- `src/infrastructure/legacyBookmarkCleanup.js` samt Aufruf in `src/background.js`
+
+Wird die Berechtigung *vorher* entfernt, bleibt das Lesezeichen im Profil liegen und muss
+von Hand gelöscht werden — die API ist dann nicht mehr erreichbar.
 
 ---
 

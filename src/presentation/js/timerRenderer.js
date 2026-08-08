@@ -2,6 +2,7 @@
 // die Restzeit zeigt das ablaufende Zifferblatt in dial.js).
 import { STATUS, PHASE } from "./constants.js";
 import { phaseText } from "./utils.js";
+import { icon } from "./icons.js";
 
 const phaseLabel  = document.getElementById("phaseLabel");
 const statusLabel = document.getElementById("statusLabel");
@@ -18,17 +19,19 @@ export function renderMeta(state, settings) {
   renderStartPauseLabel(state.status);
 }
 
+// Icon-only-Button: das SVG bleibt dekorativ, die Bedeutung tragen
+// aria-label und title (werden hier je Zustand mitgeführt).
 function renderStartPauseLabel(status) {
   if (status === STATUS.RUNNING) {
-    startPauseBtn.textContent = "⏸";
+    startPauseBtn.innerHTML = icon("pause", { size: 20 });
     startPauseBtn.setAttribute("aria-label", "Pause");
     startPauseBtn.setAttribute("title",      "Pause");
   } else if (status === STATUS.PAUSED) {
-    startPauseBtn.textContent = "▶";
+    startPauseBtn.innerHTML = icon("play", { size: 20 });
     startPauseBtn.setAttribute("aria-label", "Resume");
     startPauseBtn.setAttribute("title",      "Resume");
   } else {
-    startPauseBtn.textContent = "▶";
+    startPauseBtn.innerHTML = icon("play", { size: 20 });
     startPauseBtn.setAttribute("aria-label", "Start");
     startPauseBtn.setAttribute("title",      "Start");
   }

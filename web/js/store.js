@@ -9,12 +9,24 @@ function emptyState() {
     serverTime: Date.now(),
     timer: { status: "idle", phase: "focus", cycleInBlock: 0, remainingMs: 1500000, endsAt: null, activeTaskId: null },
     settings: { focusMinutes: 25, shortBreakMinutes: 5, longBreakMinutes: 15, cyclesUntilLongBreak: 4, autoStartNextPhase: false, todayGoalHours: 4, profileName: "Exam focus", activeExamId: null },
+    profile: {},
+    health: { hasData: false, capacityMultiplier: 1, recommendation: "unknown", reasons: [] },
     exams: [],
     tasks: [],
     topics: [],
-    today: { dayKey: "", focusMs: 0, sessionsDone: 0, goalHours: 4 },
+    notes: [],
+    resources: [],
+    materials: [],
+    navNodes: [],
+    prefs: {},
+    reviews: [],
+    reviewsDueToday: 0,
+    today: { dayKey: "", focusMs: 0, sessionsDone: 0, goalHours: 4, effectiveGoalHours: 4, capacityMultiplier: 1 },
     recentMetrics: {},
-    ui: { expandedTaskId: null },
+    pace: { overall: { factor: null, n: 0 }, byDifficulty: {} },
+    calendarToday: [],
+    lastSession: null,
+    ui: { expandedTaskId: null, examTab: "topics", notesFilter: null, selectedTopicId: null, libraryFilter: null, openNoteId: null },
   };
 }
 
@@ -33,11 +45,23 @@ export function createStore() {
       state.serverTime = snap.serverTime ?? Date.now();
       if (snap.timer) state.timer = snap.timer;
       if (snap.settings) state.settings = snap.settings;
+      if (snap.profile) state.profile = snap.profile;
+      if (snap.health) state.health = snap.health;
       if (snap.exams) state.exams = snap.exams;
       if (snap.tasks) state.tasks = snap.tasks;
       if (snap.topics) state.topics = snap.topics;
+      if (snap.notes) state.notes = snap.notes;
+      if (snap.resources) state.resources = snap.resources;
+      if (snap.materials) state.materials = snap.materials;
+      if (snap.navNodes) state.navNodes = snap.navNodes;
+      if (snap.prefs) state.prefs = snap.prefs;
+      if (snap.reviews) state.reviews = snap.reviews;
+      if (snap.reviewsDueToday !== undefined) state.reviewsDueToday = snap.reviewsDueToday;
       if (snap.today) state.today = snap.today;
       if (snap.recentMetrics) state.recentMetrics = snap.recentMetrics;
+      if (snap.pace) state.pace = snap.pace;
+      if (snap.calendarToday) state.calendarToday = snap.calendarToday;
+      if (snap.lastSession !== undefined) state.lastSession = snap.lastSession;
       state.loaded = true;
       emit();
     },

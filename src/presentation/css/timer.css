@@ -30,9 +30,9 @@
 }
 
 .timer-card.state-running-break {
-  border-color: var(--green);
+  border-color: var(--amber);
   background: var(--paper-2);
-  box-shadow: var(--shadow-card), 0 0 0 1px var(--green-soft) inset;
+  box-shadow: var(--shadow-card), 0 0 0 1px var(--amber-soft) inset;
 }
 
 /* ── Dial (ablaufende Uhr im Time-Timer-Prinzip) ── */
@@ -74,9 +74,9 @@
   transition: stroke-dashoffset 1s linear;
 }
 
-/* Phasenfarbe: Terrakotta beim Fokus, Salbeigrün in den Pausen. */
+/* Phasenfarbe: Salbeigrün beim Fokus, Bernstein in den Pausen. */
 .timer-card[data-phase="short-break"] .dial-progress,
-.timer-card[data-phase="long-break"] .dial-progress { stroke: var(--green); }
+.timer-card[data-phase="long-break"] .dial-progress { stroke: var(--amber); }
 
 .dial-handle {
   fill: var(--accent);
@@ -85,7 +85,7 @@
 }
 
 .timer-card[data-phase="short-break"] .dial-handle,
-.timer-card[data-phase="long-break"] .dial-handle { fill: var(--green); }
+.timer-card[data-phase="long-break"] .dial-handle { fill: var(--amber); }
 
 /* Der Zeiger dient nur zum Einstellen — beim Ablaufen wird er ausgeblendet. */
 .timer-card:not(.state-idle) .dial-handle { display: none; }
@@ -108,7 +108,7 @@
 }
 
 .timer-card[data-phase="short-break"] .phase,
-.timer-card[data-phase="long-break"] .phase { color: var(--green); }
+.timer-card[data-phase="long-break"] .phase { color: var(--amber); }
 
 /* Zentraler Hinweis: zeigt beim Einstellen die gewählte Dauer,
    während die Uhr läuft/pausiert ist er ausgeblendet (rein bildlich). */
@@ -137,7 +137,7 @@
 
 .timer-card.state-paused .status-badge        { border-color: var(--accent); }
 .timer-card.state-running-focus .status-badge { border-color: var(--accent); background: var(--paper-2); }
-.timer-card.state-running-break .status-badge { border-color: var(--green);  background: var(--paper-2); color: var(--green-dark); }
+.timer-card.state-running-break .status-badge { border-color: var(--amber);  background: var(--paper-2); color: var(--amber-dark); }
 
 .cycle {
   color: var(--muted);

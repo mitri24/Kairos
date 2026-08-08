@@ -20,6 +20,38 @@ export function dayKey(date = new Date()) {
   return `${y}-${m}-${d}`;
 }
 
+// Tages-Schlüssel in einer IANA-Zeitzone (z. B. "Europe/Zurich"). Ohne/ungültige
+// Zone → Serverzeit-Fallback. Behebt die Streak-/„Heute"-Verschiebung, wenn der
+// Server (UTC im Container) in einer anderen Zone tickt als der Nutzer studiert.
+export function dayKeyTz(date = new Date(), timeZone = null) {
+  if (!timeZone) return dayKey(date);
+  try {
+    // en-CA liefert YYYY-MM-DD.
+    return new Intl.DateTimeFormat("en-CA", {
+      timeZone, year: "numeric", month: "2-digit", day: "2-digit",
+    }).format(date);
+  } catch {
+    return dayKey(date);
+  }
+}
+
+// Minute-ab-Mitternacht in einer IANA-Zeitzone (für Ruhezeiten-Prüfung). Fallback: Serverzeit.
+export function localMinutesInTz(epochMs, timeZone = null) {
+  const d = new Date(epochMs);
+  if (!timeZone) return d.getHours() * 60 + d.getMinutes();
+  try {
+    const parts = new Intl.DateTimeFormat("en-GB", {
+      timeZone, hour: "2-digit", minute: "2-digit", hour12: false,
+    }).formatToParts(d);
+    const h = Number(parts.find((p) => p.type === "hour")?.value);
+    const mi = Number(parts.find((p) => p.type === "minute")?.value);
+    if (!Number.isFinite(h) || !Number.isFinite(mi)) return d.getHours() * 60 + d.getMinutes();
+    return (h % 24) * 60 + mi;
+  } catch {
+    return d.getHours() * 60 + d.getMinutes();
+  }
+}
+
 export function uuid() {
   return randomUUID();
 }
@@ -43,6 +75,25 @@ export function toBool(value) {
 export function str(value, fallback = "") {
   if (typeof value !== "string") return fallback;
   return value;
+}
+
+// Liest einen rohen Binär-Body (Datei-Upload) mit Limit.
+export function readRawBody(req, limitBytes = 25 * 1024 * 1024) {
+  return new Promise((resolve, reject) => {
+    let size = 0;
+    const chunks = [];
+    req.on("data", (chunk) => {
+      size += chunk.length;
+      if (size > limitBytes) {
+        reject(httpErr(413, "Datei zu groß (max. 25 MB)"));
+        req.destroy();
+        return;
+      }
+      chunks.push(chunk);
+    });
+    req.on("end", () => resolve(Buffer.concat(chunks)));
+    req.on("error", reject);
+  });
 }
 
 // Liest einen JSON-Body aus einem http.IncomingMessage (mit Limit).
