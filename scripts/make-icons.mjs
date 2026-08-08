@@ -1,4 +1,4 @@
-// Dependency-freie PNG-Icon-Erzeugung für die ADHD-Lernuhr.
+// Dependency-freie PNG-Icon-Erzeugung für die Focus-Lernuhr.
 // Zeichnet ein Uhr-Motiv (Papier-Zifferblatt auf Terrakotta, zwei dunkle Zeiger)
 // als RGBA-Pixelpuffer und kodiert es von Hand als PNG:
 //   RGBA-Pixel  →  gefilterte Scanlines  →  zlib.deflate  →  IHDR/IDAT/IEND + CRC32.

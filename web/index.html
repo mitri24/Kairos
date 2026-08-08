@@ -3,268 +3,801 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#a9524a" />
-    <meta name="description" content="Kairos — adaptive study planner with focus timer, day plan and week calendar with an always-visible clock." />
+    <!-- Wird von adapt.js an das aufgelöste App-Theme nachgeführt (Nutzer kann Hell/Dunkel erzwingen). -->
+    <meta name="theme-color" content="#DDDBD3" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#161815" media="(prefers-color-scheme: dark)" />
+    <meta name="description" content="Kairos — adaptive study planner: focus timer, day plan, week calendar, modules, notes and health-aware capacity." />
     <title>Kairos</title>
 
     <link rel="manifest" href="/manifest.webmanifest" />
-    <link rel="icon" href="/icons/icon.svg" type="image/svg+xml" />
-    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <!-- favicon.svg trägt die Hell/Dunkel-Umschaltung intern (prefers-color-scheme). -->
+    <link rel="icon" href="/icons/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/icons/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <link rel="mask-icon" href="/icons/safari-pinned-tab.svg" color="#3E7D5E" />
 
     <link rel="stylesheet" href="/css/tokens.css" />
     <link rel="stylesheet" href="/css/base.css" />
     <link rel="stylesheet" href="/css/timer.css" />
     <link rel="stylesheet" href="/css/tasks.css" />
-    <link rel="stylesheet" href="/css/exam.css" />
     <link rel="stylesheet" href="/css/today.css" />
     <link rel="stylesheet" href="/css/dayTimeline.css" />
-    <link rel="stylesheet" href="/css/timeline.css" />
+    <link rel="stylesheet" href="/css/exam.css" />
     <link rel="stylesheet" href="/css/topics.css" />
+    <link rel="stylesheet" href="/css/timeline.css" />
     <link rel="stylesheet" href="/css/week.css" />
+    <link rel="stylesheet" href="/css/notes.css" />
+    <link rel="stylesheet" href="/css/attachments.css" />
+    <link rel="stylesheet" href="/css/health.css" />
+    <link rel="stylesheet" href="/css/insights.css" />
     <link rel="stylesheet" href="/css/push.css" />
+    <link rel="stylesheet" href="/css/session.css" />
+    <link rel="stylesheet" href="/css/toast.css" />
+    <link rel="stylesheet" href="/css/profile.css" />
+    <link rel="stylesheet" href="/css/onboarding.css" />
+    <link rel="stylesheet" href="/css/dialog.css" />
+    <link rel="stylesheet" href="/css/voice.css" />
+    <link rel="stylesheet" href="/css/nav.css" />
+    <link rel="stylesheet" href="/css/knowledge.css" />
+    <link rel="stylesheet" href="/css/journal.css" />
+    <link rel="stylesheet" href="/css/library.css" />
+    <link rel="stylesheet" href="/css/path.css" />
+    <link rel="stylesheet" href="/css/aibot.css" />
+    <link rel="stylesheet" href="/css/studyplan.css" />
+    <link rel="stylesheet" href="/css/viewer.css" />
+    <link rel="stylesheet" href="/css/adapt.css" />
   </head>
   <body>
-    <div id="app" class="shell">
-      <!-- ════════ Sidebar: clock, navigation, timer ════════ -->
+    <div class="app-window">
+      <!-- Fenster-Titelleiste (wie im Mockup: Ampel-Punkte + zentrierter Titel) -->
+      <div class="app-titlebar">
+        <div class="app-titlebar__dots" aria-hidden="true"><span></span><span></span><span></span></div>
+        <!-- Zurück zur vorherigen Ansicht (inkl. gewählter Prüfung/Notiz).
+             Alt+← und die Maus-Zurücktaste tun dasselbe (web/js/nav.js). -->
+        <button class="app-titlebar__back" id="navBack" type="button" disabled
+                data-i18n-title="nav.back" data-i18n-aria="nav.back" title="Back" aria-label="Back">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.6 6.2-5.8 5.8 5.8 5.8"/></svg>
+        </button>
+        <span class="app-titlebar__title" id="windowTitle">Kairos — Today</span>
+        <time class="app-titlebar__date" id="globalDate"></time>
+      </div>
+      <div id="app" class="shell">
+      <!-- ════════════════ SIDEBAR ════════════════ -->
       <aside class="sidebar">
-        <nav class="nav" aria-label="Views">
-          <button class="nav-item is-active" data-view="today" id="navToday">Today</button>
-          <button class="nav-item" data-view="week" id="navWeek">Week</button>
-          <button class="nav-item" data-view="exam" id="navExam">Exam</button>
-        </nav>
-
-        <!-- Timer (analog clock + countdown) — always visible, bottom left -->
-        <div class="card timer-card timer-card--sidebar" id="timerCard">
-          <div class="phase-tabs" role="tablist">
-            <button class="phase-tab" id="tabFocus" data-phase="focus" role="tab">Focus</button>
-            <button class="phase-tab" id="tabShort" data-phase="short-break" role="tab">Short break</button>
-            <button class="phase-tab" id="tabLong" data-phase="long-break" role="tab">Long break</button>
-          </div>
-
-          <div class="dial-wrap">
-            <svg class="dial" id="dial" viewBox="0 0 280 280" role="img" aria-label="Clock and timer">
-              <circle cx="140" cy="140" r="132" fill="none" stroke="var(--line-strong)" stroke-width="6" />
-              <circle id="dialProgress" cx="140" cy="140" r="132" fill="none" stroke="var(--accent)"
-                      stroke-width="6" stroke-linecap="round" transform="rotate(-90 140 140)" />
-              <circle cx="140" cy="140" r="118" fill="var(--face)" stroke="rgba(150,138,124,0.25)" stroke-width="1.5" />
-              <g class="dial-ticks">
-                <line x1="140" y1="22" x2="140" y2="42" stroke="var(--ink-soft)" stroke-width="3" transform="rotate(0 140 140)" />
-                <line x1="140" y1="26" x2="140" y2="40" stroke="var(--line-strong)" stroke-width="2" transform="rotate(30 140 140)" />
-                <line x1="140" y1="26" x2="140" y2="40" stroke="var(--line-strong)" stroke-width="2" transform="rotate(60 140 140)" />
-                <line x1="140" y1="22" x2="140" y2="42" stroke="var(--ink-soft)" stroke-width="3" transform="rotate(90 140 140)" />
-                <line x1="140" y1="26" x2="140" y2="40" stroke="var(--line-strong)" stroke-width="2" transform="rotate(120 140 140)" />
-                <line x1="140" y1="26" x2="140" y2="40" stroke="var(--line-strong)" stroke-width="2" transform="rotate(150 140 140)" />
-                <line x1="140" y1="22" x2="140" y2="42" stroke="var(--ink-soft)" stroke-width="3" transform="rotate(180 140 140)" />
-                <line x1="140" y1="26" x2="140" y2="40" stroke="var(--line-strong)" stroke-width="2" transform="rotate(210 140 140)" />
-                <line x1="140" y1="26" x2="140" y2="40" stroke="var(--line-strong)" stroke-width="2" transform="rotate(240 140 140)" />
-                <line x1="140" y1="22" x2="140" y2="42" stroke="var(--ink-soft)" stroke-width="3" transform="rotate(270 140 140)" />
-                <line x1="140" y1="26" x2="140" y2="40" stroke="var(--line-strong)" stroke-width="2" transform="rotate(300 140 140)" />
-                <line x1="140" y1="26" x2="140" y2="40" stroke="var(--line-strong)" stroke-width="2" transform="rotate(330 140 140)" />
-              </g>
-              <line id="hourHand" x1="140" y1="140" x2="140" y2="86" stroke="var(--ink)" stroke-width="5" stroke-linecap="round" />
-              <line id="minHand" x1="140" y1="140" x2="140" y2="58" stroke="var(--ink-soft)" stroke-width="4" stroke-linecap="round" />
-              <line id="secHand" x1="140" y1="154" x2="140" y2="42" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" />
-              <circle cx="140" cy="140" r="6.5" fill="var(--ink)" />
-              <circle cx="140" cy="140" r="3" fill="var(--accent)" />
-            </svg>
-          </div>
-
-          <div class="timer-readout">
-            <div class="time-big" id="timeStr">25:00</div>
-            <div class="timer-readout__meta">
-              <span class="mode-label" id="modeLabel">Focus</span>
-              <span class="dial-digital" id="digitalTime">--:--:--</span>
-            </div>
-          </div>
-
-          <div class="current-task" id="currentTaskCard">
-            <div class="current-task__kicker" id="ctKicker">FOCUS NOW</div>
-            <div class="current-task__title" id="ctTitle">No task selected</div>
-            <div class="current-task__chips" id="ctChips"></div>
-            <div class="current-task__sub" id="ctSub"></div>
-          </div>
-
-          <div class="controls">
-            <button class="btn btn--primary btn--wide" id="toggleBtn">▶ Start</button>
-            <button class="btn btn--ghost" id="skipBtn" title="Skip">⏭</button>
-            <button class="btn btn--ghost btn--danger" id="resetBtn" title="Reset">↺</button>
-          </div>
-
-          <div class="sliders">
-            <div class="slider-row">
-              <div class="slider-row__head">
-                <span class="slider-label">Session length</span>
-                <div class="preset-group" id="sessionPresets"></div>
-              </div>
-              <div class="slider-line">
-                <input type="range" id="sessionRange" min="5" max="90" step="5" value="25" />
-                <span class="slider-value" id="sessionLabel">25 min</span>
-              </div>
-            </div>
-            <div class="slider-duo">
-              <div class="slider-row">
-                <div class="slider-mini"><span>Short</span><span class="slider-value slider-value--green" id="shortLabel">5 min</span></div>
-                <input type="range" id="shortRange" min="1" max="30" step="1" value="5" />
-              </div>
-              <div class="slider-row">
-                <div class="slider-mini"><span>Long</span><span class="slider-value slider-value--green" id="longLabel">15 min</span></div>
-                <input type="range" id="longRange" min="5" max="45" step="1" value="15" />
-              </div>
-            </div>
-          </div>
+        <div class="brand">
+          <svg class="brand__mark" viewBox="0 0 256 256" aria-hidden="true" focusable="false">
+            <g transform="translate(8 0)" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M 158 34 C 101 25, 45 63, 32 119 C 17 183, 68 223, 128 221 C 190 219, 226 172, 220 117 C 216 84, 205 66, 194 56" stroke-width="20"/>
+              <path d="M 112 69 C 108 94, 108 124, 110 171 M 111 122 C 132 105, 151 88, 169 72 M 112 123 C 133 137, 150 155, 164 173 C 170 181, 178 178, 183 166" stroke-width="18"/>
+              <circle cx="179" cy="42" r="7.5" fill="currentColor" stroke="none"/>
+            </g>
+          </svg>
+          <span>Kairos</span>
         </div>
 
-        <!-- Push notifications (work even when the app is closed) -->
-        <button class="push-toggle" id="pushToggle" type="button" aria-pressed="false" hidden>
-          <span class="push-toggle__icon" aria-hidden="true">🔔</span>
-          <span class="push-toggle__label" id="pushLabel">Enable notifications</span>
-        </button>
-        <p class="push-hint" id="pushHint" hidden></p>
+        <nav class="nav" aria-label="Views">
+          <button class="nav-item is-active" data-view="today" id="navToday">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18h18"/><path d="M6.5 18a5.5 5.5 0 0 1 11 0"/><path d="M12 3.5V6"/><path d="M4.2 8.2 5.8 9.8"/><path d="M19.8 8.2 18.2 9.8"/></svg>
+            <span data-i18n="nav.today">Today</span>
+          </button>
 
-        <div class="offline-banner" id="offlineBanner" hidden>Offline — kept locally.</div>
+          <!-- ── Planen ── -->
+          <div class="nav-group" data-group="plan">
+            <button class="nav-group__head" type="button" aria-expanded="true">
+              <span data-i18n="nav.g_plan">Plan</span>
+              <svg class="nav-group__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6.2 9.4 5.8 5.8 5.8-5.8"/></svg>
+            </button>
+            <div class="nav-group__items">
+              <button class="nav-item" data-view="week" id="navWeek">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 9.5h17"/><path d="M8 3.5V6M16 3.5V6"/></svg>
+                <span data-i18n="nav.week">Week</span>
+              </button>
+              <div class="nav-row" id="examNavRow">
+                <button class="nav-item" data-view="exam" id="navExam">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.4"/><circle cx="12" cy="12" r="4.3"/><path d="M12 11.9h.01"/></svg>
+                  <span data-i18n="nav.exam">Module</span>
+                </button>
+                <button class="nav-row__toggle" id="examSubToggle" type="button" aria-expanded="true" aria-controls="examSubnav" data-i18n-title="nav.exam_list" data-i18n-aria="nav.exam_list" title="Show/hide the module list">
+                  <svg class="nav-row__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6.2 9.4 5.8 5.8 5.8-5.8"/></svg>
+                </button>
+              </div>
+
+              <!-- Prüfungsliste: immer sichtbar (ausgefahren), nur auf Wunsch einklappbar -->
+              <div class="nav-sub" id="examSubnav">
+                <div id="examChips"></div>
+                <button class="nav-sub__item nav-sub__add" id="addExamBtn" title="Add module">
+                  <span class="nav-sub__mark"><svg class="ico" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5.5v13M5.5 12h13"/></svg></span><span class="nav-sub__name">Add module</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Lernen ── -->
+          <div class="nav-group" data-group="learn">
+            <button class="nav-group__head" type="button" aria-expanded="true">
+              <span data-i18n="nav.g_learn">Learn</span>
+              <svg class="nav-group__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6.2 9.4 5.8 5.8 5.8-5.8"/></svg>
+            </button>
+            <div class="nav-group__items">
+              <button class="nav-item" data-view="library" id="navLibrary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 4.8A2 2 0 0 1 6.5 3H19v15.5H6.5a2 2 0 0 0-2 2z"/><path d="M4.5 4.8v15.7A2 2 0 0 0 6.5 21H19"/><path d="M8.5 7.5h6"/></svg>
+                <span data-i18n="nav.library">Library</span>
+              </button>
+              <button class="nav-item" data-view="journal" id="navJournal">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13.5 5.6 18.4 10.5"/><path d="M15.1 4 20 8.9 9.4 19.5l-5.4 1.1 1.1-5.4z"/></svg>
+                <span data-i18n="nav.journal">Journal</span>
+                <span class="nav-badge" id="navJournalBadge" hidden>0</span>
+              </button>
+              <button class="nav-item" data-view="notes" id="navNotes">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7.5A2.5 2.5 0 0 0 5 5.5v13A2.5 2.5 0 0 0 7.5 21h9a2.5 2.5 0 0 0 2.5-2.5V8z"/><path d="M14 3v5h5"/><path d="M8.5 13h7M8.5 16.5h4.5"/></svg>
+                <span data-i18n="nav.notes">Notes</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- ── Verstehen ── -->
+          <div class="nav-group" data-group="understand">
+            <button class="nav-group__head" type="button" aria-expanded="true">
+              <span data-i18n="nav.g_understand">Understand</span>
+              <svg class="nav-group__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6.2 9.4 5.8 5.8 5.8-5.8"/></svg>
+            </button>
+            <div class="nav-group__items">
+              <button class="nav-item" data-view="insights" id="navInsights">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.4 19.6h15.2"/><path d="M6.6 17.4V12M11.4 17.4V8.4M16.2 17.4V5"/></svg>
+                <span data-i18n="nav.insights">Insights</span>
+              </button>
+              <button class="nav-item" data-view="health" id="navHealth">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20.1 5 13a4.4 4.4 0 0 1 6.2-6.2l.8.8.8-.8A4.4 4.4 0 0 1 19 13z"/></svg>
+                <span data-i18n="nav.health">Health</span>
+              </button>
+              <button class="nav-item" data-view="knowledge" id="navKnowledge">
+                <!-- Ausnahme: Doktorhut hat kein Pendant in /js/icons.js — Silhouette bleibt, Format angeglichen. -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2 8.5l10 5.5 10-5.5z"/><path d="M6 11v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"/><path d="M22 8.5V15"/></svg>
+                <span data-i18n="nav.knowledge">Methods</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="nav-group nav-custom" data-group="custom">
+            <div class="nav-custom__head">
+              <button class="nav-group__head" type="button" aria-expanded="true"><span>Module</span><svg class="nav-group__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6.2 9.4 5.8 5.8 5.8-5.8"/></svg></button>
+              <button class="nav-custom__add" id="navCustomAdd" type="button" title="Neues Modul hinzufügen" aria-label="Neues Modul hinzufügen">+</button>
+            </div>
+            <div class="nav-group__items nav-tree" id="navCustomTree"></div>
+          </div>
+        </nav>
+
+        <div class="sidebar__spacer">
+          <div class="offline-banner" id="offlineBanner" hidden>Offline — kept locally.</div>
+
+          <!-- Benutzer + Benachrichtigungen -->
+          <div class="sidebar__foot">
+            <button class="user-chip" id="userChip" type="button">
+              <span class="user-chip__avatar" id="userAvatar">K</span>
+              <span class="user-chip__name" id="userName">You</span>
+            </button>
+            <button class="push-toggle" id="pushToggle" type="button" aria-pressed="false" title="Enable notifications" hidden>
+              <svg class="push-toggle__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+              <span class="push-toggle__label" id="pushLabel">Enable notifications</span>
+            </button>
+          </div>
+          <p class="push-hint" id="pushHint" hidden></p>
+        </div>
       </aside>
 
-      <!-- ════════ Main area with views ════════ -->
+      <!-- ════════════════ MAIN ════════════════ -->
       <main class="main">
 
         <!-- ─────── TODAY ─────── -->
         <section class="view view--today" id="viewToday">
-          <div class="view__head">
-            <h1 class="view__title">Today · <span id="todayDateLabel">—</span></h1>
-          </div>
-
-          <div class="today-grid">
-            <!-- Day timeline (left) -->
-            <div class="today-col today-col--plan">
-              <div class="card plan-card">
-                <div class="card__head">
-                  <h2 class="card__title">Day plan</h2>
-                  <span class="pill pill--muted" id="planClock" title="Current time">--:--</span>
+          <!-- Kopf: Datum + GENAU EINE Aktion. Alles andere (Suche, „New task",
+               „Say it", Speicher-Indikator, Fach-Legende) ist bewusst entfallen —
+               es war entweder wirkungslos oder eine Dublette der Eingabezeile. -->
+          <div class="view__head today-head">
+            <div class="today-head__id">
+              <!-- Tageslast gehört zur Identität des Tages, nicht in eine eigene
+                   Widget-Karte: ein dünner Messstreifen direkt unter dem Datum.
+                   (Ein Ring wäre falsch — der bedeutet in dieser App „Timer".) -->
+              <div class="daymeter" id="capacityCard">
+                <div class="daymeter__bar" role="img" aria-label="Today’s load">
+                  <span class="daymeter__seg daymeter__seg--done" id="loadDone"></span>
+                  <span class="daymeter__seg daymeter__seg--planned" id="loadPlanned"></span>
                 </div>
-                <p class="plan-hint">Drag a task onto the timeline or set its time · Past &amp; open → you'll be asked</p>
-                <div class="day-timeline" id="dayTimeline" aria-label="Day timeline">
-                  <div class="day-timeline__inner" id="dayTimelineInner"></div>
-                </div>
-                <p class="empty" id="planEmpty" hidden>Nothing planned yet — give a task a time.</p>
+                <span class="daymeter__val" id="capacityValue">–</span>
+                <span class="daymeter__legend" id="loadLegend"></span>
+                <span class="daymeter__note" id="capacityNote" hidden></span>
               </div>
             </div>
 
-            <!-- Today's tasks -->
-            <div class="today-col today-col--tasks">
-              <div class="card today-card" id="todayCard">
-                <div class="card__head">
-                  <h2 class="card__title">Today's study</h2>
-                  <div class="today-goal">Goal
-                    <input type="number" id="todayGoalHours" class="today-goal__input" min="0.5" max="16" step="0.5" value="4" /> h
+            <div class="view__head-actions">
+              <div class="today-viewmenu">
+                <button class="btn btn--ghost today-viewmenu__trigger" id="todayViewBtn" type="button" aria-expanded="false" aria-controls="todayViewPanel">
+                  <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/><circle cx="9" cy="7" r="1.5" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="11" cy="17" r="1.5" fill="currentColor" stroke="none"/></svg>
+                  <span id="todayViewBtnLabel">View</span>
+                </button>
+                <div class="today-viewmenu__panel" id="todayViewPanel" hidden>
+                  <div class="today-viewmenu__panelhead">
+                    <div class="today-viewmenu__title" id="todayViewTitle">Show on Today</div>
+                    <div class="today-viewmenu__bulk">
+                      <button type="button" id="todayWidgetsAll">All</button>
+                      <button type="button" id="todayWidgetsNone">None</button>
+                    </div>
                   </div>
-                </div>
-                <div class="progress"><div class="progress__bar" id="todayProgressBar"></div></div>
-                <div class="today-foot">
-                  <span id="todayDoneLabel">0.0 h of 4.0 h done</span>
-                  <button class="btn btn--soft" id="startTodayBtn">▶ Start now</button>
+                  <label><input type="checkbox" data-today-widget="checkin"><span id="todayWidgetCheckin">Today’s pace</span></label>
+                  <label><input type="checkbox" data-today-widget="attention"><span id="todayWidgetAttention">Attention</span></label>
+                  <label><input type="checkbox" data-today-widget="next"><span id="todayWidgetNext">Next step</span></label>
+                  <label><input type="checkbox" data-today-widget="timeline"><span id="todayWidgetTimeline">Day plan</span></label>
+                  <label><input type="checkbox" data-today-widget="open"><span id="todayWidgetOpen">Inbox</span></label>
+                  <label><input type="checkbox" data-today-widget="capacity"><span id="todayWidgetCapacity">Capacity details</span></label>
+                  <div class="today-viewmenu__sizes" id="todayContainerSizes"></div>
                 </div>
               </div>
-
-              <div class="card tasks-card">
-                <div class="card__head">
-                  <h2 class="card__title">Today's tasks</h2>
-                  <span class="pill" id="taskCount">0</span>
-                </div>
-                <div class="task-input-row">
-                  <input type="text" id="taskInput" class="text-input" placeholder="Add a task…" maxlength="160" />
-                  <button class="add-btn" id="taskAddBtn" title="Add">+</button>
-                </div>
-
-                <div class="next-task" id="nextTaskCard" hidden>
-                  <div class="next-task__kicker">UP NEXT</div>
-                  <div class="next-task__text" id="nextText">–</div>
-                  <div class="next-task__chips" id="nextChips"></div>
-                  <button class="btn btn--primary btn--wide" id="startNextBtn">▶ Start this task</button>
-                </div>
-
-                <div class="task-list" id="taskListOpen"></div>
-                <p class="empty" id="taskEmpty">No tasks yet today.</p>
-
-                <details class="done-wrap" id="doneWrap">
-                  <summary>Done today (<span id="doneCount">0</span>)</summary>
-                  <div class="task-list task-list--done" id="taskListDone"></div>
-                </details>
-                <span id="taskExamName" hidden></span>
-              </div>
+              <button class="btn btn--soft" id="planDayBtn" data-i18n-title="plan.hint" title="Give every open task a time today — in priority order, around your calendar. You can undo it.">
+                <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 9.5h17"/><path d="M8 3.5V6M16 3.5V6"/><path d="M8.6 14.2h6.8"/></svg>
+                <span data-i18n="plan.button">Find time for my tasks</span>
+              </button>
             </div>
           </div>
+
+          <!-- Empathischer Tages-Check-in: keine Diagnose, keine Bewertung.
+               Die Antwort gilt nur heute und skaliert den Auto-Plan. -->
+          <section class="day-intent" id="dayIntent" aria-labelledby="dayIntentTitle">
+            <div class="day-intent__copy">
+              <span class="day-intent__eyebrow" id="dayIntentEyebrow">Today’s pace</span>
+              <h2 class="day-intent__title" id="dayIntentTitle">What kind of day is possible today?</h2>
+              <p class="day-intent__hint" id="dayIntentHint">Not what you should manage — what feels realistic.</p>
+            </div>
+            <div class="day-intent__choices" id="dayIntentChoices" role="radiogroup" aria-label="Today’s capacity">
+              <button class="day-intent__choice" type="button" data-energy="gentle" role="radio" aria-checked="false"><span class="day-intent__icon"><i></i></span><span><b>Gentle</b><small>Keep it light</small></span></button>
+              <button class="day-intent__choice" type="button" data-energy="steady" role="radio" aria-checked="false"><span class="day-intent__icon"><i></i><i></i></span><span><b>Steady</b><small>A normal pace</small></span></button>
+              <button class="day-intent__choice" type="button" data-energy="strong" role="radio" aria-checked="false"><span class="day-intent__icon"><i></i><i></i><i></i></span><span><b>Plenty</b><small>Room for more</small></span></button>
+            </div>
+            <div class="day-intent__response" id="dayIntentResponse" aria-live="polite"></div>
+          </section>
+
+          <!-- ZONE 2 · Genau EINE Antwort auf „was jetzt" — über die volle Breite -->
+          <div class="today-now">
+            <div class="next-task" id="nextTaskCard" hidden>
+              <div class="next-task__main">
+                <div class="next-task__head">
+                  <span class="kicker" id="nextKicker">Right now</span>
+                  <span class="next-task__pill" id="nextPill" hidden></span>
+                </div>
+                <div class="next-task__text" id="nextText">–</div>
+                <a class="next-task__res" id="nextResource" href="#" target="_blank" rel="noopener noreferrer" hidden></a>
+              </div>
+              <div class="next-task__side">
+                <button class="btn btn--primary" id="startNextBtn">
+                  <svg class="ico play-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.8 5.2 18.6 12 7.8 18.8z"/></svg>
+                  Start focus
+                </button>
+              </div>
+            </div>
+
+            <!-- Ehrlicher Erstzustand statt leerer Fläche -->
+            <div class="next-empty" id="nextEmptyCard" hidden>
+              <div class="next-empty__title">Nothing to do yet</div>
+              <p class="next-empty__body">Add your first task on the right — Kairos then picks what to start.</p>
+            </div>
+          </div>
+
+          <!-- ZONE 3 · direkte Grid-Elemente, kein überlagernder Wrapper -->
+            <div class="plan-card" id="todayPlanCard">
+              <div class="section-title plan-card__head">
+                <span class="section-title__name">Today’s plan</span>
+                <span class="section-title__meta plan-card__meta" id="planClockMeta">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13.2" r="7.6"/><path d="M12 9.4v3.8l2.6 1.6"/><path d="M9.6 3.4h4.8"/></svg>
+                  <span id="planClock">--:--</span>
+                </span>
+              </div>
+              <div class="tl-allday" id="dayAllday" hidden></div>
+              <div class="day-timeline" id="dayTimeline" aria-label="Day timeline">
+                <div class="day-timeline__inner" id="dayTimelineInner"></div>
+              </div>
+              <p class="empty" id="planEmpty" hidden>Nothing planned yet — drag a task from the Inbox onto a time, or let Kairos find times.</p>
+            </div>
+
+            <!-- Die offene Arbeit: erfassen und sehen an EINEM Ort -->
+            <div class="today-context">
+              <div class="unscheduled-card" id="unscheduledCard">
+                <div class="section-title">
+                  <span class="unscheduled-card__title">Inbox</span>
+                </div>
+
+                <!-- Erfassung sitzt dort, wo das Ergebnis auftaucht.
+                     EIN gefüllter Knopf (Anlegen) und ein stiller (Diktat) —
+                     vorher standen zwei grüne Knöpfe unterschiedlicher Form
+                     nebeneinander, ohne erkennbare Rangfolge. -->
+                <div class="quick-compose">
+                  <span class="quick-compose__lead" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M12 5.5v13M5.5 12h13"/></svg></span>
+                  <input type="text" id="taskInput" class="quick-compose__input" placeholder="What do you want to get done?" maxlength="160" autocomplete="off" />
+                  <button class="quick-compose__voice" id="voiceBtn" type="button" data-i18n-title="voice.title" title="Say your tasks" data-i18n-aria="voice.title" aria-label="Say your tasks">
+                    <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9.2" y="2.8" width="5.6" height="10.8" rx="2.8"/><path d="M5.4 11.6a6.6 6.6 0 0 0 13.2 0"/><path d="M12 18.2V21"/></svg>
+                  </button>
+                  <button class="quick-compose__submit" id="taskAddBtn" type="button" data-i18n="task.add" title="Add task">Add</button>
+                </div>
+
+                <div class="unscheduled-list" id="unscheduledList"></div>
+                <p class="empty" id="unscheduledEmpty" hidden>Nothing open — everything has a time.</p>
+              </div>
+
+            </div>
         </section>
 
         <!-- ─────── WEEK ─────── -->
         <section class="view view--week" id="viewWeek" hidden>
-          <div class="view__head">
-            <h1 class="view__title">Week</h1>
-            <div class="week-nav">
-              <button class="week-nav__btn" id="weekPrev" title="Previous week">‹</button>
-              <button class="week-nav__today" id="weekToday">This week</button>
-              <span class="week-nav__label" id="weekLabel">–</span>
-              <button class="week-nav__btn" id="weekNext" title="Next week">›</button>
+          <div class="week-surface">
+            <div class="week-surface__toolbar">
+              <h1 class="week-surface__range" id="weekLabel">Week</h1>
+              <div class="week-nav" aria-label="Week navigation">
+                <button class="wk-navbtn" id="weekPrev" aria-label="Previous week"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.6 6.2-5.8 5.8 5.8 5.8"/></svg></button>
+                <button class="wk-navbtn wk-navbtn--today" id="weekToday">This week</button>
+                <button class="wk-navbtn" id="weekNext" aria-label="Next week"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9.4 6.2 5.8 5.8-5.8 5.8"/></svg></button>
+              </div>
             </div>
+            <div class="week-legendrow">
+              <div class="week-legend" id="weekLegend"></div>
+              <div class="week-tools">
+                <span class="week-selection" id="weekSelection" hidden></span>
+                <button class="week-tool week-tool--danger" id="weekDeleteSelected" type="button" hidden>Delete selected</button>
+                <button class="week-tool" id="weekClearSelection" type="button" hidden>Cancel</button>
+                <button class="week-tool" id="weekCalendarsBtn" type="button">Calendars</button>
+              </div>
+            </div>
+            <div class="week-calendars" id="weekCalendars" hidden></div>
+            <div class="week-board" id="weekGrid"></div>
           </div>
-          <div class="week-grid" id="weekGrid"></div>
         </section>
 
         <!-- ─────── EXAM ─────── -->
         <section class="view view--exam" id="viewExam" hidden>
-          <div class="view__head">
-            <h1 class="view__title">Exam</h1>
-            <div class="exam-switch">
-              <div class="exam-chips" id="examChips" aria-label="Exams"></div>
-              <button class="exam-chip exam-chip--add" id="addExamBtn" title="Add exam">+ Exam</button>
+          <div class="exam-identity" id="examIdentity">
+            <div class="exam-identity__main">
+              <input type="text" id="examName" class="exam-identity__name" placeholder="Name the module…" value="" />
+              <div class="exam-identity__chips">
+                <label class="exam-chipfield exam-colorfield" title="Custom module colour as hexadecimal">
+                  <input type="color" id="examColorPicker" value="#3E7D5E" aria-label="Module colour" />
+                  <input type="text" id="examColorHex" class="exam-chipfield__input" value="#3E7D5E" maxlength="7" pattern="#[0-9A-Fa-f]{6}" aria-label="Module colour in hexadecimal" />
+                </label>
+                <label class="exam-chipfield">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 9.5h17"/><path d="M8 3.5V6M16 3.5V6"/></svg>
+                  <input type="datetime-local" id="examDate" class="exam-chipfield__input" />
+                </label>
+                <span class="exam-chipfield exam-chipfield--muted" title="Time of day — coming soon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13.2" r="7.6"/><path d="M12 9.4v3.8l2.6 1.6"/><path d="M9.6 3.4h4.8"/></svg>
+                  <span id="examTimeRange">Time not set yet</span>
+                </span>
+                <span class="exam-chipfield exam-chipfield--muted" title="Room — coming soon">
+                  <!-- Ausnahme: Ort-Pin hat kein Pendant in /js/icons.js — Silhouette bleibt, Format angeglichen. -->
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21c5-4.5 7-7.6 7-11a7 7 0 0 0-14 0c0 3.4 2 6.5 7 11z"/><circle cx="12" cy="10" r="2.4"/></svg>
+                  <span id="examRoom">Room not set yet</span>
+                </span>
+                <button class="icon-btn" id="wrapExamBtn" title="Wrap up &amp; archive this module" aria-label="Wrap up module">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.6 4h8.8v4.6a4.4 4.4 0 0 1-8.8 0z"/><path d="M7.6 5.6H5a3 3 0 0 0 2.9 3M16.4 5.6H19a3 3 0 0 1-2.9 3"/><path d="M12 13v3"/><path d="M9 20.5h6l-.8-4.5h-4.4z"/></svg>
+                </button>
+                <button class="icon-btn icon-btn--danger" id="deleteExamBtn" title="Delete this module" aria-label="Delete module">
+                  <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6.8h16"/><path d="M9.6 6.8V5.4a1.4 1.4 0 0 1 1.4-1.4h2a1.4 1.4 0 0 1 1.4 1.4v1.4"/><path d="M6.6 6.8 7.5 19a2 2 0 0 0 2 1.9h5a2 2 0 0 0 2-1.9l.9-12.2"/><path d="M10.4 10.5v6.3M13.6 10.5v6.3"/></svg>
+                </button>
+                <label class="exam-chipfield exam-chipfield--pensum" title="Planned total study hours for this module — your workload target">
+                  <!-- Ausnahme: Pensum-Tacho hat kein Pendant in /js/icons.js — Silhouette bleibt, Format angeglichen. -->
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 13a8 8 0 0 1 16 0"/><path d="M12 13l3.5-2.5"/></svg>
+                  <input type="number" id="examPensum" class="exam-chipfield__input exam-pensum__input" min="0" step="1" value="0" placeholder="0" aria-label="Workload in hours" />
+                  <span class="exam-pensum__unit">h workload</span>
+                </label>
+              </div>
+            </div>
+            <div class="exam-readiness">
+              <div class="ring exam-ring" id="examRing" style="--frac:0">
+                <div class="ring__hole"><span class="exam-ring__num" id="examDaysNum">–</span><span class="exam-ring__unit">days left</span></div>
+              </div>
+              <div class="exam-readiness__text">
+                <div class="exam-readiness__head">
+                  <span class="exam-readiness__eyebrow">Will it fit?</span>
+                  <span class="exam-readiness__pill" id="examFitPill">–</span>
+                </div>
+                <div class="exam-readiness__bar">
+                  <div class="exam-readiness__fill" id="examFitFill" style="width:0"><span id="examFitNeed"></span></div>
+                  <span class="exam-readiness__cushion" id="examFitCushion"></span>
+                </div>
+                <div class="exam-readiness__note" id="examFitNote"><span id="examHMS"></span></div>
+                <button class="exam-readiness__cta" id="examPlanNext" type="button" hidden></button>
+              </div>
             </div>
           </div>
 
-          <div class="exam-grid">
-            <div class="card exam-card" id="examCard">
-              <div class="exam-card__head">
-                <input type="text" id="examName" class="exam-card__name" placeholder="Name the exam…" value="" />
-                <button class="icon-btn" id="deleteExamBtn" title="Delete this exam">🗑</button>
+          <div class="exam-empty empty--box" id="examEmpty" hidden>
+            <p>No module yet — add one with “Add module”.</p>
+            <button class="btn btn--primary btn--sm" type="button" data-open-studyplan>
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.2 4.2 12.7 8.5 17 10l-4.3 1.5-1.5 4.3-1.5-4.3L5.4 10l4.3-1.5z"/><path d="m17.8 15.4.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg>
+              <span data-i18n="splan.open">Build from a goal or pasted text</span>
+            </button>
+          </div>
+
+          <div class="exam-toolbar" id="examToolbar">
+            <div class="seg" id="examTabs">
+              <button class="seg__btn is-active" id="examTabTopics" data-tab="topics" data-i18n="exam.tab_topics">Topics</button>
+              <button class="seg__btn" id="examTabNotes" data-tab="notes" data-i18n="exam.tab_notes">Notes</button>
+              <button class="seg__btn" id="examTabPath" data-tab="path" data-i18n="exam.tab_path">Path</button>
+            </div>
+            <div class="exam-toolbar__right">
+              <span class="exam-legend" id="examMeta"></span>
+              <button class="exam-endspurt-btn" id="examEndspurtBtn" type="button" hidden>Final-days focus</button>
+            </div>
+          </div>
+
+          <div class="exam-grid" id="examGrid">
+            <!-- Topics-Tab: LINKS Workload + Themenliste · RECHTS gewähltes Thema -->
+            <div class="exam-pane" id="examTopicsPane">
+              <div class="exam-left">
+                <div class="card workload-card">
+                  <div class="card__head"><span class="kicker">Workload · adapts to your pace</span></div>
+                  <div class="workload-card__big"><span id="examWorkloadHours">—</span><span id="examRemainLabel" class="workload-card__sub">–</span></div>
+                  <div class="workload-card__chart" id="topicChart"></div>
+                  <div class="workload-legend">
+                    <span class="workload-legend__item"><i style="background:var(--accent)"></i>done</span>
+                    <span class="workload-legend__item"><i style="background:var(--amber)"></i>hard</span>
+                    <span class="workload-legend__item"><i style="background:#e0ddd3"></i>to do</span>
+                  </div>
+                </div>
+
+                <div class="exam-topics__head">
+                  <span class="exam-topics__title">Topics</span>
+                  <span class="exam-topics__drag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.3 6h.01M14.7 6h.01M9.3 12h.01M14.7 12h.01M9.3 18h.01M14.7 18h.01"/></svg>drag to prioritise</span>
+                </div>
+                <div class="topic-list" id="topicList"></div>
+                <p class="empty" id="topicEmpty">List every topic you need to master in this module.</p>
+                <div class="input-row topic-add-row">
+                  <input type="text" id="topicInput" class="text-input" placeholder="Add a topic…" maxlength="160" />
+                  <button class="add-btn" id="topicAddBtn" title="Add"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5.5v13M5.5 12h13"/></svg></button>
+                </div>
+                <!-- Statt Thema für Thema zu tippen: Ziel sagen oder Stoff einfügen
+                     und die Gliederung übernehmen (web/js/studyplan.js). -->
+                <button class="btn btn--soft btn--sm splan-cta" type="button" data-open-studyplan>
+                  <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.2 4.2 12.7 8.5 17 10l-4.3 1.5-1.5 4.3-1.5-4.3L5.4 10l4.3-1.5z"/><path d="m17.8 15.4.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg>
+                  <span data-i18n="splan.open">Build from a goal or pasted text</span>
+                </button>
+                <span class="pill" id="topicCount" hidden>0</span>
+
+                <!-- Dateien der PRÜFUNG (ohne Themenbezug) — alles zum Fach an einem Ort. -->
+                <div id="examFiles"></div>
               </div>
-              <div class="exam-card__count">
-                <span class="exam-card__days" id="examDaysNum">–</span>
-                <span class="exam-card__daysunit">Days</span>
-                <span class="exam-card__hms" id="examHMS">--:--:--</span>
+
+              <div class="exam-detail" id="examTopicDetail">
+                <div class="empty--box exam-detail__empty" id="examDetailEmpty">Pick a topic to see how you’ll learn it.</div>
+                <div class="exam-detail__body" id="examDetailBody" hidden>
+                  <div class="exam-detail__head">
+                    <div>
+                      <div class="exam-detail__title" id="examDetailTitle">–</div>
+                      <div class="exam-detail__meta">
+                        <span class="detail-chip" id="examDetailDiff">Topic</span>
+                        <span class="exam-detail__est" id="examDetailEst">Estimate —</span>
+                      </div>
+                    </div>
+                    <button class="btn btn--primary exam-detail__plan" id="examAddToPlanBtn" title="coming soon" disabled>
+                      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5.5v13M5.5 12h13"/></svg>Add to plan
+                    </button>
+                  </div>
+
+                  <div class="res-panel">
+                    <div class="res-panel__section">
+                      <div class="res-panel__head"><span class="res-panel__title">Learn this</span><span class="res-panel__count" id="examResCount">no links yet</span></div>
+                      <div class="res-list" id="examResourceList"></div>
+                      <p class="res-empty" id="examResEmpty">No materials linked yet — add the page you learn on below.</p>
+                      <div class="res-add">
+                        <input type="text" id="examResName" placeholder="Name (optional)" maxlength="120" />
+                        <input type="text" id="examResUrl" placeholder="Paste a link…" maxlength="600" />
+                        <button class="res-add__btn" id="examResAddBtn" title="Add link" aria-label="Add link"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5.5v13M5.5 12h13"/></svg></button>
+                      </div>
+                      <!-- Dateien zu genau diesem Thema. -->
+                      <div id="examTopicFiles"></div>
+                    </div>
+                    <div class="res-divider"></div>
+                    <div class="res-panel__section">
+                      <div class="res-panel__head"><span class="res-panel__title">Module relevance</span></div>
+                      <p class="res-empty">No module stats yet — coming soon.</p>
+                    </div>
+                  </div>
+
+                  <div class="method-panel">
+                    <div class="method-panel__title">No material yet? Pick a method</div>
+                    <div class="method-chips" id="examMethodChips">
+                      <button class="method-chip" disabled>Generate NotebookLM video</button>
+                      <button class="method-chip" disabled>Summarise into a report</button>
+                      <button class="method-chip" disabled>Work through by hand</button>
+                    </div>
+                    <div class="method-prompt">
+                      <input type="text" id="examMethodInput" placeholder="Tell Kairos exactly what you’re looking for…" disabled />
+                      <button class="method-prompt__send" aria-label="Send" disabled>
+                        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.6 12h14.8"/><path d="m13.4 6 6 6-6 6"/></svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <input type="datetime-local" id="examDate" class="exam-card__date" />
-              <div class="progress progress--green"><div class="progress__bar" id="examProgressBar"></div></div>
-              <div class="exam-card__foot">
-                <label class="exam-pensum">Workload <input type="number" id="examPensum" min="0" step="1" value="0" /> h</label>
-                <span id="examRemainLabel" class="exam-card__remain">–</span>
-              </div>
-              <div class="exam-card__empty" id="examEmpty" hidden>No exam yet — add one with “+ Exam”.</div>
             </div>
 
-            <div class="card topics-card">
-              <div class="card__head">
-                <h2 class="card__title">Exam scope · All topics</h2>
-                <span class="pill" id="topicCount">0</span>
+            <!-- Notes-Tab (prüfungsbezogen) -->
+            <div class="exam-pane" id="examNotesPane" hidden>
+              <div class="card exam-notes">
+                <div class="input-row">
+                  <input type="text" id="examNoteInput" class="text-input" placeholder="Add a note for this module…" maxlength="240" />
+                  <button class="add-btn" id="examNoteAddBtn" title="Add note"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5.5v13M5.5 12h13"/></svg></button>
+                </div>
+                <div class="notes-grid notes-grid--exam" id="examNotesList"></div>
+                <p class="empty" id="examNotesEmpty">No notes for this module yet.</p>
               </div>
-              <p class="card__hint">Topics to master before the exam (a checklist separate from Todos)</p>
-              <div class="task-input-row">
-                <input type="text" id="topicInput" class="text-input" placeholder="Add a topic…" maxlength="160" />
-                <button class="add-btn" id="topicAddBtn" title="Add">+</button>
-              </div>
-              <div class="topic-list" id="topicList"></div>
-              <p class="empty" id="topicEmpty">List every topic you need to master before the exam.</p>
             </div>
 
-            <div class="card timeline-card">
-              <div class="card__head">
-                <h2 class="card__title">Timeline</h2>
-                <span class="pill pill--muted" id="paceLabel">–</span>
+            <!-- Lernrouten-Tab: die Themen DIESER Prüfung als Weg (js/path.js) -->
+            <div class="exam-pane" id="examPathPane" hidden>
+              <div id="pathRoot"></div>
+            </div>
+          </div>
+
+          <!-- ─── Exam mode · Endspurt (greift automatisch in den letzten Tagen) ─── -->
+          <div class="exam-endspurt" id="examEndspurt" hidden>
+            <div class="endspurt__head">
+              <div class="endspurt__mode"><span class="endspurt__mode-dot"></span><span class="endspurt__mode-lbl">Module mode · final days</span></div>
+              <button class="endspurt__toggle" id="endspurtToggle" type="button" title="Switch back to the full workspace" aria-pressed="true">
+                <span class="endspurt__toggle-lbl">Focused view</span>
+                <span class="endspurt__toggle-track"><span class="endspurt__toggle-knob"></span></span>
+              </button>
+            </div>
+            <div class="endspurt__headline" id="endspurtName">Module</div>
+            <div class="endspurt__daysrow">
+              <div class="endspurt__days"><span class="endspurt__days-num" id="endspurtDays">–</span><span class="endspurt__days-lbl" id="endspurtLeft">days left</span></div>
+              <div class="endspurt__coach">Only review &amp; close gaps now — no new topics. Kairos keeps what moves your grade in front.</div>
+            </div>
+            <div class="endspurt__body">
+              <div class="endspurt__shaky">
+                <div class="endspurt__shaky-head"><span>Still shaky — close these first</span><span class="endspurt__shaky-count" id="endspurtShakyCount">–</span></div>
+                <div class="endspurt__shaky-list" id="endspurtShakyList"></div>
+                <p class="endspurt__shaky-empty" id="endspurtShakyEmpty" hidden>Nothing shaky yet — rate your topics to see what needs a last pass.</p>
+                <div class="endspurt__solid" id="endspurtSolid" hidden><span class="endspurt__solid-chip"><svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.6 4.6 4.6L19 6.8"/></svg></span><span id="endspurtSolidText"></span></div>
               </div>
-              <div class="timeline-foot"><span>Expected finish</span><span id="finishLabel" class="timeline-finish">–</span></div>
-              <div class="timeline" id="timeline"></div>
-              <p class="empty" id="timelineEmpty">Add open tasks and a schedule will appear here.</p>
+              <div class="endspurt__side">
+                <div class="endspurt__review-title">Today · review only</div>
+                <div class="endspurt__review-list" id="endspurtReviewList"></div>
+                <p class="endspurt__review-empty" id="endspurtReviewEmpty" hidden>No review blocks planned yet — give this module’s topics a time on Today.</p>
+                <div class="endspurt__sleep">
+                  <div class="endspurt__sleep-head">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.4 14.6A8.6 8.6 0 0 1 9.4 3.6a8.6 8.6 0 1 0 11 11z"/></svg>
+                    <span>Protect your sleep</span>
+                  </div>
+                  <div class="endspurt__sleep-note">Rest beats cramming — avoid blocks after 22:00 the night before.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- timeline.js benötigt diese IDs; die Pace-Karte gibt es im Design nicht mehr. -->
+          <div class="exam-timeline-hidden" hidden aria-hidden="true">
+            <span id="paceLabel"></span><span id="finishLabel"></span>
+            <div id="timeline"></div><p id="timelineEmpty"></p>
+          </div>
+        </section>
+
+        <!-- ─────── NOTES ─────── -->
+        <section class="view view--notes" id="viewNotes" hidden>
+          <!-- Zwei Zustände: Übersicht (Liste) ODER ein geöffnetes Dokument. -->
+          <div id="notesList">
+          <div class="notes-filters" id="notesFilters"></div>
+
+          <div class="card notes-compose">
+            <textarea id="noteInput" class="notes-compose__input" rows="2" placeholder="Write a note — e.g. “Revisit pushdown automata”…" maxlength="600"></textarea>
+            <div class="notes-compose__foot">
+              <div class="notes-compose__opts">
+                <label class="notes-compose__subject">
+                  <span class="dot" id="noteSubjectDot"></span>
+                  <input type="text" id="noteSubject" placeholder="Subject (optional)" maxlength="60" />
+                </label>
+                <span class="notes-compose__dictate" aria-disabled="true" title="Voice dictation coming soon">
+                  <svg class="ico mic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9.2" y="2.8" width="5.6" height="10.8" rx="2.8"/><path d="M5.4 11.6a6.6 6.6 0 0 0 13.2 0"/><path d="M12 18.2V21"/></svg>
+                  Dictate soon
+                </span>
+              </div>
+              <div class="notes-compose__actions">
+                <button class="btn btn--soft btn--sm" id="noteNewDocBtn" title="Open an empty document">New document</button>
+                <button class="btn btn--primary btn--sm" id="noteAddBtn">Add note</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="notes-grid" id="notesGrid"></div>
+          <p class="empty" id="notesEmpty" hidden>No notes yet — jot the first thought above.</p>
+          </div>
+
+          <!-- ── Dokument-Ansicht: eine Notiz als Seite (Titel · Text · Dateien) ── -->
+          <article class="note-doc" id="noteDoc" hidden>
+            <div class="note-doc__bar">
+              <button class="btn btn--ghost btn--sm" id="noteDocBack">← All notes</button>
+              <div class="note-doc__baractions">
+                <span class="note-doc__saved" id="noteDocSaved" aria-live="polite"></span>
+                <div class="seg note-doc__mode">
+                  <button class="seg__btn is-active" id="noteDocWrite" type="button">Write</button>
+                  <button class="seg__btn" id="noteDocRead" type="button">Read</button>
+                </div>
+                <button class="icon-btn" id="noteDocPin" title="Pin note" aria-pressed="false">
+                  <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3.5h6l-.7 5.2 3 2.9H6.7l3-2.9z"/><path d="M12 11.6V20.5"/></svg>
+                </button>
+                <button class="icon-btn icon-btn--danger" id="noteDocDel" title="Delete note">
+                  <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 6.5h15"/><path d="M9.5 6.5V4.8h5v1.7"/><path d="M6.6 6.5 7.5 20h9l.9-13.5"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <input class="note-doc__title" id="noteDocTitle" placeholder="Untitled" maxlength="140" aria-label="Document title" />
+
+            <div class="note-doc__meta">
+              <label class="note-doc__subject">
+                <span class="dot" id="noteDocDot"></span>
+                <input type="text" id="noteDocSubject" placeholder="Subject" maxlength="60" aria-label="Subject" />
+              </label>
+              <select id="noteDocExam" class="note-doc__exam" aria-label="Module"></select>
+              <span class="note-doc__stamp" id="noteDocStamp"></span>
+            </div>
+
+            <textarea class="note-doc__body" id="noteDocBody"
+              placeholder="Start writing. Markdown works: # heading · - list · - [ ] task · **bold** · `code`"
+              aria-label="Document text"></textarea>
+            <div class="note-doc__read md" id="noteDocRender" hidden></div>
+
+            <div id="noteDocFiles"></div>
+          </article>
+        </section>
+
+        <!-- ─────── HEALTH ─────── -->
+        <section class="view view--health" id="viewHealth" hidden>
+          <div class="health-source" id="healthSource"></div>
+          <div class="health-grid" id="healthGrid"></div>
+        </section>
+
+        <!-- ─────── INSIGHTS ─────── -->
+        <section class="view view--insights" id="viewInsights" hidden>
+          <div class="view__head">
+            <div>
+              <div class="view__eyebrow">Your patterns</div>
+              <h1 class="view__title">Insights</h1>
+            </div>
+            <div class="view__head-actions">
+              <div class="seg insights-range" role="tablist" title="Range filtering — coming soon">
+                <button class="seg__btn" data-range="week" role="tab" disabled>Week</button>
+                <button class="seg__btn is-active" data-range="month" role="tab" disabled>Month</button>
+                <button class="seg__btn" data-range="all" role="tab" disabled>All</button>
+              </div>
+            </div>
+          </div>
+          <div class="insights-grid" id="insightsGrid"></div>
+        </section>
+
+        <!-- ─────── LIBRARY (Bibliothek) ─────── -->
+        <section class="view view--library" id="viewLibrary" hidden>
+          <div id="libraryRoot"></div>
+        </section>
+
+        <!-- ─────── JOURNAL (Rückblick + aktiver Abruf) ─────── -->
+        <section class="view view--journal" id="viewJournal" hidden>
+          <div id="journalRoot"></div>
+        </section>
+
+        <!-- ─────── KNOWLEDGE (Methoden & Neuigkeiten) ─────── -->
+        <section class="view view--knowledge" id="viewKnowledge" hidden>
+          <div id="knowledgeRoot"></div>
+        </section>
+
+        <!-- ─────── PROFILE / SETTINGS ─────── -->
+        <section class="view view--profile" id="viewProfile" hidden>
+          <div class="view__head">
+            <div>
+              <div class="view__eyebrow">You</div>
+              <h1 class="view__title">Profile &amp; settings</h1>
+            </div>
+            <button class="btn btn--ghost btn--sm" id="profileBack">Back to Today</button>
+          </div>
+
+          <div class="profile-scroll">
+            <div class="profile-account">
+              <div class="profile-account__avatar" id="profileAvatar">K</div>
+              <div class="profile-account__id">
+                <input type="text" id="pfName" class="profile-account__name" placeholder="Your name" maxlength="60" />
+                <div class="profile-account__mail" id="profileMail">signed in on this device</div>
+              </div>
+              <button class="btn btn--ghost btn--sm" id="profileSignout" title="No account yet — Kairos runs locally" disabled>Sign out</button>
+            </div>
+
+            <!-- Wave 6: Lernprofil · Darstellung · Features · Geteilte Links (JS-gerendert) -->
+            <div id="profileWave6"></div>
+
+            <div class="profile-cols">
+              <div class="profile-col">
+                <div class="card profile-card">
+                  <div class="profile-card__title">Study preferences</div>
+                  <div class="profile-rows">
+                    <label class="profile-row"><span class="profile-row__label">Daily goal</span><span class="profile-pill-edit"><input type="number" id="pfGoal" min="0.5" max="16" step="0.5" /> h</span></label>
+                    <div class="profile-row"><span class="profile-row__label">Chronotype</span>
+                      <!-- Icons zeichengleich zu sunrise/sun/moon aus /js/icons.js (CHRONOTYPES in shared/methods.js):
+                           statisches Markup kann icon() nicht aufrufen, deshalb hier 1:1 dieselben Pfade. -->
+                      <div class="seg profile-seg" id="pfChrono">
+                        <button class="seg__btn" type="button" data-chrono="early"><svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18h18"/><path d="M6.5 18a5.5 5.5 0 0 1 11 0"/><path d="M12 3.5V6"/><path d="M4.2 8.2 5.8 9.8"/><path d="M19.8 8.2 18.2 9.8"/></svg> Morning</button>
+                        <button class="seg__btn" type="button" data-chrono="intermediate"><svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.1"/><path d="M12 3.2v2.1M12 18.7v2.1M4.8 4.8l1.5 1.5M17.7 17.7l1.5 1.5M3.2 12h2.1M18.7 12h2.1M4.8 19.2l1.5-1.5M17.7 6.3l1.5-1.5"/></svg> Mid</button>
+                        <button class="seg__btn" type="button" data-chrono="late"><svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.4 14.6A8.6 8.6 0 0 1 9.4 3.6a8.6 8.6 0 1 0 11 11z"/></svg> Evening</button>
+                      </div>
+                    </div>
+                    <label class="profile-row"><span class="profile-row__label">Default focus length</span><span class="profile-pill-edit"><input type="number" id="pfFocus" min="5" max="90" step="5" /> min</span></label>
+                    <label class="profile-row"><span class="profile-row__label">Short break</span><span class="profile-pill-edit"><input type="number" id="pfShortBreak" min="1" max="30" step="1" /> min</span></label>
+                    <label class="profile-row"><span class="profile-row__label">Long break</span><span class="profile-pill-edit"><input type="number" id="pfLongBreak" min="5" max="45" step="1" /> min</span></label>
+                    <label class="profile-row"><span class="profile-row__label">Focus blocks until long break</span><span class="profile-pill-edit"><input type="number" id="pfCycles" min="2" max="8" step="1" /></span></label>
+                    <div class="profile-row profile-row--top">
+                      <div><div class="profile-row__label">Auto-start next phase</div><div class="profile-row__sub">roll into breaks &amp; focus without tapping start</div></div>
+                      <button class="switch" id="pfAutoStart" type="button" role="switch" aria-checked="false"></button>
+                    </div>
+                    <div class="profile-row"><span class="profile-row__label">Protect sleep <span class="profile-row__muted" id="pfSleepWindow"></span></span><button class="switch" id="pfSleep" type="button" disabled title="No auto-scheduler yet — sleep isn't enforced"></button></div>
+                  </div>
+                </div>
+                <div class="card profile-card">
+                  <div class="profile-card__title">Body &amp; health basics</div>
+                  <div class="profile-rows">
+                    <label class="profile-row"><span class="profile-row__label">Height</span><span class="profile-pill-edit"><input type="number" id="pfHeight" min="0" max="260" step="1" /> cm</span></label>
+                    <label class="profile-row"><span class="profile-row__label">Weight</span><span class="profile-pill-edit"><input type="number" id="pfWeight" min="0" max="400" step="0.5" /> kg</span></label>
+                    <div class="profile-row"><span class="profile-row__label">Cycle tracking</span><button class="switch" id="pfCycle" type="button" disabled title="Set a female profile + connect a wearable to track your cycle"></button></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="profile-col">
+                <div class="card profile-card">
+                  <div class="profile-card__title" data-i18n="cal.title">Calendars</div>
+                  <div class="cal-accounts" id="calAccounts"></div>
+                  <div class="cal-add">
+                    <div class="seg cal-add__kind" id="calKindSeg">
+                      <button class="seg__btn is-active" type="button" data-kind="caldav">iCloud (CalDAV)</button>
+                      <button class="seg__btn" type="button" data-kind="ics">ICS-URL</button>
+                    </div>
+                    <div class="cal-add__fields" id="calFieldsCaldav">
+                      <input type="text" id="calUser" class="text-input" data-i18n-ph="cal.placeholder_user" placeholder="Apple ID (email)" autocomplete="username" autocapitalize="off" />
+                      <input type="password" id="calPass" class="text-input" data-i18n-ph="cal.placeholder_pass" placeholder="App-specific password" autocomplete="off" />
+                      <p class="profile-hint" data-i18n="cal.hint_apppw">iCloud needs an app-specific password: appleid.apple.com → Sign-In &amp; Security → App-Specific Passwords.</p>
+                    </div>
+                    <div class="cal-add__fields" id="calFieldsIcs" hidden>
+                      <input type="text" id="calUrl" class="text-input" data-i18n-ph="cal.placeholder_url" placeholder="https://… or webcal://… (ICS feed)" autocapitalize="off" />
+                    </div>
+                    <button class="btn btn--primary btn--sm" id="calAddBtn" data-i18n="cal.connect">Connect</button>
+                  </div>
+                </div>
+                <div class="card profile-card">
+                  <div class="profile-card__title" data-i18n="remind.title">Reminders</div>
+                  <div class="profile-rows">
+                    <div class="profile-row profile-row--top">
+                      <div><div class="profile-row__label" data-i18n="remind.tasks">Task reminders (push)</div><div class="profile-row__sub" data-i18n="remind.tasks_sub">a heads-up before and a nudge when a timed task starts</div></div>
+                      <button class="switch" id="pfRemindTasks" type="button" role="switch" aria-checked="true"></button>
+                    </div>
+                    <label class="profile-row"><span class="profile-row__label" data-i18n="remind.lead">Heads-up lead time</span><span class="profile-pill-edit"><input type="number" id="pfRemindLead" min="0" max="120" step="5" /> min</span></label>
+                  </div>
+                </div>
+                <div class="card profile-card">
+                  <div class="profile-card__title">Privacy &amp; data</div>
+                  <div class="profile-rows">
+                    <div class="profile-row profile-row--top">
+                      <div><div class="profile-row__label">AI planning &amp; suggestions</div><div class="profile-row__sub">uses your tasks &amp; readiness</div></div>
+                      <button class="switch" id="pfAi" type="button" role="switch" aria-checked="false"></button>
+                    </div>
+                    <div class="profile-row profile-row--top">
+                      <div><div class="profile-row__label">Share health data with planner</div><div class="profile-row__sub" id="pfConsent">follows AI consent</div></div>
+                      <button class="switch" id="pfShare" type="button" disabled title="Governed by the AI-planning consent above"></button>
+                    </div>
+                    <div class="profile-actions">
+                      <button class="btn btn--ghost btn--sm" id="pfExport">Export JSON</button>
+                      <button class="btn btn--ghost btn--sm" disabled title="CSV / ICS export coming soon">CSV / ICS</button>
+                      <button class="btn btn--ghost btn--sm btn--danger" id="pfDelete" title="No account to delete — remove the local database file to clear data" disabled>Delete data</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
       </main>
+      </div>
     </div>
 
     <script type="module" src="/js/main.js"></script>

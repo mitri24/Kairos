@@ -1,0 +1,222 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   Kairos · Sage — Notes: Filter-Chips, Compose-Karte, Notiz-Grid & -Karten,
+   Exam-Notizen und die angepinnte Notiz auf „Today".
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Filter-Chips (Kopf der Notes-Ansicht) ─────────────── */
+.notes-filters { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: 0 0 20px; flex: none; }
+.notes-filter {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 7px 14px; border: 1px solid var(--line); border-radius: 20px;
+  background: var(--card); color: var(--ink-2); font: 600 12.5px var(--font);
+  cursor: pointer; white-space: nowrap;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.notes-filter:hover { border-color: var(--divider); color: var(--ink); }
+.notes-filter .dot { width: 7px; height: 7px; background: var(--sc, var(--accent)); }
+.notes-filter.is-active { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.notes-filter.is-active .dot { background: rgba(255, 255, 255, .9); }
+
+/* ── Compose-Karte ─────────────────────────────────────── */
+.notes-compose { display: block; padding: 16px; margin-bottom: 20px; flex: none; }
+.notes-compose__input {
+  border: 0; background: transparent; padding: 0; width: 100%; min-height: 46px; resize: none;
+  font: 500 15px/1.5 var(--font); color: var(--ink);
+}
+.notes-compose__input:focus { border: 0; box-shadow: none; }
+.notes-compose__input::placeholder { color: var(--placeholder); }
+
+.notes-compose__foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 26px; }
+.notes-compose__opts { display: flex; align-items: center; gap: 9px; min-width: 0; }
+.notes-compose__subject {
+  display: inline-flex; align-items: center; gap: 7px; padding: 7px 11px;
+  border-radius: var(--r-xs); background: var(--card-inset); font: 600 12.5px var(--font); color: var(--ink-2);
+}
+.notes-compose__subject .dot { width: 7px; height: 7px; }
+.notes-compose__subject input {
+  border: 0; background: transparent; padding: 0; width: 130px; max-width: 34vw;
+  font: 600 12.5px var(--font); color: var(--ink-2);
+}
+.notes-compose__subject input:focus { border: 0; box-shadow: none; }
+/* „Dictate soon" — ehrlich deaktiviert (kein Diktat-Backend) */
+.notes-compose__dictate {
+  display: inline-flex; align-items: center; gap: 6px; padding: 7px 11px;
+  border-radius: var(--r-xs); background: var(--card-inset);
+  font: 600 12.5px var(--font); color: #8a8f82; cursor: default; user-select: none;
+}
+/* Icons erben die Textfarbe des Chips (currentColor) — kein fester Strich-Wert. */
+.notes-compose__dictate svg { flex: none; }
+
+/* ── Notiz-Grid ────────────────────────────────────────── */
+.notes-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; align-content: start; margin-top: 20px; }
+.view--notes .notes-grid { flex: 1; min-height: 0; overflow-y: auto; padding-bottom: 8px; }
+.notes-grid--exam { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 4px; }
+
+/* ── Notiz-Karte ───────────────────────────────────────── */
+.note-card {
+  display: flex; flex-direction: column; padding: 15px;
+  border: 1px solid var(--line); border-radius: var(--r-md); background: var(--card);
+  transition: border-color .15s, box-shadow .15s;
+}
+.note-card:hover { border-color: var(--divider); box-shadow: var(--shadow-card); }
+.note-card--pinned { background: var(--note-pin); border-color: var(--note-pin-bd); }
+
+.note-card__top { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 20px; }
+.note-card__eyebrow { font: 600 11px var(--font); letter-spacing: .08em; text-transform: uppercase; color: var(--muted-3); }
+.note-card__pinned-label {
+  display: inline-flex; align-items: center; gap: 7px;
+  font: 600 11px var(--font); letter-spacing: .08em; text-transform: uppercase; color: var(--amber-label);
+}
+.note-card__pinned-label .pin { stroke: var(--amber); }
+
+/* Die Karte ist der Deckel eines Dokuments: Titel führt, darunter ein
+   Textauszug. Der ganze Block ist EIN Knopf zum Öffnen. */
+.note-card__open {
+  flex: 1; display: flex; flex-direction: column; gap: 5px; align-items: flex-start;
+  margin-top: 10px; padding: 0; border: 0; background: transparent;
+  text-align: left; cursor: pointer; min-width: 0; width: 100%;
+}
+.note-card__title {
+  font: 700 15px/1.35 var(--font); color: var(--ink-strong);
+  word-break: break-word; overflow-wrap: anywhere;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.note-card__open:hover .note-card__title { color: var(--accent-ink); }
+.note-card__text {
+  font: 500 13px/1.45 var(--font); color: var(--muted-2);
+  word-break: break-word; overflow-wrap: anywhere;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.note-card__files {
+  display: inline-flex; align-items: center; gap: 3px;
+  font: 600 10.5px var(--font); color: var(--muted-3);
+}
+
+.note-card__foot { display: flex; align-items: center; justify-content: flex-start; gap: 8px; margin-top: 12px; }
+.note-card__subj {
+  font: 600 10px var(--font); padding: 2px 8px; border-radius: 12px; white-space: nowrap;
+  background: var(--sc-tint, var(--accent-tint)); color: var(--sc-ink, var(--accent-ink));
+}
+.note-card__nosub { font: 500 11px var(--font); color: var(--muted-3); }
+.note-card__plan {
+  display: inline-flex; align-items: center; gap: 5px;
+  border: 0; background: none; padding: 0; font: 600 11.5px var(--font); color: var(--accent);
+  cursor: pointer; white-space: nowrap; transition: color .15s;
+}
+.note-card__plan svg { flex: none; }
+.note-card__plan:hover { color: var(--accent-strong); }
+
+/* Karten-Aktionen: nur bei Hover/Fokus sichtbar (Ruhezustand = 1:1 zum Design) */
+.note-card__actions { display: flex; align-items: center; gap: 2px; flex: none; opacity: 0; transition: opacity .15s; }
+.note-card:hover .note-card__actions, .note-card:focus-within .note-card__actions { opacity: 1; }
+.note-card__icon {
+  display: inline-grid; place-items: center; width: 28px; height: 28px; flex: none;
+  border: 0; border-radius: 8px; background: none; color: var(--muted-2); cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.note-card__icon svg { width: 15px; height: 15px; }
+.note-card__icon:hover { background: var(--card-inset); }
+.note-card__icon[aria-pressed="true"] { color: var(--amber-ink); }
+.note-card__icon--danger:hover { background: rgba(194, 96, 63, .1); color: var(--danger); }
+
+/* ── „New note"-Kachel (gestrichelt, horizontal) ── */
+.note-tile {
+  display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 8px;
+  min-height: 120px; border: 1px dashed #D8DCCF; border-radius: var(--r-md); background: transparent;
+  color: var(--muted-3); font: 600 13.5px var(--font); cursor: pointer;
+  transition: border-color .15s, background .15s, color .15s;
+}
+/* Icon erbt die Textfarbe der Kachel (currentColor) und darf nicht schrumpfen. */
+.note-tile svg { flex: none; }
+.note-tile:hover { border-color: var(--accent); background: var(--accent-tint); color: var(--accent-ink); }
+
+/* Angepinnte Notizen liegen in der gemeinsamen Pinnwand-Schublade
+   (web/js/library.js, .refpanel__*) — auf „Today" gibt es dafür keine
+   eigene Karte mehr, deshalb hier auch keine Regeln. */
+
+.notes-compose__actions { display: flex; align-items: center; gap: 8px; flex: none; }
+
+/* ═══ Dokument-Ansicht (eine Notiz als Seite) ══════════════════════════════
+   Bewusst schmale Textspalte und ruhige Flächen: hier wird gelesen und
+   geschrieben, nicht bedient. Die Bedienung sitzt in der Leiste oben. */
+.note-doc { display: flex; flex-direction: column; max-width: 760px; width: 100%; margin: 0 auto; }
+.note-doc[hidden] { display: none; }
+
+.note-doc__bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.note-doc__baractions { display: flex; align-items: center; gap: 8px; }
+.note-doc__saved {
+  font: 500 11.5px var(--font); color: var(--muted-3); min-width: 52px; text-align: right;
+}
+.note-doc__mode { flex: none; }
+
+.note-doc__title {
+  margin-top: 22px; width: 100%; border: 0; background: transparent; padding: 0;
+  font: 800 30px/1.2 var(--font); letter-spacing: -.6px; color: var(--ink-strong);
+}
+.note-doc__title::placeholder { color: var(--faint); }
+.note-doc__title:focus { outline: none; }
+
+.note-doc__meta { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+.note-doc__subject {
+  display: inline-flex; align-items: center; gap: 7px;
+  border: 1px solid var(--line); border-radius: var(--r-pill); padding: 5px 12px; background: var(--card);
+}
+.note-doc__subject .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; background: var(--faint); }
+.note-doc__subject input {
+  border: 0; background: transparent; padding: 0; width: 12ch;
+  font: 600 12.5px var(--font); color: var(--ink);
+}
+.note-doc__subject input:focus { outline: none; }
+.note-doc__exam {
+  border: 1px solid var(--line); border-radius: var(--r-pill); padding: 5px 10px;
+  background: var(--card); font: 600 12.5px var(--font); color: var(--ink-2); cursor: pointer;
+}
+.note-doc__stamp { font: 500 11.5px var(--font); color: var(--muted-3); margin-left: auto; }
+
+.note-doc__body {
+  margin-top: 18px; min-height: 320px; width: 100%; resize: vertical;
+  border: 1px solid transparent; border-radius: var(--r-md); padding: 14px 2px;
+  background: transparent; color: var(--ink);
+  font: 500 15px/1.65 var(--font); tab-size: 2;
+}
+.note-doc__body:focus { outline: none; }
+.note-doc__body::placeholder { color: var(--faint); }
+
+/* Lesemodus: gerendertes Markdown. */
+.note-doc__read { margin-top: 18px; min-height: 320px; }
+.md { font: 500 15px/1.65 var(--font); color: var(--ink); word-break: break-word; overflow-wrap: anywhere; }
+.md h2 { font: 800 22px/1.3 var(--font); letter-spacing: -.3px; color: var(--ink-strong); margin: 26px 0 8px; }
+.md h3 { font: 800 17px/1.35 var(--font); color: var(--ink-strong); margin: 22px 0 6px; }
+.md h4, .md h5, .md h6 { font: 700 15px/1.4 var(--font); color: var(--ink-strong); margin: 18px 0 6px; }
+.md > :first-child { margin-top: 0; }
+.md p { margin: 0 0 12px; }
+.md ul, .md ol { margin: 0 0 12px; padding-left: 22px; }
+.md li { margin: 3px 0; }
+.md li.md-task { list-style: none; margin-left: -22px; display: flex; align-items: baseline; gap: 8px; }
+.md li.md-task input { accent-color: var(--accent); flex: none; }
+.md li.md-task.is-done { color: var(--muted-2); text-decoration: line-through; }
+.md blockquote {
+  margin: 0 0 12px; padding: 6px 0 6px 14px;
+  border-left: 3px solid var(--accent-border); color: var(--ink-2);
+}
+.md code {
+  font: 500 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+  background: var(--card-inset); border-radius: 5px; padding: 1px 5px;
+}
+.md pre.md-code {
+  margin: 0 0 14px; padding: 12px 14px; border-radius: var(--r-md);
+  background: var(--card-inset); overflow-x: auto;
+}
+.md pre.md-code code { background: transparent; padding: 0; white-space: pre; }
+.md hr { border: 0; border-top: 1px solid var(--line); margin: 22px 0; }
+.md a { color: var(--accent-ink); text-decoration: underline; text-underline-offset: 2px; }
+
+/* ── Responsive ────────────────────────────────────────── */
+@media (max-width: 960px) { .notes-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 700px) {
+  .notes-grid, .notes-grid--exam { grid-template-columns: 1fr; }
+  .notes-compose__foot { flex-direction: column; align-items: stretch; gap: 10px; }
+  .notes-compose__opts { justify-content: space-between; }
+  .note-doc__title { font-size: 24px; }
+  .note-doc__stamp { margin-left: 0; }
+}

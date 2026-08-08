@@ -1,0 +1,1390 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Kairos — User-Flow- & Produkt-Report</title>
+<style>
+  /* ══════════ Sage-Design-System (an der App orientiert: web/css/tokens.css) ══════════ */
+  :root{
+    --bg:#F3F1EA; --surface:#FBFAF5; --surface-2:#FFFFFF;
+    --ink:#26302A; --ink-soft:#3B463F; --muted:#6B7169; --muted-2:#8A9088;
+    --accent:#3E7D5E; --accent-ink:#2F6349; --accent-tint:#EBF1EC;
+    --amber:#C89A4C; --amber-ink:#8A6D3B; --amber-tint:#F6EFDF;
+    --blue:#7C9AC2; --blue-ink:#4A678C; --blue-tint:#E8EEF5;
+    --rust:#C2603F; --rust-ink:#A24E32; --rust-tint:#F5E3DB;
+    --pink:#C98AA6; --purple:#8A7CC2;
+    --line:#E2DFD4; --line-2:#D6D2C4;
+    --radius:14px; --radius-sm:9px;
+    --shadow:0 1px 2px rgba(38,48,42,.05), 0 6px 22px rgba(38,48,42,.06);
+    --shadow-lg:0 2px 6px rgba(38,48,42,.06), 0 18px 46px rgba(38,48,42,.10);
+    --mono:"SF Mono",ui-monospace,"JetBrains Mono",Menlo,Consolas,monospace;
+    --sans:"Hanken Grotesk",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#161A17; --surface:#1E2420; --surface-2:#232A25;
+      --ink:#E8EBE5; --ink-soft:#CDD3CB; --muted:#9AA298; --muted-2:#7C837A;
+      --accent:#6FB68E; --accent-ink:#8FCEA9; --accent-tint:#22302A;
+      --amber:#D9B978; --amber-ink:#E4C98D; --amber-tint:#332B1B;
+      --blue:#9DB6D6; --blue-ink:#B3C7DE; --blue-tint:#212A33;
+      --rust:#DE8A6C; --rust-ink:#E7A184; --rust-tint:#33221B;
+      --line:#2E352F; --line-2:#3A423A;
+      --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 22px rgba(0,0,0,.28);
+      --shadow-lg:0 2px 6px rgba(0,0,0,.34),0 18px 46px rgba(0,0,0,.4);
+    }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:var(--sans); font-size:16px; line-height:1.62;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  }
+  .wrap{display:grid; grid-template-columns:264px minmax(0,1fr); gap:0; max-width:1320px; margin:0 auto;}
+
+  /* ── Sticky TOC ── */
+  .toc{position:sticky; top:0; align-self:start; height:100vh; overflow-y:auto; padding:26px 18px 40px; border-right:1px solid var(--line);}
+  .toc__brand{display:flex; align-items:center; gap:9px; font-weight:800; font-size:19px; letter-spacing:-.02em; margin-bottom:4px;}
+  .toc__brand .dot{width:22px;height:22px;border-radius:50%;background:var(--accent);display:inline-grid;place-items:center;color:#fff;font-size:12px;}
+  .toc__sub{color:var(--muted); font-size:12px; margin:0 0 18px; line-height:1.4;}
+  .toc a{display:block; color:var(--ink-soft); text-decoration:none; font-size:13.5px; padding:5px 10px; border-radius:8px; margin:1px 0;}
+  .toc a:hover{background:var(--accent-tint); color:var(--accent-ink);}
+  .toc a .n{color:var(--muted-2); font-variant-numeric:tabular-nums; margin-right:8px; font-size:12px;}
+  .toc__group{font-size:10.5px; text-transform:uppercase; letter-spacing:.14em; color:var(--muted-2); margin:16px 10px 6px;}
+
+  /* ── Main ── */
+  main{padding:40px clamp(20px,4vw,60px) 90px; min-width:0;}
+  header.rep{margin-bottom:14px;}
+  .eyebrow{font-size:12px; text-transform:uppercase; letter-spacing:.16em; color:var(--accent-ink); font-weight:700;}
+  h1{font-size:clamp(28px,4vw,40px); line-height:1.1; letter-spacing:-.025em; margin:.15em 0 .1em; font-weight:820;}
+  .lead{font-size:17px; color:var(--ink-soft); max-width:70ch;}
+  .meta-row{display:flex; flex-wrap:wrap; gap:8px; margin-top:16px;}
+  .meta-row .pill{background:var(--surface); border:1px solid var(--line); border-radius:999px; padding:4px 12px; font-size:12.5px; color:var(--muted);}
+  .meta-row .pill b{color:var(--ink);}
+
+  section.s{margin:52px 0 0; scroll-margin-top:20px;}
+  section.s > h2{font-size:25px; letter-spacing:-.02em; margin:0 0 4px; font-weight:780; display:flex; align-items:baseline; gap:12px;}
+  section.s > h2 .num{font-size:14px; font-weight:700; color:#fff; background:var(--accent); border-radius:8px; padding:3px 9px; letter-spacing:0;}
+  section.s > .intro{color:var(--muted); max-width:74ch; margin:2px 0 20px;}
+  h3{font-size:18px; margin:30px 0 10px; letter-spacing:-.01em; font-weight:720;}
+  h4{font-size:15px; margin:18px 0 6px; font-weight:700; color:var(--ink-soft);}
+  p{margin:9px 0;} ul,ol{margin:9px 0; padding-left:22px;} li{margin:4px 0;}
+  a.inline{color:var(--accent-ink); text-decoration:underline; text-underline-offset:2px;}
+
+  /* ── Cards & grid ── */
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:18px 20px; box-shadow:var(--shadow); margin:14px 0;}
+  .card--flat{box-shadow:none;}
+  .grid{display:grid; gap:14px;}
+  .g2{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .g3{grid-template-columns:repeat(3,minmax(0,1fr));}
+  .g4{grid-template-columns:repeat(4,minmax(0,1fr));}
+  @media(max-width:880px){.g2,.g3,.g4{grid-template-columns:1fr;}}
+
+  /* ── Evidence chip ── */
+  code.ev{font-family:var(--mono); font-size:11.5px; background:var(--accent-tint); color:var(--accent-ink); border:1px solid #cfe0d4; padding:1px 6px; border-radius:6px; white-space:nowrap;}
+  @media (prefers-color-scheme: dark){ code.ev{border-color:#2c3d31;} }
+  code.k{font-family:var(--mono); font-size:12.5px; background:var(--surface-2); border:1px solid var(--line); padding:1px 5px; border-radius:5px; color:var(--rust-ink);}
+
+  /* ── Badges ── */
+  .b{display:inline-flex; align-items:center; gap:5px; font-size:11.5px; font-weight:700; padding:2px 9px; border-radius:999px; border:1px solid transparent; white-space:nowrap; line-height:1.5;}
+  .b-ok{background:var(--accent-tint); color:var(--accent-ink); border-color:#cfe0d4;}
+  .b-part{background:var(--amber-tint); color:var(--amber-ink); border-color:#ead9b3;}
+  .b-gap{background:var(--rust-tint); color:var(--rust-ink); border-color:#e9cbbd;}
+  .b-info{background:var(--blue-tint); color:var(--blue-ink); border-color:#cddcec;}
+  .b-muted{background:var(--surface-2); color:var(--muted); border-color:var(--line);}
+  .b-nv{background:repeating-linear-gradient(45deg,var(--surface-2),var(--surface-2) 6px,var(--bg) 6px,var(--bg) 12px); color:var(--muted); border-color:var(--line-2); border-style:dashed;}
+
+  /* ── Callouts ── */
+  .callout{border-radius:var(--radius); padding:16px 18px 16px 20px; margin:16px 0; border:1px solid var(--line); position:relative; background:var(--surface);}
+  .callout::before{content:""; position:absolute; left:0; top:0; bottom:0; width:5px; border-radius:5px 0 0 5px;}
+  .callout h4{margin:0 0 6px;}
+  .callout p:last-child{margin-bottom:0;}
+  .co-scope{background:linear-gradient(180deg,var(--amber-tint),var(--surface)); }
+  .co-scope::before{background:var(--amber);}
+  .co-risk{background:var(--rust-tint);} .co-risk::before{background:var(--rust);}
+  .co-info::before{background:var(--blue);}
+  .co-ok::before{background:var(--accent);}
+
+  /* ── Tables ── */
+  .tbl-wrap{overflow-x:auto; margin:14px 0; border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow);}
+  table{border-collapse:collapse; width:100%; font-size:13.5px; background:var(--surface); min-width:640px;}
+  th,td{text-align:left; padding:10px 13px; border-bottom:1px solid var(--line); vertical-align:top;}
+  thead th{background:var(--accent-tint); color:var(--accent-ink); font-size:11.5px; text-transform:uppercase; letter-spacing:.06em; position:sticky; top:0;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:var(--bg);}
+  td.tight{white-space:nowrap;}
+  table.compact th, table.compact td{padding:7px 10px; font-size:12.5px;}
+
+  /* ── Scorecard tiles ── */
+  .tiles{display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:12px; margin:16px 0;}
+  .tile{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-sm); padding:13px 14px; box-shadow:var(--shadow);}
+  .tile .t-name{font-size:13px; font-weight:700; margin-bottom:8px; color:var(--ink);}
+  .tile .t-bar{height:7px; border-radius:4px; background:var(--line); overflow:hidden; margin-bottom:7px;}
+  .tile .t-bar > i{display:block; height:100%; border-radius:4px;}
+  .tile .t-note{font-size:11.5px; color:var(--muted); line-height:1.35;}
+  .fill-ok{background:var(--accent);} .fill-part{background:var(--amber);} .fill-gap{background:var(--rust);}
+
+  /* ── Persona ── */
+  .persona{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; display:flex; flex-direction:column;}
+  .persona__head{padding:16px 18px; border-bottom:1px solid var(--line); display:flex; gap:13px; align-items:center;}
+  .persona__ava{width:44px; height:44px; border-radius:50%; display:grid; place-items:center; font-weight:800; font-size:18px; color:#fff; flex:none;}
+  .persona__body{padding:14px 18px 18px; font-size:13.5px;}
+  .persona__body dt{font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted-2); font-weight:700; margin-top:11px;}
+  .persona__body dd{margin:2px 0 0; color:var(--ink-soft);}
+  .persona__tag{font-size:11.5px; color:var(--muted);}
+
+  /* ── Journey phase ── */
+  .phase{border-left:3px solid var(--accent); padding:2px 0 2px 18px; margin:14px 0; position:relative;}
+  .phase::before{content:""; position:absolute; left:-8px; top:4px; width:13px; height:13px; border-radius:50%; background:var(--accent); border:3px solid var(--bg);}
+  .phase h4{margin:0 0 2px; font-size:16px; color:var(--ink);}
+  .phase .grid{margin-top:8px;}
+  .mini{font-size:12.5px;}
+  .mini .lbl{font-size:10px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted-2); font-weight:700; display:block; margin-bottom:1px;}
+
+  /* ── Quotes (mental model) ── */
+  .quotes{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px;}
+  .quote{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:14px 16px; box-shadow:var(--shadow);}
+  .quote .q{font-size:15px; font-weight:640; color:var(--ink); margin-bottom:7px; letter-spacing:-.01em;}
+  .quote .q::before{content:"„"; color:var(--accent); font-weight:800;}
+  .quote .q::after{content:"“"; color:var(--accent); font-weight:800;}
+  .quote .a{font-size:12.5px; color:var(--muted);}
+
+  /* ── Flowchart (A) ── */
+  .flow{display:flex; flex-direction:column; align-items:center; gap:0; margin:18px 0;}
+  .flow .node{background:var(--surface); border:1.5px solid var(--accent); color:var(--accent-ink); border-radius:11px; padding:9px 16px; font-weight:650; font-size:13.5px; text-align:center; box-shadow:var(--shadow); max-width:420px;}
+  .flow .node small{display:block; color:var(--muted); font-weight:500; font-size:11px;}
+  .flow .node.alt{border-color:var(--amber); color:var(--amber-ink);}
+  .flow .node.warn{border-color:var(--rust); color:var(--rust-ink); background:var(--rust-tint);}
+  .flow .arr{width:2px; height:20px; background:var(--line-2); position:relative;}
+  .flow .arr::after{content:""; position:absolute; bottom:0; left:50%; transform:translateX(-50%); border:5px solid transparent; border-top-color:var(--line-2);}
+
+  /* ── Decision tree (B) ── */
+  .tree{font-family:var(--mono); font-size:13px; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:16px 18px; overflow-x:auto; box-shadow:var(--shadow); line-height:1.75;}
+  .tree .q{color:var(--accent-ink); font-weight:700;}
+  .tree .yes{color:var(--accent-ink);} .tree .no{color:var(--rust-ink);}
+  .tree .mut{color:var(--muted);}
+
+  /* ── Swimlane (C) ── */
+  .swim{display:grid; grid-template-columns:96px 1fr; gap:10px; margin:16px 0;}
+  .swim__lane{display:contents;}
+  .swim__label{display:grid; place-items:center; text-align:center; font-weight:800; font-size:12px; border-radius:10px; padding:8px; writing-mode:horizontal-tb;}
+  .swim__label.user{background:var(--blue-tint); color:var(--blue-ink);}
+  .swim__label.sys{background:var(--accent-tint); color:var(--accent-ink);}
+  .swim__steps{display:flex; gap:8px; flex-wrap:wrap; align-items:center;}
+  .swim__steps .st{background:var(--surface); border:1px solid var(--line-2); border-radius:9px; padding:7px 11px; font-size:12.5px; box-shadow:var(--shadow); position:relative;}
+  .swim__steps .st.u{border-color:#c9d6e6;} .swim__steps .st.s{border-color:#cfe0d4;}
+  .swim__steps .sep{color:var(--muted-2); font-weight:800;}
+
+  /* ── Use-case (D) ── */
+  .usecase{display:grid; grid-template-columns:130px 1fr; gap:12px; align-items:center; margin:16px 0;}
+  .actor{display:flex; flex-direction:column; align-items:center; gap:6px; padding:12px; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow);}
+  .actor .fig{width:34px;height:34px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:16px;}
+  .actor .nm{font-weight:700; font-size:12.5px; text-align:center;}
+  .actor.sys .fig{background:var(--blue);} .actor.ext .fig{background:var(--amber);}
+  .cases{display:flex; flex-wrap:wrap; gap:8px;}
+  .uc{border:1px solid var(--line-2); border-radius:999px; padding:6px 14px; font-size:12.5px; background:var(--surface); box-shadow:var(--shadow);}
+  .uc.gap{border-style:dashed; color:var(--muted); background:repeating-linear-gradient(45deg,var(--surface),var(--surface) 6px,var(--bg) 6px,var(--bg) 12px);}
+
+  /* ── State machine (E) ── */
+  .fsm{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:14px 0; padding:16px; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow);}
+  .state{border:1.5px solid var(--accent); color:var(--accent-ink); border-radius:999px; padding:6px 15px; font-weight:700; font-size:12.5px; font-family:var(--mono); background:var(--surface-2);}
+  .state.init{background:var(--accent); color:#fff;}
+  .state.term{border-color:var(--muted-2); color:var(--muted);}
+  .state.err{border-color:var(--rust); color:var(--rust-ink); border-style:dashed;}
+  .fsm .to{color:var(--muted-2); font-weight:800; font-size:15px;}
+  .fsm .to small{display:block; font-size:9.5px; font-weight:600; text-align:center; color:var(--muted-2);}
+
+  /* ── IA tree (F) ── */
+  .ia{font-family:var(--mono); font-size:13px; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:16px 18px; overflow-x:auto; box-shadow:var(--shadow); line-height:1.7;}
+  .ia .root{color:var(--accent-ink); font-weight:800;}
+  .ia .l1{color:var(--ink);} .ia .l2{color:var(--muted);}
+  .ia .tag{font-family:var(--sans); font-size:10.5px; margin-left:6px;}
+
+  /* ── Quadrant matrix (G) ── */
+  .quad-wrap{margin:20px 0;}
+  .quad{display:grid; grid-template-columns:repeat(2,1fr); grid-template-rows:repeat(2,minmax(150px,auto)); gap:3px; background:var(--line); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow); position:relative;}
+  .quad .cell{background:var(--surface); padding:30px 14px 14px; position:relative;}
+  .quad .cell h5{margin:0 0 8px; font-size:12px; text-transform:uppercase; letter-spacing:.06em;}
+  .quad .cell.q1{background:linear-gradient(160deg,var(--accent-tint),var(--surface));} /* hi value / lo complexity */
+  .quad .cell.q2{background:linear-gradient(160deg,var(--amber-tint),var(--surface));}
+  .quad .cell.q3{background:var(--surface);}
+  .quad .cell.q4{background:linear-gradient(160deg,var(--rust-tint),var(--surface));}
+  .fchip{display:inline-block; background:var(--surface-2); border:1px solid var(--line-2); border-radius:7px; padding:3px 8px; font-size:11.5px; margin:3px 3px 0 0;}
+  .fchip.miss{border-style:dashed; color:var(--muted);}
+  .axis-x{text-align:center; font-size:11px; font-weight:700; color:var(--muted); letter-spacing:.08em; text-transform:uppercase; margin-top:8px;}
+  .axis-y{writing-mode:vertical-rl; transform:rotate(180deg); font-size:11px; font-weight:700; color:var(--muted); letter-spacing:.08em; text-transform:uppercase;}
+  .quad-grid{display:grid; grid-template-columns:26px 1fr; gap:8px; align-items:center;}
+
+  /* ── Nav flow (I) ── */
+  .navflow{display:flex; flex-wrap:wrap; gap:10px; align-items:stretch; margin:14px 0;}
+  .navflow .col{flex:1 1 150px; min-width:140px;}
+  .nfnode{background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:9px 12px; font-size:12.5px; box-shadow:var(--shadow); margin-bottom:8px;}
+  .nfnode .hd{font-weight:700; font-size:13px; display:flex; align-items:center; gap:6px;}
+  .nfnode .st{font-size:11px; color:var(--muted); margin-top:3px;}
+  .nfnode.stuck{border-color:var(--rust); background:var(--rust-tint);}
+  .nfnode.entry{border-color:var(--accent); background:var(--accent-tint);}
+
+  /* ── misc ── */
+  .kv{display:grid; grid-template-columns:auto 1fr; gap:2px 12px; font-size:13px;}
+  .kv dt{color:var(--muted-2); font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:.06em; padding-top:3px;}
+  .kv dd{margin:0;}
+  .sev{display:inline-block; width:9px;height:9px;border-radius:50%; margin-right:2px; vertical-align:baseline;}
+  .sev.h{background:var(--rust);} .sev.m{background:var(--amber);} .sev.l{background:var(--accent);}
+  .rank{font-variant-numeric:tabular-nums; font-weight:800; color:var(--accent); margin-right:6px;}
+  .foot{margin-top:70px; padding-top:22px; border-top:1px solid var(--line); color:var(--muted); font-size:12.5px;}
+  hr.soft{border:none; border-top:1px solid var(--line); margin:26px 0;}
+  .legend{display:flex; flex-wrap:wrap; gap:14px; font-size:12px; color:var(--muted); margin:6px 0 2px;}
+  .legend span{display:inline-flex; align-items:center; gap:5px;}
+  /* Relevanz-Punkte & Studenten-Lebenszyklus (§14) */
+  .rel{display:inline-block; width:12px; height:12px; border-radius:50%; vertical-align:middle;}
+  .rel.h{background:var(--accent);} .rel.m{background:var(--amber);} .rel.l{background:var(--line-2);}
+  .usid{font-family:var(--mono); font-size:11px; color:var(--muted); white-space:nowrap; font-weight:700;}
+  .st-ok{color:var(--accent-ink); font-weight:700;} .st-part{color:var(--amber-ink); font-weight:700;} .st-gap{color:var(--rust-ink); font-weight:700;}
+  .phase-band{display:flex; align-items:center; gap:11px; margin:28px 0 8px; padding:11px 15px; border-radius:11px; background:var(--accent-tint); border:1px solid #cfe0d4;}
+  .phase-band .pnum{width:27px;height:27px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-weight:800;font-size:13px;flex:none;}
+  .phase-band h3{margin:0; font-size:17px; color:var(--accent-ink);}
+  .phase-band .psub{color:var(--muted); font-size:12.5px; margin-left:auto; font-style:italic;}
+  @media (prefers-color-scheme: dark){ .phase-band{border-color:#2c3d31;} }
+  @media(max-width:880px){.phase-band .psub{display:none;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ══════════ TOC ══════════ -->
+  <aside class="toc">
+    <div class="toc__brand"><span class="dot">◔</span> Kairos</div>
+    <p class="toc__sub">User-Flow- & Produkt-Report · evidenzbasiert aus dem Code</p>
+    <div class="toc__group">Analyse</div>
+    <a href="#scope"><span class="n">0</span>Scope-Hinweis</a>
+    <a href="#s1"><span class="n">1</span>Executive Summary</a>
+    <a href="#s2"><span class="n">2</span>Zielpersonen</a>
+    <a href="#s3"><span class="n">3</span>User Journey Map</a>
+    <a href="#s4"><span class="n">4</span>User Workflows</a>
+    <a href="#s5"><span class="n">5</span>Informationsbedarf</a>
+    <a href="#s6"><span class="n">6</span>Mentales Modell</a>
+    <a href="#s7"><span class="n">7</span>Navigation Review</a>
+    <div class="toc__group">Lücken & Risiken</div>
+    <a href="#s8"><span class="n">8</span>Fehlende Features</a>
+    <a href="#s9"><span class="n">9</span>Overengineering</a>
+    <a href="#s10"><span class="n">10</span>UX-Risikoanalyse</a>
+    <div class="toc__group">Darstellung</div>
+    <a href="#s11"><span class="n">11</span>Diagramme A–I</a>
+    <div class="toc__group">Ableitung</div>
+    <a href="#s12"><span class="n">12</span>Empfehlungen</a>
+    <a href="#s13"><span class="n">13</span>Senior Verdict</a>
+    <div class="toc__group">Studenten-Sicht</div>
+    <a href="#s14"><span class="n">14</span>User Stories · Lebenszyklus</a>
+  </aside>
+
+  <!-- ══════════ MAIN ══════════ -->
+  <main>
+    <header class="rep">
+      <div class="eyebrow">Senior Product / UX / Fullstack Review</div>
+      <h1>Kairos — User-Flow- &amp; Produkt-Report</h1>
+      <p class="lead">Eine nutzerzentrierte Analyse der real ausgelieferten App: Fokus-Timer, Aufgaben-/Prüfungsplanung, Tages-Timeline, Notizen, Health-Readiness und Insights — als PWA, Chrome-Extension und Node/SQLite-Backend. Jede Einschätzung ist mit <code class="ev">Datei:Zeile</code> belegt.</p>
+      <div class="meta-row">
+        <span class="pill">Branch <b>feat/multi-tenant-auth</b></span>
+        <span class="pill">Stack <b>Vanilla-JS-PWA + zero-dep Node</b></span>
+        <span class="pill">Analysierte Module <b>≈ 40 Dateien</b></span>
+        <span class="pill">Methodik <b>Code, Routen, State, Schema, Tests, Docs</b></span>
+        <span class="pill">Scope <b>Planungs-App · Ausführung extern</b></span>
+        <span class="pill">Stand <b>2026-07-10</b></span>
+      </div>
+    </header>
+
+    <!-- ── SCOPE ── -->
+    <div class="callout co-scope" id="scope" style="scroll-margin-top:20px">
+      <h4>⚠︎ Scope-Hinweis: Vorlage ≠ Domäne (transparent gemacht)</h4>
+      <p>Die Aufgabenvorlage ist für eine <b>Flugplanungs-App</b> formuliert („Flug planen“, „Startentscheidung“, „Wetter/Luftraum/No-Fly-Zones“, „Payload“, „Pilot/Admin“). Das tatsächliche Projekt ist jedoch <b>Kairos</b> — ein <b>Konzentration-Fokus-/Lernplaner</b> (<code class="ev">README.md:1</code>, <code class="ev">web/manifest.webmanifest:2</code>, <code class="ev">docs/SPEC.md:1</code>). Um dennoch jeden geforderten Abschnitt zu liefern, <b>ohne zu halluzinieren</b>, wurde die Vorlage 1:1 auf die reale Domäne übertragen:</p>
+      <div class="tbl-wrap" style="margin-top:10px">
+        <table class="compact">
+          <thead><tr><th>Vorlage (Aviation)</th><th>Kairos-Äquivalent (real, im Code belegt)</th></tr></thead>
+          <tbody>
+            <tr><td>Flug planen / Route</td><td>Lern-/Fokus-Session &amp; Tagesplan (Aufgaben mit Uhrzeit) <code class="ev">web/js/dayTimeline.js</code></td></tr>
+            <tr><td>Startentscheidung / Flug starten</td><td>Fokus-Block starten (aktive Aufgabe + Timer) <code class="ev">web/js/tasks.js:54</code></td></tr>
+            <tr><td>Wetter / Luftraum / Einschränkungen</td><td>Readiness &amp; Health-Kapazität + Tages-Constraints (06–24 h) <code class="ev">web/js/health.js</code></td></tr>
+            <tr><td>Payload / Treibstoff</td><td>Pensum/Workload (Prüfung), Restzeit-Kapazität <code class="ev">web/js/exam.js:84</code></td></tr>
+            <tr><td>Kartenansicht</td><td>Es gibt <b>keine Landkarte</b> — Äquivalent ist die zeitliche Karte: Tages-Timeline + Wochenkalender</td></tr>
+            <tr><td>Pilot / Admin / Team</td><td>Nur eine Rolle: der/die Lernende. <b>Kein Admin, kein Team</b> im Code vorhanden.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="margin-bottom:0">Wo der Code keine Eindeutigkeit hergibt, ist dies mit <span class="b b-nv">Needs manual verification</span> markiert.</p>
+    </div>
+
+    <!-- ── PRODUKT-SCOPE-KORREKTUR (vom Autor) ── -->
+    <div class="callout co-info" style="margin-top:14px">
+      <h4>✎ Korrektur des Produkt-Selbstverständnisses (vom Autor bestätigt)</h4>
+      <p><b>Kairos ist bewusst NUR eine Planungs- &amp; Fokus-App.</b> Die eigentliche <b>Ausführung und das aktive Lernen</b> (Karteikarten, Abrufen, Lesen, Videos) finden auf <b>externen, verlinkten Webseiten</b> statt — nicht in Kairos. Dieser Report ist entsprechend nachgeschärft: Das Fehlen von FSRS/Spaced-Repetition, Retrieval-Prompts oder „aktivem Lernen“ ist damit <b>kein Defizit</b>, sondern bewusst ausgelagert.</p>
+      <p style="margin-bottom:0"><b>Wichtige Konsequenz (im Code geprüft):</b> Wenn die Ausführung extern liegt, ist der <b>Hand-off zu diesen Seiten das eigentliche Kernversprechen</b> der App — und genau der ist heute <u>nicht</u> als Feature gebaut. Es gibt <b>kein Link-/URL-Feld</b> an Aufgaben, Themen oder Notizen (<code class="ev">server/schema.sql</code>, <code class="ev">server/routes.js:66</code>), und Text wird escaped gerendert, d. h. <b>ein in eine Notiz/Aufgabe eingefügter Link ist nicht klickbar</b> (<code class="ev">web/js/notes.js:158</code>, <code class="ev">web/js/tasks.js:297</code>). Das Extension-Overlay begleitet zwar jede Seite, ist aber <b>nicht an die aktive Aufgabe/Seite gekoppelt</b> (<code class="ev">src/content/overlay.js</code>). <b>→ Diese Brücke zu bauen ist die wichtigste Produktlücke.</b></p>
+    </div>
+
+    <!-- ══════════ 1. EXECUTIVE SUMMARY ══════════ -->
+    <section class="s" id="s1">
+      <h2><span class="num">1</span> Executive Summary</h2>
+      <p class="intro">Was die App heute aus Nutzersicht wirklich ist, für wen sie gedacht ist, wie klar der Fluss ist — und wo die größten Risiken und Lücken liegen.</p>
+
+      <h3>Was die App aktuell aus Nutzersicht macht</h3>
+      <p>Kairos ist ein <b>Fokus-Timer mit angebauter Lern-/Aufgabenplanung</b>. Der/die Nutzer:in legt Aufgaben an, gibt ihnen optional eine Uhrzeit auf einem Tages-Zeitstrahl (06:00–24:00), startet einen Pomodoro-Fokusblock und sieht Fortschritt gegen ein Tagesziel. Dazu kommen ein Wochenkalender, ein Prüfungs-Countdown mit Themen-Checkliste, ein Notizblock und zwei „weiche“ Ansichten: <b>Health</b> (Schlaf/Erholung/Readiness → empfohlene Tageslast) und <b>Insights</b> (Fokus-Statistik). Der Timer läuft <b>server-autoritativ</b> weiter, auch bei geschlossenem Tab (<code class="ev">docs/README-Lernuhr.md:63</code>, <code class="ev">server/timer.js</code>), und die PWA ist offline-fähig (<code class="ev">web/sw.js:8</code>). <b>Wichtig für die Einordnung:</b> Kairos ist die <b>Planungs-/Fokus-Ebene</b> — das eigentliche Lernen passiert bewusst auf <b>externen, verlinkten Seiten</b>, die die App orchestrieren, aber nicht ersetzen soll.</p>
+
+      <h3>Für wen sie gedacht ist</h3>
+      <p>Explizit für <b>Studierende in Prüfungsphasen, Konzentration als First-Class-Use-Case</b> (<code class="ev">docs/SPEC.md:88-90</code>, <code class="ev">README.md:3</code>). Die Design-Sprache (immer sichtbare Zeit, „ein nächster Schritt“, scham-freie Nachplanung überfälliger Blöcke) folgt einem Konzentration-„Nordstern“ (<code class="ev">docs/SPEC.md:83</code>).</p>
+
+      <h3>Wie klar der Nutzerfluss ist</h3>
+      <p>Der <b>Kern-Loop ist klar und schnell</b>: „Aufgabe eintippen → (Zeit geben) → Start focus“. Er ist an drei Stellen ein Klick entfernt (Header-<code class="k">New</code>, <code class="k">Up next → Start focus</code>, <code class="k">Start now</code>). Alles darüber hinaus ist jedoch <b>ohne Führung</b>: kein Onboarding, kein Login, kein Erklärtext beim leeren Erststart, und mehrere Ansichten (Health, Insights) sind ohne Daten leer.</p>
+
+      <h3>Reifegrad je Produktbereich</h3>
+      <div class="tiles">
+        <div class="tile"><div class="t-name">Fokus-Timer</div><div class="t-bar"><i class="fill-ok" style="width:92%"></i></div><div class="t-note">Reif, getestet, server-autoritativ, offline. <code class="ev">shared/pomodoro.js</code></div></div>
+        <div class="tile"><div class="t-name">Aufgaben + Tages-/Wochenplan</div><div class="t-bar"><i class="fill-ok" style="width:88%"></i></div><div class="t-note">Drag&amp;Drop, Prioritäten, Subtasks, Now-Linie. <code class="ev">web/js/tasks.js</code></div></div>
+        <div class="tile"><div class="t-name">Prüfung + Themen</div><div class="t-bar"><i class="fill-ok" style="width:80%"></i></div><div class="t-note">Countdown, Pensum, Themen-Fortschritt. <code class="ev">web/js/exam.js</code></div></div>
+        <div class="tile"><div class="t-name">Notizen</div><div class="t-bar"><i class="fill-ok" style="width:78%"></i></div><div class="t-note">Filter, Pin, „→ plan it“. <code class="ev">web/js/notes.js</code></div></div>
+        <div class="tile"><div class="t-name">Insights</div><div class="t-bar"><i class="fill-part" style="width:66%"></i></div><div class="t-note">Solide, aber read-only &amp; leer ohne Historie.</div></div>
+        <div class="tile"><div class="t-name">Health / Readiness</div><div class="t-bar"><i class="fill-part" style="width:48%"></i></div><div class="t-note">Backend stark; Frontend meist leer/manuell, keine Live-Wearable-Kopplung.</div></div>
+        <div class="tile"><div class="t-name">Auth / Multi-Tenant</div><div class="t-bar"><i class="fill-gap" style="width:20%"></i></div><div class="t-note">Nur Schema-Migration. Laufende API <b>unauthentifiziert</b>. <code class="ev">server/routes.js</code></div></div>
+        <div class="tile"><div class="t-name">Onboarding</div><div class="t-bar"><i class="fill-gap" style="width:6%"></i></div><div class="t-note">Nicht vorhanden.</div></div>
+        <div class="tile"><div class="t-name">Hand-off zu externen Lern-Seiten</div><div class="t-bar"><i class="fill-gap" style="width:14%"></i></div><div class="t-note">Kern-Mechanik der Planungs-App — heute nur passiv (Overlay), kein Link-Feld. <code class="ev">web/js/notes.js:158</code></div></div>
+      </div>
+
+      <div class="grid g2">
+        <div class="callout co-risk card--flat">
+          <h4>Größte UX-Risiken</h4>
+          <ol style="margin:0; padding-left:20px">
+            <li><b>Leerer Erststart ohne Onboarding.</b> Neue Nutzer landen direkt auf „Today“ mit leeren Spalten (<code class="ev">web/js/nav.js:35</code>).</li>
+            <li><b>Extension-Overlay auf <em>jeder</em> Website, ohne Schließen-Knopf</b> (nur „zu Pille schrumpfen“) — max. z-index (<code class="ev">src/content/overlay.js:66</code>, <code class="ev">:357</code>).</li>
+            <li><b>Kein Login trotz sensibler Health-/Personendaten.</b> API offen, <code class="k">CORS *</code> (<code class="ev">server/index.js:22</code>).</li>
+            <li><b>Planungs-Intelligenz fehlt.</b> Auto-Scheduling &amp; Machbarkeits-Check sind nicht gebaut (Planung ist rein manuell). <em>Hinweis:</em> FSRS/aktives Lernen aus <code class="ev">docs/SPEC.md</code> gehören zum separaten „Pace“-Track bzw. laufen bewusst <b>extern</b> — das ist <b>kein</b> Kairos-Defizit.</li>
+            <li><b>Inkonsistentes Branding/Sprache.</b> „Kairos“ vs. „Focus Pomodoro“, DE/EN gemischt (<code class="ev">src/presentation/sidepanel.html:15</code>).</li>
+          </ol>
+        </div>
+        <div class="callout co-info card--flat">
+          <h4>Größte Produktlücken</h4>
+          <ol style="margin:0; padding-left:20px">
+            <li><b>Account/Login/Sync</b> — trotz Branch-Name nur DB-Migration, kein Flow (<code class="ev">web/js/api.js</code> hat keine Auth-Endpunkte).</li>
+            <li><b>Automatischer, kalender-bewusster Scheduler</b> — Planung ist rein manuell (Drag&amp;Drop).</li>
+            <li><b>Live-Wearable-Integration</b> — nur manuelle Eingabe + Import-API, keine Geräteanbindung im UI.</li>
+            <li><b>Erstklassiger Hand-off zu externen Lern-Seiten</b> — kein Link-/URL-Feld, Links in Notizen/Aufgaben sind nicht klickbar (<code class="ev">web/js/notes.js:158</code>). Für eine Planungs-App, die extern ausführt, ist <b>das</b> die Kern-Lücke.</li>
+            <li><b>Profil-Editor &amp; Daten-Export im UI</b> — Felder existieren im Backend, aber ohne Bearbeitungs-Screen.</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="callout co-ok">
+        <h4>Einordnung in einem Satz</h4>
+        <p style="margin-bottom:0"><b>Kairos ist als Single-User-<em>Planungs-</em>&amp;-Fokus-App bereits erstaunlich rund und liebevoll Konzentration-gerecht gebaut — aber es ist kein produktreifes Multi-User-Produkt:</b> Onboarding, Authentifizierung, ein <em>erstklassiger Hand-off zu den externen Lern-Seiten</em> und optionale Planungs-Automatik fehlen. <b>Aktives Lernen selbst ist bewusst extern und daher kein Mangel der App.</b></p>
+      </div>
+    </section>
+
+    <!-- ══════════ 2. PERSONAS ══════════ -->
+    <section class="s" id="s2">
+      <h2><span class="num">2</span> Zielpersonen / Target Personas</h2>
+      <p class="intro">Die Personas sind nicht erfunden, sondern aus der Produkt-Spec abgeleitet (<code class="ev">docs/SPEC.md:88-96</code>) und mit dem <b>real gebauten</b> Funktionsumfang abgeglichen — inklusive der Stellen, an denen die App die Erwartung (noch) nicht erfüllt.</p>
+
+      <div class="grid g3">
+        <!-- Primär -->
+        <article class="persona">
+          <div class="persona__head">
+            <div class="persona__ava" style="background:var(--accent)">M</div>
+            <div><div style="font-weight:800">Mira, 22</div><div class="persona__tag">Primärer Nutzer · Konzentration · Medizin</div></div>
+          </div>
+          <div class="persona__body">
+            <dl style="margin:0">
+              <dt>Rolle</dt><dd>Medizinstudentin, 6 Fächer parallel, gestaffelte Klausuren.</dd>
+              <dt>Ziel</dt><dd>Überhaupt anfangen, dranbleiben und den Tag nicht kollabieren lassen.</dd>
+              <dt>Motivation</dt><dd>Externalisierte Zeit &amp; „ein nächster Schritt“ statt Entscheidungslähmung.</dd>
+              <dt>Frustrationen</dt><dd>Plant unrealistisch, cramt nachts, verpasste Blöcke → Scham → Vermeidung (<code class="ev">docs/SPEC.md:94</code>).</dd>
+              <dt>Tech-Verständnis</dt><dd>Mittel. Will „öffnen &amp; los“, keine Konfiguration.</dd>
+              <dt>Kern-Entscheidungen</dt><dd>Welche Aufgabe jetzt? Wie lange? Ist der überfällige Block noch relevant?</dd>
+              <dt>Erwartet</dt><dd>Sofort startbarer Fokus, scham-freie Nachplanung — <span class="b b-ok">erfüllt</span> via Overdue-Prompt (<code class="ev">web/js/dayTimeline.js:132</code>).</dd>
+              <dt>Versteht sie wahrscheinlich nicht</dt><dd>Warum „Health“ leer ist; dass „aim ~Xh“ nur ein Hinweis ist, keine Grenze.</dd>
+            </dl>
+          </div>
+        </article>
+
+        <!-- Sekundär -->
+        <article class="persona">
+          <div class="persona__head">
+            <div class="persona__ava" style="background:var(--blue)">S</div>
+            <div><div style="font-weight:800">Sara, 25</div><div class="persona__tag">Sekundärer Nutzer · berufsbegleitend</div></div>
+          </div>
+          <div class="persona__body">
+            <dl style="margin:0">
+              <dt>Rolle</dt><dd>Lernt neben dem Job, wenig &amp; fragmentierte Zeit (<code class="ev">docs/SPEC.md:96</code>).</dd>
+              <dt>Ziel</dt><dd>Wissen, ob der Stoff zeitlich bis zur Deadline überhaupt aufgeht.</dd>
+              <dt>Motivation</dt><dd>Kontrolle &amp; Realismus; kein schlechtes Gewissen.</dd>
+              <dt>Frustrationen</dt><dd>Abende zerfallen; „reicht die Zeit?“ bleibt unbeantwortet.</dd>
+              <dt>Tech-Verständnis</dt><dd>Mittel–hoch, aber wenig Geduld für Setup.</dd>
+              <dt>Kern-Entscheidungen</dt><dd>Was heute? Was verschiebe ich? Prüfungs-Countdown im Blick behalten.</dd>
+              <dt>Erwartet</dt><dd>Machbarkeits-Check („Cushion“) — <span class="b b-gap">nicht gebaut</span>. Es gibt nur den Countdown &amp; Pensum-Feld (<code class="ev">web/js/exam.js:141</code>), keine Rest-Zeit-Bilanz gegen die Deadline.</dd>
+              <dt>Versteht sie wahrscheinlich nicht</dt><dd>Dass Pensum (h) und tatsächlich geplante Aufgaben nicht miteinander verrechnet werden.</dd>
+            </dl>
+          </div>
+        </article>
+
+        <!-- Power -->
+        <article class="persona">
+          <div class="persona__head">
+            <div class="persona__ava" style="background:var(--amber)">J</div>
+            <div><div style="font-weight:800">Junho, 19</div><div class="persona__tag">Power User · diszipliniert</div></div>
+          </div>
+          <div class="persona__body">
+            <dl style="margin:0">
+              <dt>Rolle</dt><dd>Bestnoten-Ehrgeiz, nutzt bereits Anki + Timer getrennt (<code class="ev">docs/SPEC.md:95</code>).</dd>
+              <dt>Ziel</dt><dd>Spaced Repetition &amp; Timer in <em>einem</em> konfliktbewussten Plan.</dd>
+              <dt>Motivation</dt><dd>Effizienz, Messbarkeit, Optimierung.</dd>
+              <dt>Frustrationen</dt><dd>Tools reden nicht miteinander; Reviews kollidieren mit Terminen.</dd>
+              <dt>Tech-Verständnis</dt><dd>Hoch. Erwartet Tastatur, Presets, Statistik, Export.</dd>
+              <dt>Kern-Entscheidungen</dt><dd>Session-Längen, Fach-Verteilung, was heute wiederholen.</dd>
+              <dt>Erwartet</dt><dd>Seine externen Tools (Anki, LMS, Skripte) <em>terminiert &amp; verlinkt</em> im Plan — Kairos plant, die Ausführung bleibt extern (das ist ok). Heute fehlt genau die Brücke: kein Link-Feld, keine Review-Blöcke, die auf eine Ressource zeigen. <span class="b b-part">Planung ok · Hand-off fehlt</span></dd>
+              <dt>Versteht er wahrscheinlich nicht</dt><dd>Wie er eine geplante Aufgabe mit der konkreten externen Lern-Seite verknüpft — es gibt kein Link-Feld.</dd>
+            </dl>
+          </div>
+        </article>
+      </div>
+
+      <div class="callout co-info">
+        <h4>Persona-Erkenntnis für das Produktteam</h4>
+        <p style="margin-bottom:0">Die <b>primäre Persona (Mira)</b> wird am besten bedient — Fokus-Loop und scham-freie Nachplanung treffen ihren Bedarf. <b>Sara</b> fehlt der Machbarkeits-Check, <b>Junho</b> die <em>Verknüpfung</em> seiner externen Tools mit dem Plan. Als <b>Planungs-App</b> ist der Anspruch stimmig — das aktive Lernen passiert bewusst extern. Das Erwartungs-Risiko liegt daher nicht in „fehlenden Lern-Features“, sondern in der <b>fehlenden Brücke zu den externen Seiten</b> und in <b>fehlendem Onboarding/Trust</b> (siehe §10).</p>
+      </div>
+    </section>
+
+    <!-- ══════════ 3. JOURNEY ══════════ -->
+    <section class="s" id="s3">
+      <h2><span class="num">3</span> User Journey Map</h2>
+      <p class="intro">Vom ersten Öffnen bis zum erfolgreichen Start eines Fokusblocks — und darüber hinaus bis „nach dem Flug“. Übertragung der Aviation-Phasen auf den realen Lern-Flow. Legende: <span class="b b-ok">gut unterstützt</span> <span class="b b-part">teilweise</span> <span class="b b-gap">Lücke</span>.</p>
+
+      <!-- Phase 1 -->
+      <div class="phase">
+        <h4>1 · App öffnen &nbsp;<span class="b b-part">teilweise</span></h4>
+        <div class="grid g3">
+          <div class="mini"><span class="lbl">Nutzerziel</span>Schnell in den Arbeitsmodus kommen.</div>
+          <div class="mini"><span class="lbl">Fragen</span>„Wo bin ich? Was ist das?“</div>
+          <div class="mini"><span class="lbl">Nötige Info</span>Kurzorientierung, was die App tut.</div>
+          <div class="mini"><span class="lbl">App-Unterstützung</span>Bootet direkt in „Today“, Timer sofort sichtbar (<code class="ev">web/js/main.js:132</code>).</div>
+          <div class="mini"><span class="lbl">Pain Point</span>Kein Willkommen, kein Beispiel, kein Login → leere App.</div>
+          <div class="mini"><span class="lbl">Risiko / Fix</span><span class="sev h"></span>Erststart wirkt „kaputt/leer“ → Onboarding + Demo-Daten.</div>
+        </div>
+      </div>
+      <!-- Phase 2 -->
+      <div class="phase">
+        <h4>2 · Orientierung &nbsp;<span class="b b-ok">gut</span></h4>
+        <div class="grid g3">
+          <div class="mini"><span class="lbl">Nutzerziel</span>Verstehen, wo Aufgaben/Timer/Plan sind.</div>
+          <div class="mini"><span class="lbl">Fragen</span>„Wo lege ich etwas an?“</div>
+          <div class="mini"><span class="lbl">Nötige Info</span>Navigation, primärer CTA.</div>
+          <div class="mini"><span class="lbl">App-Unterstützung</span>6 klare Nav-Punkte + persistenter Timer + <code class="k">New</code>-CTA (<code class="ev">web/index.html:38</code>).</div>
+          <div class="mini"><span class="lbl">Pain Point</span>„Notes“ existiert dreifach (Ansicht, Exam-Tab, Pinned) → leichte Redundanz.</div>
+          <div class="mini"><span class="lbl">Risiko / Fix</span><span class="sev l"></span>Gering. Ggf. Notes konsolidieren.</div>
+        </div>
+      </div>
+      <!-- Phase 3 -->
+      <div class="phase">
+        <h4>3 · „Route planen“ = Tag/Session planen &nbsp;<span class="b b-ok">gut</span></h4>
+        <div class="grid g3">
+          <div class="mini"><span class="lbl">Nutzerziel</span>Aufgaben anlegen &amp; auf den Tag legen.</div>
+          <div class="mini"><span class="lbl">Fragen</span>„Was mache ich wann?“</div>
+          <div class="mini"><span class="lbl">Nötige Info</span>Aufgabentext, optional Uhrzeit/Dauer/Priorität.</div>
+          <div class="mini"><span class="lbl">App-Unterstützung</span>Eintippen (o. Diktat), Drag auf Timeline, Wochenkalender (<code class="ev">web/js/dayTimeline.js:183</code>, <code class="ev">web/js/week.js:103</code>).</div>
+          <div class="mini"><span class="lbl">Pain Point</span>Nur Text ist Pflicht; Zeit/Dauer versteckt im Aufklapp-Detail.</div>
+          <div class="mini"><span class="lbl">Risiko / Fix</span><span class="sev m"></span>Aufgaben ohne Dauer erscheinen nicht auf der Timeline — nicht offensichtlich.</div>
+        </div>
+      </div>
+      <!-- Phase 4 -->
+      <div class="phase">
+        <h4>4 · „Flugparameter prüfen“ = Timer-/Session-Parameter &nbsp;<span class="b b-ok">gut</span></h4>
+        <div class="grid g3">
+          <div class="mini"><span class="lbl">Nutzerziel</span>Session-Länge &amp; Pausen festlegen.</div>
+          <div class="mini"><span class="lbl">Fragen</span>„25 min oder 45? Wann Pause?“</div>
+          <div class="mini"><span class="lbl">Nötige Info</span>Fokus-/Pausendauer, Zyklen.</div>
+          <div class="mini"><span class="lbl">App-Unterstützung</span>Presets 15/25/45/60 + Slider (<code class="ev">web/js/timer.js:9</code>); sanitisiert (<code class="ev">shared/pomodoro.js:71</code>).</div>
+          <div class="mini"><span class="lbl">Pain Point</span>Dauer-Slider hinter <code class="k">&lt;details&gt;</code> versteckt (<code class="ev">web/index.html:119</code>).</div>
+          <div class="mini"><span class="lbl">Risiko / Fix</span><span class="sev l"></span>Gering; gute Defaults.</div>
+        </div>
+      </div>
+      <!-- Phase 5 -->
+      <div class="phase">
+        <h4>5 · „Wetter / Luftraum / Einschränkungen“ = Readiness &amp; Constraints &nbsp;<span class="b b-part">teilweise</span></h4>
+        <div class="grid g3">
+          <div class="mini"><span class="lbl">Nutzerziel</span>Einschätzen, wie viel heute realistisch geht.</div>
+          <div class="mini"><span class="lbl">Fragen</span>„Bin ich fit? Wie viel schaffe ich?“</div>
+          <div class="mini"><span class="lbl">Nötige Info</span>Schlaf, Erholung, Kapazität, Tageslast.</div>
+          <div class="mini"><span class="lbl">App-Unterstützung</span>Health-Kontext → „aim ~Xh“-Pille + Reasons (<code class="ev">web/js/today.js:60</code>, <code class="ev">server/health/context.js</code>).</div>
+          <div class="mini"><span class="lbl">Pain Point</span>Ohne Wearable meist leer; Werte nur manuell; „aim“ ist unverbindlich.</div>
+          <div class="mini"><span class="lbl">Risiko / Fix</span><span class="sev m"></span>Signal ohne Konsequenz → Readiness sichtbar an die Start-Entscheidung koppeln.</div>
+        </div>
+      </div>
+      <!-- Phase 6 -->
+      <div class="phase">
+        <h4>6 · Flug vorbereiten = Aufgabe wählen / aktiv setzen &nbsp;<span class="b b-ok">gut</span></h4>
+        <div class="grid g3">
+          <div class="mini"><span class="lbl">Nutzerziel</span>Die „jetzt“-Aufgabe festlegen.</div>
+          <div class="mini"><span class="lbl">Fragen</span>„Woran arbeite ich zuerst?“</div>
+          <div class="mini"><span class="lbl">Nötige Info</span>Priorität, Fälligkeit, nächste Aufgabe.</div>
+          <div class="mini"><span class="lbl">App-Unterstützung</span>„Up next“ = höchste Prio; „Activate in timer“ (<code class="ev">web/js/tasks.js:116</code>).</div>
+          <div class="mini"><span class="lbl">Pain Point</span>Start ist auch <b>ohne</b> aktive Aufgabe möglich („No task selected“).</div>
+          <div class="mini"><span class="lbl">Risiko / Fix</span><span class="sev l"></span>Fokuszeit ohne Aufgabe wird keiner Aufgabe gutgeschrieben (nur Tagesziel).</div>
+        </div>
+      </div>
+      <!-- Phase 7 -->
+      <div class="phase">
+        <h4>7 · Startentscheidung &nbsp;<span class="b b-gap">Lücke</span></h4>
+        <div class="grid g3">
+          <div class="mini"><span class="lbl">Nutzerziel</span>Sicher sein: „jetzt starten ist ok“.</div>
+          <div class="mini"><span class="lbl">Fragen</span>„Darf/soll ich jetzt?“</div>
+          <div class="mini"><span class="lbl">Nötige Info</span>Vollständigkeit, Readiness, Konflikte.</div>
+          <div class="mini"><span class="lbl">App-Unterstützung</span><b>Keine Freigabe-/Blockade-Logik.</b> Start ist immer sofort möglich (<code class="ev">web/js/timer.js:43</code>).</div>
+          <div class="mini"><span class="lbl">Pain Point</span>Anders als eine Flug-App gibt es keinen „Ready-to-start“-Check.</div>
+          <div class="mini"><span class="lbl">Risiko / Fix</span><span class="sev m"></span>Für Konzentration ist „sofort start“ meist richtig — aber ein optionaler „aim erreicht/übertroffen“-Hinweis fehlt.</div>
+        </div>
+      </div>
+      <!-- Phase 8 -->
+      <div class="phase">
+        <h4>8 · Flug starten = Fokus starten &nbsp;<span class="b b-ok">gut</span></h4>
+        <div class="grid g3">
+          <div class="mini"><span class="lbl">Nutzerziel</span>Loslegen.</div>
+          <div class="mini"><span class="lbl">Fragen</span>—</div>
+          <div class="mini"><span class="lbl">Nötige Info</span>Restzeit, Phase.</div>
+          <div class="mini"><span class="lbl">App-Unterstützung</span>Ein Klick; Ring + Ton + optional Notification-Permission (<code class="ev">web/js/main.js:159</code>).</div>
+          <div class="mini"><span class="lbl">Pain Point</span>Permission-Prompt beim ersten Start kann überraschen.</div>
+          <div class="mini"><span class="lbl">Risiko / Fix</span><span class="sev l"></span>Gering; „einmalig“ gedrosselt.</div>
+        </div>
+      </div>
+      <!-- Phase 9 -->
+      <div class="phase">
+        <h4>9 · Während des Flugs = laufende Session &nbsp;<span class="b b-ok">gut</span></h4>
+        <div class="grid g3">
+          <div class="mini"><span class="lbl">Nutzerziel</span>Im Fokus bleiben, Zeit spüren.</div>
+          <div class="mini"><span class="lbl">Fragen</span>„Wie lange noch? Was kommt?“</div>
+          <div class="mini"><span class="lbl">Nötige Info</span>Restzeit, aktuelle Aufgabe, nächste Phase.</div>
+          <div class="mini"><span class="lbl">App-Unterstützung</span>Live-Ring, Now-Linie, Phasenwechsel-Ton + Web-Push auch bei geschlossener App (<code class="ev">web/sw.js:150</code>).</div>
+          <div class="mini"><span class="lbl">Pain Point</span>Downtime-Robustheit gelöst (kein Phantom-Chaining) — <span class="b b-ok">getestet</span> (<code class="ev">tests/timerFixes.test.js:38</code>).</div>
+          <div class="mini"><span class="lbl">Risiko / Fix</span><span class="sev l"></span>Gering.</div>
+        </div>
+      </div>
+      <!-- Phase 10 -->
+      <div class="phase">
+        <h4>10 · Nach dem Flug = Pause / Review / Insights &nbsp;<span class="b b-part">teilweise</span></h4>
+        <div class="grid g3">
+          <div class="mini"><span class="lbl">Nutzerziel</span>Fortschritt sehen, gut abschließen.</div>
+          <div class="mini"><span class="lbl">Fragen</span>„Habe ich mein Ziel erreicht? Was lief?“</div>
+          <div class="mini"><span class="lbl">Nötige Info</span>Fokuszeit, Streak, Fächer, Muster.</div>
+          <div class="mini"><span class="lbl">App-Unterstützung</span>Tagesziel-Ring, Insights (Woche/Streak/Fächer/bester Tag) (<code class="ev">web/js/insights.js</code>).</div>
+          <div class="mini"><span class="lbl">Pain Point</span>Kein sauberer Rück-Hand-off von der externen Lern-Seite in den Plan (nur manuelles Abhaken); optionale 20-Sek-Notiz fehlt.</div>
+          <div class="mini"><span class="lbl">Risiko / Fix</span><span class="sev m"></span>Ohne Reflexion kein Lern-Feedback-Loop → optionale 20-Sek-Review.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ 4. WORKFLOWS ══════════ -->
+    <section class="s" id="s4">
+      <h2><span class="num">4</span> Alle User Workflows</h2>
+      <p class="intro">Jeder in der Vorlage geforderte Workflow — auf den realen Code abgebildet. <b>Wichtig:</b> mehrere Vorlagen-Workflows existieren in Kairos <b>gar nicht</b> und sind ehrlich als Lücke markiert. Legende: <span class="b b-ok">vorhanden</span> <span class="b b-part">teilweise</span> <span class="b b-gap">fehlt</span>.</p>
+
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th style="min-width:150px">Workflow</th><th>Startpunkt · Ziel</th><th>Schritte · Systemreaktion</th><th>Fehlerfälle · Exit</th><th>Verbesserung</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><b>Registrierung / Login</b><br><span class="b b-gap">fehlt</span></td>
+              <td>—</td>
+              <td>Kein Auth-Flow im UI; <code class="ev">web/js/api.js</code> hat keinen Auth-Aufruf. Backend-Routen ohne Auth (<code class="ev">server/routes.js:16-248</code>). Multi-Tenant nur als Migrations-Skript (<code class="ev">server/migrations/multitenant.mjs</code>).</td>
+              <td>Kein Login = kein Fehlerfall; aber auch keine Datentrennung.</td>
+              <td>Magic-Link-Login bauen, API absichern, PWA-Session verdrahten (§8/§10).</td>
+            </tr>
+            <tr>
+              <td><b>Onboarding</b><br><span class="b b-gap">fehlt</span></td>
+              <td>Erststart</td>
+              <td>Kein Onboarding-Screen; boot() → „Today“ (<code class="ev">web/js/nav.js:35</code>).</td>
+              <td>Leere App wirkt „nicht fertig“.</td>
+              <td>3-Schritt-Setup: Name, Tagesziel, erste Aufgabe/Prüfung; Demo-Daten.</td>
+            </tr>
+            <tr>
+              <td><b>Dashboard</b><br><span class="b b-ok">vorhanden</span></td>
+              <td>Nav „Today“ · Tag im Blick</td>
+              <td>Plan-Timeline, Tasks, Up-next, Fokus-Rhythmus, Tagesziel-Ring (<code class="ev">web/index.html:159</code>).</td>
+              <td>Leerzustände zeigen Hinweise („Nothing planned yet“).</td>
+              <td>Readiness prominenter; leere Spalten mit CTA füllen.</td>
+            </tr>
+            <tr>
+              <td><b>„Flug erstellen“ = Aufgabe anlegen</b><br><span class="b b-ok">vorhanden</span></td>
+              <td>Task-Input / <code class="k">New</code> · Aufgabe erfassen</td>
+              <td>Text (+optional Diktat) → <code class="k">POST /api/tasks</code>, geplant auf heute (<code class="ev">web/js/tasks.js:35</code>, <code class="ev">server/routes.js:66</code>). Snapshot zurück.</td>
+              <td>Leerer Text → 400 „text fehlt“ (<code class="ev">server/routes.js:68</code>); UI ignoriert leer.</td>
+              <td>Schnell-Felder (Dauer/Zeit) inline statt nur im Detail.</td>
+            </tr>
+            <tr>
+              <td><b>„Flug planen“ = Aufgabe terminieren</b><br><span class="b b-ok">vorhanden</span></td>
+              <td>Drag / Zeit-Feld · auf den Tag legen</td>
+              <td>Drag auf Timeline / Uhrzeit setzen → <code class="k">scheduledMin</code>+<code class="k">plannedDate</code> (<code class="ev">web/js/dayTimeline.js:190</code>). Wochen-DnD (<code class="ev">web/js/week.js:112</code>).</td>
+              <td>Kein Konflikt-Check; Slot außerhalb 06–24 wird geklemmt.</td>
+              <td>Auto-Vorschlag freier Slots; Kollisionswarnung.</td>
+            </tr>
+            <tr>
+              <td><b>„Flug bearbeiten“ = Aufgabe editieren</b><br><span class="b b-ok">vorhanden</span></td>
+              <td>Task aufklappen · Details ändern</td>
+              <td>Priorität, Estimate, Zeit, Datum, Due, Subject, Subtasks (<code class="ev">web/js/tasks.js:219</code>) → <code class="k">PUT /api/tasks/:id</code>.</td>
+              <td>Optimistisch; bei Offline nur Warnung in Konsole (<code class="ev">web/js/tasks.js:29</code>).</td>
+              <td>Sichtbares Speicher-/Fehler-Feedback statt nur <code class="k">console.warn</code>.</td>
+            </tr>
+            <tr>
+              <td><b>„Flug starten“ = Fokus starten</b><br><span class="b b-ok">vorhanden</span></td>
+              <td>Start focus / Start now · loslegen</td>
+              <td>Aktive Aufgabe setzen + <code class="k">POST /api/timer/start</code> (<code class="ev">web/js/tasks.js:54</code>). Server-Timer läuft weiter.</td>
+              <td>Start ohne Aufgabe möglich; kein Blocker.</td>
+              <td>Optionaler „ohne Aufgabe starten?“-Hinweis.</td>
+            </tr>
+            <tr>
+              <td><b>„Flug abbrechen“ = Session zurücksetzen</b><br><span class="b b-part">teilweise</span></td>
+              <td>Reset / Skip · aufhören/überspringen</td>
+              <td><code class="k">reset</code>/<code class="k">skip</code> (<code class="ev">web/js/timer.js:50</code>). In der Extension mit <code class="k">confirm()</code> (<code class="ev">src/content/overlay.js:365</code>).</td>
+              <td>Kein „Grund“ (anders als Spec F8a); PWA fragt nicht nach.</td>
+              <td>Grund-bewusstes Abbrechen (Pause/erledigt/zu schwer) → Nachplanung.</td>
+            </tr>
+            <tr>
+              <td><b>„Flug abschließen“ = Aufgabe erledigt</b><br><span class="b b-ok">vorhanden</span></td>
+              <td>Checkbox / Overdue-Ja · abschließen</td>
+              <td>Task done → <code class="k">doneAt</code>, Fokuszeit in <code class="k">spent_ms</code>/<code class="k">daily_metrics</code> (<code class="ev">server/repo.js:159</code>, <code class="ev">:272</code>).</td>
+              <td>Phasen-Abschluss pausiert (kein Auto-Chaining nach Downtime).</td>
+              <td>Kurze Erfolgs-/Reflexions-Karte.</td>
+            </tr>
+            <tr>
+              <td><b>„Kartenansicht“</b><br><span class="b b-part">Ersatz</span></td>
+              <td>Nav „Today“/„Week“ · räumlich→zeitlich</td>
+              <td>Keine Geo-Karte; stattdessen Tages-Zeitstrahl + Wochen-Board mit Now-Linie (<code class="ev">web/js/week.js</code>).</td>
+              <td>—</td>
+              <td>Ggf. Monats-/Prüfungs-Timeline als „Big Picture“.</td>
+            </tr>
+            <tr>
+              <td><b>„Wetterinformationen“ = Health</b><br><span class="b b-part">teilweise</span></td>
+              <td>Nav „Health“ · Zustand prüfen</td>
+              <td>Schlaf/Recovery/Activity/Capacity/Body/Wellness-Karten (<code class="ev">web/js/health.js:411</code>); Kontext aus 14 Tagen (<code class="ev">server/routes.js:161</code>).</td>
+              <td>Leer ohne Daten; „Enter manually“ deckt nur Schlaf/HRV/RHR/Steps.</td>
+              <td>Echte Wearable-Kopplung (OAuth/Import-UI) statt nur API.</td>
+            </tr>
+            <tr>
+              <td><b>Warnungen / Validierungen</b><br><span class="b b-part">teilweise</span></td>
+              <td>Laufzeit · Nutzer schützen</td>
+              <td>Overdue-Prompt (<code class="ev">web/js/dayTimeline.js:132</code>), Offline-Banner, Push-blocked-Hinweis, Server-Coercion/Clamps (<code class="ev">shared/pomodoro.js:71</code>).</td>
+              <td>Keine Vorab-Validierung „Plan unvollständig“; kaum sichtbare Fehlermeldungen im Frontend.</td>
+              <td>Sichtbare, freundliche Fehlermeldungen &amp; Plan-Checks.</td>
+            </tr>
+            <tr>
+              <td><b>Profil / Einstellungen</b><br><span class="b b-gap">fast keins</span></td>
+              <td>User-Chip / Timer-Slider · konfigurieren</td>
+              <td>Timer-Dauern &amp; Tagesziel editierbar (<code class="ev">web/js/today.js:23</code>). Profil-API existiert (<code class="ev">server/routes.js:153</code>), aber <b>kein Profil-Editor-Screen</b>; User-Chip zeigt nur den Namen (<code class="ev">web/js/main.js:62</code>).</td>
+              <td>„Add weight in your profile“ ohne UI, um Gewicht zu setzen (<code class="ev">web/js/health.js:342</code>). <span class="b b-nv">Needs manual verification</span></td>
+              <td>Vollen Profil-/Settings-Screen bauen (Name, Body, Chronotyp, Consent).</td>
+            </tr>
+            <tr>
+              <td><b>Datenimport / -export</b><br><span class="b b-part">nur API</span></td>
+              <td>— · Daten ein/aus</td>
+              <td>Health-Import per <code class="k">POST /api/health/import</code> (<code class="ev">server/routes.js:185</code>), Schema-Endpoint. <b>Kein UI</b>; kein genereller Export/Backup außer DB-Datei kopieren (<code class="ev">docs/README-Lernuhr.md:99</code>).</td>
+              <td>Ohne UI für Normalnutzer nicht zugänglich.</td>
+              <td>JSON/CSV/ICS-Export im UI (Spec F12, <code class="ev">docs/SPEC.md:247</code>).</td>
+            </tr>
+            <tr>
+              <td><b>Admin- / Team-Funktionen</b><br><span class="b b-gap">nicht vorhanden</span></td>
+              <td>—</td>
+              <td>Kein Admin, keine Rollen, kein Team im Code. Alles ist Single-User-Singleton (<code class="ev">server/repo.js:33</code>).</td>
+              <td>—</td>
+              <td>Erst nach echtem Auth/Tenancy relevant.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ══════════ 5. INFO NEEDS ══════════ -->
+    <section class="s" id="s5">
+      <h2><span class="num">5</span> Informationsbedarf des Nutzers</h2>
+      <p class="intro">Welche Informationen braucht jemand, um sicher &amp; sinnvoll einen Lern-/Fokus-Tag zu planen und zu starten? Die Aviation-Kategorien sind auf das Lernen übertragen. Spalten: wird abgefragt? verständlich erklärt? Pflicht/optional? fehlt? überflüssig?</p>
+      <div class="legend">
+        <span><span class="b b-ok">abgefragt</span></span>
+        <span><span class="b b-part">teilweise</span></span>
+        <span><span class="b b-gap">fehlt</span></span>
+        <span><span class="b b-muted">n/a in Domäne</span></span>
+      </div>
+      <div class="tbl-wrap">
+        <table class="compact">
+          <thead><tr><th>Aviation-Kategorie → Lern-Äquivalent</th><th>Abgefragt?</th><th>Erklärt?</th><th>Pflicht?</th><th>Bewertung · Beleg</th></tr></thead>
+          <tbody>
+            <tr><td><b>Route</b> → Reihenfolge/Tagesplan der Aufgaben</td><td><span class="b b-ok">ja</span></td><td>implizit</td><td>optional</td><td>Sortierung nach Prio/Fälligkeit; Timeline visualisiert. <code class="ev">web/js/tasks.js:178</code></td></tr>
+            <tr><td><b>Startpunkt</b> → „jetzt“ (aktuelle Zeit)</td><td><span class="b b-ok">ja</span></td><td>ja (Now-Linie)</td><td>automatisch</td><td>NTP-korrigierte Uhr &amp; Now-Linie. <code class="ev">web/js/clock.js</code>, <code class="ev">shared/daySchedule.js:38</code></td></tr>
+            <tr><td><b>Zielpunkt</b> → Prüfungsdatum/Deadline</td><td><span class="b b-ok">ja</span></td><td>ja (Countdown)</td><td>optional</td><td>Exam-Datum + Countdown-Ring. <code class="ev">web/js/exam.js:141</code></td></tr>
+            <tr><td><b>Datum / Uhrzeit</b> → Termin der Aufgabe</td><td><span class="b b-ok">ja</span></td><td>ja</td><td>optional</td><td>scheduledMin/plannedDate/dueDate. <code class="ev">web/js/tasks.js:244</code></td></tr>
+            <tr><td><b>Wetter</b> → Readiness/Erholung</td><td><span class="b b-part">manuell/Import</span></td><td>teilweise</td><td>optional</td><td>Recovery-Badge Ready/Rest/Steady. <code class="ev">web/js/health.js:269</code></td></tr>
+            <tr><td><b>Wind</b> → HRV / Ruhepuls-Abweichung</td><td><span class="b b-part">wenn Daten</span></td><td>teilweise</td><td>optional</td><td>HRV-Delta, RHR. <code class="ev">web/js/health.js:286</code></td></tr>
+            <tr><td><b>Sicht</b> → Schlaf / Schlafschuld</td><td><span class="b b-part">manuell/Import</span></td><td>ja</td><td>optional</td><td>Schlaf-Ring + Phasen. <code class="ev">web/js/health.js:225</code></td></tr>
+            <tr><td><b>Luftraum</b> → Tages-Constraints (06–24, Tageslast)</td><td><span class="b b-part">implizit</span></td><td>schwach</td><td>fix</td><td>Fenster hart, Tagesziel weich. <code class="ev">shared/daySchedule.js:8</code></td></tr>
+            <tr><td><b>No-Fly-Zones</b> → geschützte Erholung/Schlaf</td><td><span class="b b-gap">fehlt im Web</span></td><td>—</td><td>—</td><td>Spec-Konzept „geschützte Freizeit“ nicht gebaut. <code class="ev">docs/SPEC.md:216</code></td></tr>
+            <tr><td><b>Genehmigungen</b> → Einwilligung (KI/Daten)</td><td><span class="b b-part">Backend</span></td><td>schwach</td><td>opt-in</td><td>aiEnabled + dataConsentAt, aber kein UI. <code class="ev">server/repo.js:349</code></td></tr>
+            <tr><td><b>Fluggerät</b> → Wearable-Quelle</td><td><span class="b b-part">Chips</span></td><td>teilweise</td><td>optional</td><td>RingConn/WHOOP/Apple/Manual, nur Anzeige. <code class="ev">web/js/health.js:20</code></td></tr>
+            <tr><td><b>Akku / Treibstoff</b> → Kapazität/Energie</td><td><span class="b b-part">abgeleitet</span></td><td>teilweise</td><td>auto</td><td>capacityMultiplier → „aim ~Xh“. <code class="ev">web/js/today.js:66</code></td></tr>
+            <tr><td><b>Payload</b> → Pensum/Workload, Estimate</td><td><span class="b b-ok">ja</span></td><td>teilweise</td><td>optional</td><td>Exam totalHours, task estMinutes. <code class="ev">server/routes.js:52</code></td></tr>
+            <tr><td><b>Checklisten</b> → Themen &amp; Subtasks</td><td><span class="b b-ok">ja</span></td><td>ja</td><td>optional</td><td>Topics-Checkliste + Subtasks. <code class="ev">web/js/topics.js</code></td></tr>
+            <tr><td><b>Risiko</b> → Überfällig / Machbarkeit</td><td><span class="b b-part">Overdue</span></td><td>ja (Prompt)</td><td>—</td><td>Overdue-Nachfrage vorhanden; „Cushion“ fehlt. <code class="ev">docs/SPEC.md:314</code></td></tr>
+            <tr><td><b>Notfalloptionen</b> → Verschieben/„später“</td><td><span class="b b-part">später-Snooze</span></td><td>ja</td><td>—</td><td>Yes/No→neuer Slot/später. <code class="ev">web/js/dayTimeline.js:157</code></td></tr>
+            <tr><td><b>Verantwortliche Person</b> → Nutzer:in</td><td><span class="b b-gap">kein Login</span></td><td>—</td><td>—</td><td>Nur Anzeigename; keine echte Identität. <code class="ev">web/js/main.js:62</code></td></tr>
+            <tr><td><b>Dokumentation</b> → Notizen</td><td><span class="b b-ok">ja</span></td><td>ja</td><td>optional</td><td>Notizblock, Pin, „→ plan it“. <code class="ev">web/js/notes.js</code></td></tr>
+            <tr><td><b>(neu) Lern-Ressource / Link</b> → die externe Seite, auf der gelernt wird</td><td><span class="b b-gap">nein</span></td><td>—</td><td>—</td><td>Kein URL-Feld; Links in Notizen/Aufgaben sind <b>nicht klickbar</b> (Text wird escaped). <code class="ev">web/js/notes.js:158</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout co-info">
+        <h4>Kern-Befund Informationsbedarf</h4>
+        <p style="margin-bottom:0">Die <b>Planungs-Grunddaten</b> (was, wann, wie lange, bis wann) sind sauber abfragbar. Die <b>„Zustands-Daten“</b> (Readiness/Schlaf/Kapazität) sind konzeptionell stark modelliert, aber im Alltag meist <b>leer</b>, weil eine echte Geräteanbindung fehlt — sie bleiben damit ein <b>unverbindliches Signal ohne Konsequenz</b>. Überflüssig ist praktisch nichts; eher fehlt die <b>Verknüpfung</b> zwischen Readiness und tatsächlicher Start-/Planungsentscheidung. Und — zentral für eine Planungs-App, die die Ausführung auslagert — fehlt die <b>Verknüpfung zwischen Aufgabe/Thema und der externen Lern-Ressource</b> (kein Link-Feld, Links nicht klickbar).</p>
+      </div>
+    </section>
+
+    <!-- ══════════ 6. MENTAL MODEL ══════════ -->
+    <section class="s" id="s6">
+      <h2><span class="num">6</span> Mentales Modell des Nutzers</h2>
+      <p class="intro">Was denkt die Person wahrscheinlich in Schlüsselmomenten — und wie (gut) beantwortet die App es heute?</p>
+      <div class="quotes">
+        <div class="quote"><div class="q">Wo fange ich an?</div><div class="a"><span class="b b-ok">gut</span> „Up next“ + „Start focus“ + „New“ geben einen klaren Einstieg. <code class="ev">web/js/tasks.js:360</code></div></div>
+        <div class="quote"><div class="q">Ist das jetzt erlaubt / soll ich starten?</div><div class="a"><span class="b b-gap">unklar</span> Keine Freigabe-Logik; Start ist immer möglich. Readiness ist nur Hinweis. <code class="ev">web/js/timer.js:43</code></div></div>
+        <div class="quote"><div class="q">Habe ich alle Pflichtdaten eingegeben?</div><div class="a"><span class="b b-part">teils</span> Nur Aufgabentext ist Pflicht; alles andere optional — gut für Konzentration, aber „ist das genug?“ bleibt offen. <code class="ev">server/routes.js:68</code></div></div>
+        <div class="quote"><div class="q">Kann ich jetzt starten?</div><div class="a"><span class="b b-ok">ja</span> Immer sofort — ein Klick. Kein Blocker. <code class="ev">web/js/today.js:29</code></div></div>
+        <div class="quote"><div class="q">Was passiert, wenn Health-Daten fehlen?</div><div class="a"><span class="b b-ok">ehrlich</span> Ehrliche Leerzustände, Kapazität = 1,0×, „Not enough data“. <code class="ev">web/js/health.js:27</code></div></div>
+        <div class="quote"><div class="q">Speichert die App meinen Plan automatisch?</div><div class="a"><span class="b b-part">ja, aber unsichtbar</span> Jede Mutation persistiert server-seitig — aber ohne sichtbares „gespeichert“. <code class="ev">web/js/api.js:9</code></div></div>
+        <div class="quote"><div class="q">Kann ich den Plan später ändern?</div><div class="a"><span class="b b-ok">ja</span> Alles editier-/verschiebbar (Drag&amp;Drop, Detail). <code class="ev">web/js/week.js:103</code></div></div>
+        <div class="quote"><div class="q">Wer sieht meine Daten?</div><div class="a"><span class="b b-gap">Risiko</span> Kein Login, API offen, <code class="k">CORS *</code>, sensible Health-Daten. Antwort heute: „potenziell jeder mit Netzzugang zum Port“. <code class="ev">server/index.js:22</code></div></div>
+        <div class="quote"><div class="q">Warum ist plötzlich ein Timer auf jeder Website?</div><div class="a"><span class="b b-gap">Überraschung</span> Extension-Overlay auf <code class="k">&lt;all_urls&gt;</code>, nicht schließbar. <code class="ev">src/content/overlay.js:24</code></div></div>
+        <div class="quote"><div class="q">Woher kommt dieses Lesezeichen „⏱ 00:00“?</div><div class="a"><span class="b b-gap">Überraschung</span> Extension legt selbst ein Lesezeichen an &amp; benennt es laufend um. <code class="ev">src/infrastructure/chromeBookmarkBarTicker.js:46</code></div></div>
+      </div>
+    </section>
+
+    <!-- ══════════ 7. NAVIGATION REVIEW ══════════ -->
+    <section class="s" id="s7">
+      <h2><span class="num">7</span> Navigation Review</h2>
+      <p class="intro">Findet der Nutzer den wichtigsten CTA? Weiß er, wo er ist? Gibt es Dead Ends, Redundanz, versteckte Funktionen oder Mobile-Probleme?</p>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Frage</th><th>Befund</th><th>Bewertung</th><th>Beleg</th></tr></thead>
+          <tbody>
+            <tr><td>Wichtigster CTA schnell findbar?</td><td><b>Ja.</b> „New“, „Up next → Start focus“, „Start now“, persistenter Timer — Start ist nie mehr als ein Klick entfernt.</td><td><span class="b b-ok">gut</span></td><td><code class="ev">web/index.html:167</code></td></tr>
+            <tr><td>Klar, wo man sich befindet?</td><td>Aktiver Nav-State + View-Titel; Exam-Subnav nur in Exam sichtbar.</td><td><span class="b b-ok">gut</span></td><td><code class="ev">web/js/nav.js:18</code></td></tr>
+            <tr><td>Menüs logisch?</td><td>6 Top-Level klar; aber „Notes“ existiert 3-fach (Ansicht, Exam-Tab, Pinned auf Today).</td><td><span class="b b-part">ok</span></td><td><code class="ev">web/js/notes.js:257</code></td></tr>
+            <tr><td>Zu viele Schritte?</td><td>Aufgaben-Detail bündelt 6 Felder hinter „Expand“ — gut für Fokus, aber Zeit/Dauer sind „versteckt“.</td><td><span class="b b-part">ok</span></td><td><code class="ev">web/js/tasks.js:235</code></td></tr>
+            <tr><td>Dead Ends?</td><td><b>Ja:</b> Health leer → nur „Enter manually“; Insights leer → keine Handlung; User-Chip → keine Profilseite.</td><td><span class="b b-gap">Problem</span></td><td><code class="ev">web/js/health.js:194</code></td></tr>
+            <tr><td>Redundante Seiten?</td><td>Drei Zeitdarstellungen: Day-Timeline, Wochen-Board, „Pace“-Timeline (<code class="k">#timeline</code>). Notes 3-fach.</td><td><span class="b b-part">prüfen</span></td><td><code class="ev">web/js/timeline.js</code></td></tr>
+            <tr><td>Versteckte wichtige Funktionen?</td><td>Dauer-Slider in <code class="k">&lt;details&gt;</code>; Drag nur per Grip-Glyph; Diktat nur bei Browser-Support; Push-Toggle bis Support versteckt.</td><td><span class="b b-part">ok</span></td><td><code class="ev">web/index.html:119</code></td></tr>
+            <tr><td>Mobile UX?</td><td>Desktop-orientiertes <code class="k">sidebar + main</code>-Grid; <code class="k">viewport-fit=cover</code> gesetzt. Wie die 3-Spalten-„Today“ auf schmalen Screens umbricht, ist im CSS nicht abschließend verifiziert.</td><td><span class="b b-nv">Needs manual verification</span></td><td><code class="ev">web/index.html:5</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout co-risk">
+        <h4>Navigations-Hauptprobleme</h4>
+        <ol style="margin:0; padding-left:20px">
+          <li><b>Dead Ends bei leeren Ansichten &amp; fehlender Profilseite</b> — der User-Chip suggeriert ein Konto/Profil, führt aber nirgendwohin.</li>
+          <li><b>Notes-Redundanz</b> — dieselbe Entität an drei Orten kann verwirren, welche „die echte“ ist.</li>
+          <li><b>Mobile</b> ist das größte offene Risiko und sollte real auf Geräten getestet werden.</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ══════════ 8. FEHLENDE FEATURES ══════════ -->
+    <section class="s" id="s8">
+      <h2><span class="num">8</span> Fehlende Features</h2>
+      <p class="intro">Was für ein produktreifes Lern-/Planungsprodukt fehlt — priorisiert nach Must / Should / Nice / (jetzt) nicht nötig. „Must-have“ heißt: ohne dies kein seriöses Multi-User-Release.</p>
+
+      <div class="grid g2">
+        <div class="card">
+          <h4><span class="b b-gap">Must-have</span> &nbsp;Produktreife-Blocker</h4>
+          <ul style="margin:6px 0 0">
+            <li><b>Erstklassiger Hand-off zu externen Lern-Seiten.</b> Link-/URL-Feld an Aufgabe/Thema, klickbare Links, „Ressource öffnen“, Timer an die Seite koppeln. Das ist die <em>Kern-Mechanik</em> einer Planungs-App, die extern ausführt — heute nicht gebaut (<code class="ev">web/js/notes.js:158</code>).</li>
+            <li><b>Authentifizierung &amp; Datentrennung.</b> Login/Session + <code class="k">user_id</code>-Scoping. Heute: keins — API offen, Health-PII lesbar (<code class="ev">server/routes.js:153</code>, <code class="ev">docs/DEPLOY.md:122</code>).</li>
+            <li><b>Onboarding + geführte Leerzustände + Demo-Daten.</b> Heute landet man in einer leeren App (<code class="ev">web/js/nav.js:35</code>).</li>
+            <li><b>Profil-/Einstellungs-Screen.</b> Felder existieren (Body, Chronotyp, Consent, Gerät), aber ohne UI (<code class="ev">server/repo.js:317</code>).</li>
+            <li><b>Sichtbares Speicher-/Fehler-Feedback.</b> Fehler enden in <code class="k">console.warn</code> (<code class="ev">web/js/tasks.js:29</code>).</li>
+            <li><b>Verifiziertes Mobile-Layout.</b> Aktuell Desktop-Grid; Umbruch ungeprüft.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4><span class="b b-part">Should-have</span> &nbsp;Deutlicher Mehrwert</h4>
+          <ul style="margin:6px 0 0">
+            <li><b>Machbarkeits-„Cushion“.</b> „Reicht die Zeit bis zur Prüfung?“ — Pensum vs. geplante/verfügbare Zeit (<code class="ev">docs/SPEC.md:314</code>).</li>
+            <li><b>Readiness an Handlung koppeln.</b> Heute nur Anzeige „aim ~Xh“ ohne Konsequenz (<code class="ev">web/js/today.js:66</code>).</li>
+            <li><b>Kurze Post-Session-Reflexion</b> (Geschafft? Warum nicht?) → Lern-Feedback-Loop (<code class="ev">docs/SPEC.md:181</code>).</li>
+            <li><b>Daten-Export im UI</b> (JSON/CSV/ICS) statt nur DB-Datei kopieren.</li>
+            <li><b>Extension-Overlay: Schließen/Deaktivieren + Einstellungen</b> (<code class="ev">src/content/overlay.js:357</code>).</li>
+            <li><b>Echte Wearable-Kopplung</b> (OAuth/Import-UI) statt nur Roh-API.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4><span class="b b-info">Nice-to-have</span> &nbsp;Differenzierung</h4>
+          <ul style="margin:6px 0 0">
+            <li><b>Review-<em>Terminierung</em> (nicht die Engine).</b> FSRS/aktives Wiederholen läuft bewusst <b>extern</b>; sinnvoll wäre nur, <em>Review-Blöcke</em> zu planen, die auf die externe Ressource verlinken.</li>
+            <li><b>Automatischer Scheduler</b> (freie Slots, Earliest-Deadline-First).</li>
+            <li><b>Kalender-Sync</b> (ICS/CalDAV), Auto-Reschedule.</li>
+            <li><b>KI-Planungsassistent.</b> Consent-Feld <code class="k">aiEnabled</code> ist schon da, aber ohne Funktion (<code class="ev">server/repo.js:349</code>).</li>
+            <li><b>Body-Doubling / Co-Study.</b></li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4><span class="b b-muted">Nicht nötig (jetzt)</span></h4>
+          <ul style="margin:6px 0 0">
+            <li><b>Admin/Team/Rollen</b> — kein Bedarf für einen Single-User-Fokus (erst nach echtem Tenancy).</li>
+            <li><b>Öffentliche Leaderboards</b> — explizites Spec-Anti-Ziel (<code class="ev">docs/SPEC.md:457</code>).</li>
+            <li><b>Native-Mac-Parität im Web</b> — dafür existiert der separate <code class="k">Pace/</code>-Track (SwiftUI).</li>
+            <li><b>Gamifizierung von „Stunden“</b> — bewusst vermeiden (<code class="ev">docs/SPEC.md:455</code>).</li>
+            <li><b>Eigene Lern-/Übungs-Engine im Web</b> — <em>bewusst extern</em>, siehe Kasten unten.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout co-info">
+        <h4>Bewusst <em>außerhalb</em> des Scopes (extern gelöst)</h4>
+        <p style="margin-bottom:0">Auf Klarstellung des Autors: <b>Kairos ist eine reine Planungs-App</b>; die eigentliche <b>Ausführung und das aktive Lernen</b> (Karteikarten, Retrieval, Lesen, Videos) passieren auf <b>externen, verlinkten Webseiten</b>. Daher sind <b>FSRS/Spaced-Repetition-Engine, Retrieval-Prompts, Fehler-Vault und Post-Session-Lernkarten</b> <u>kein</u> Mangel der App, sondern bewusst delegiert. Die Konsequenz: Der Wert der App steht und fällt mit der <b>Qualität der Verlinkung/Hand-offs</b> zu diesen Seiten — genau dort liegt heute die größte echte Lücke (siehe Must-have oben).</p>
+      </div>
+    </section>
+
+    <!-- ══════════ 9. OVERENGINEERING ══════════ -->
+    <section class="s" id="s9">
+      <h2><span class="num">9</span> Unnötige Features / Overengineering</h2>
+      <p class="intro">Wo aktuell Komplexität ohne proportionalen Nutzerwert steckt, technische Konzepte ins UI durchschlagen oder Dinge doppelt gebaut sind.</p>
+
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Beobachtung</th><th>Warum problematisch</th><th>Beleg</th><th>Empfehlung</th></tr></thead>
+          <tbody>
+            <tr><td><b>Zwei divergente Pomodoro-Engines</b></td><td><code class="k">shared/pomodoro.js</code> (PWA/Server) vs. <code class="k">src/domain/pomodoroDomain.js</code> (Extension) mit <b>unterschiedlichen Clamps</b> (Fokus 5–90 vs. 10–90 usw.) und abweichender <code class="k">resetSession</code>-Signatur → gleicher Nutzer, unterschiedliches Verhalten; Wartungs-/QA-Last.</td><td><code class="ev">src/domain/pomodoroDomain.js:44</code></td><td>Extension auf <code class="k">shared/</code> vereinheitlichen; eine Quelle der Wahrheit.</td></tr>
+            <tr><td><b>Drei Zeitdarstellungen</b></td><td>Day-Timeline, Wochen-Board <em>und</em> „Pace“-Timeline (<code class="k">#timeline</code>). Letztere überschneidet sich stark mit der Day-Timeline; unklarer Zusatznutzen.</td><td><code class="ev">web/js/timeline.js</code></td><td>„Pace“-Timeline in Day-/Week-View integrieren oder entfernen.</td></tr>
+            <tr><td><b>Health-Backend ≫ Health-Nutzung</b></td><td>28 kanonische Metriken, 6 Quellen-Mapper, Intraday-Samples, RFC-genaue Normalisierung — aber <b>keine</b> Live-Geräteanbindung im UI und nur wenige Karten. Starkes Fundament, aktuell aber überinvestiert relativ zur erreichbaren Nutzung.</td><td><code class="ev">server/health/fields.js:16</code></td><td>Fundament behalten, aber Import-/Verbindungs-UI liefern, damit es <em>erreichbar</em> wird.</td></tr>
+            <tr><td><b>Bookmark-Bar-Ticker (Extension)</b></td><td>Legt selbst ein Lesezeichen an und benennt es laufend um; Titel-Heuristik trifft nicht-englische Leisten evtl. daneben; überrascht Nutzer. Hoher Aufwand, niedriger Wert.</td><td><code class="ev">src/infrastructure/chromeBookmarkBarTicker.js:46</code></td><td>Entfernen oder klar opt-in.</td></tr>
+            <tr><td><b>All-Sites-Overlay: richtige Idee, halb gebaut</b></td><td>Als Fokus-Brücke auf den <em>externen Lern-Seiten</em> ist das Overlay konzeptionell genau richtig (Kairos ist ja die Planungs-/Fokus-Ebene über der externen Ausführung). Aber es ist <b>nicht an Aufgabe/Seite gekoppelt</b>, hat <b>keinen Schließen-Knopf</b> und kostet die Install-Warnung „all your data on all websites“.</td><td><code class="ev">manifest.json:12</code></td><td>Behalten, aber: Schließen/Opt-out, an aktive Aufgabe koppeln, Permissions minimieren.</td></tr>
+            <tr><td><b>Multi-Tenant-Migration gebaut, aber geparkt</b></td><td>Vollständiges Auth-/Tenancy-Schema existiert, wird aber <b>nirgends aufgerufen</b>; dazu liegt eine <code class="k">*.pre-auth-backup</code>-DB herum. Toter Code + Verwirrungsrisiko.</td><td><code class="ev">server/migrations/multitenant.mjs</code></td><td>Entweder aktivieren (§10/§12) oder bewusst als „geplant“ dokumentieren; Backup-DB aufräumen.</td></tr>
+            <tr><td><b>Technik schlägt ins UI durch</b></td><td>„NTP“/„lokal“-Label, Push-„test“-Notification, „Offline — kept locally“ — teils Entwickler-Sprache.</td><td><code class="ev">web/js/clock.js:20</code></td><td>In nutzerfreundliche Formulierungen übersetzen.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout co-info">
+        <h4>Wichtige Nuance</h4>
+        <p style="margin-bottom:0">„Overengineering“ heißt hier <b>nicht schlecht gebaut</b> — im Gegenteil, die Domänenlogik, die Readiness-Berechnung (nachvollziehbare Gründe, saubere Clamps <code class="k">[0.6, 1.15]</code>) und die Timer-Downtime-Robustheit sind <b>überdurchschnittlich sauber</b> (<code class="ev">server/health/context.js:88</code>, <code class="ev">tests/timerFixes.test.js:38</code>). Das Problem ist die <b>Schieflage</b>: viel Tiefe im Backend/der Domäne, zu wenig an der erreichbaren Oberfläche (Onboarding, Geräte-Anbindung, Profil, Auth).</p>
+      </div>
+    </section>
+
+    <!-- ══════════ 10. UX-RISIKO ══════════ -->
+    <section class="s" id="s10">
+      <h2><span class="num">10</span> UX-Risikoanalyse</h2>
+      <p class="intro">Bewertung nach Eintrittswahrscheinlichkeit und Schwere. <span class="sev h"></span>hoch <span class="sev m"></span>mittel <span class="sev l"></span>gering.</p>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Risiko</th><th>Wahrsch.</th><th>Schwere</th><th>Beleg</th><th>Gegenmittel</th></tr></thead>
+          <tbody>
+            <tr><td><b>Datenleck / -missbrauch</b> — unauth API, <code class="k">CORS *</code>, Health-PII per <code class="k">GET /api/profile</code>, <code class="k">/api/push/test</code>-Broadcast für alle, VAPID-Private-Key in der SQLite-Datei</td><td class="tight"><span class="sev m"></span>mittel</td><td class="tight"><span class="sev h"></span><b>hoch</b></td><td><code class="ev">server/index.js:22</code>, <code class="ev">server/routes.js:24</code></td><td>Auth + Tenancy; API hinter Login; Proxy-Härtung; Key aus DB in Secret.</td></tr>
+            <tr><td><b>Nutzer versteht die App nicht</b> (leerer Erststart, kein Onboarding)</td><td class="tight"><span class="sev h"></span>hoch</td><td class="tight"><span class="sev m"></span>mittel</td><td><code class="ev">web/js/nav.js:35</code></td><td>Onboarding, Demo-Daten, leere Zustände mit CTA.</td></tr>
+            <tr><td><b>Schlechte Mobile-Bedienbarkeit</b></td><td class="tight"><span class="b b-nv">NV</span></td><td class="tight"><span class="sev h"></span>hoch</td><td><code class="ev">web/index.html:5</code></td><td>Real auf Geräten testen; responsives Layout.</td></tr>
+            <tr><td><b>Start mit unvollständigen Daten</b> / kein „genug?“-Signal</td><td class="tight"><span class="sev m"></span>mittel</td><td class="tight"><span class="sev l"></span>gering</td><td><code class="ev">server/routes.js:68</code></td><td>Für Konzentration bewusst niedrigschwellig lassen; optionaler Hinweis.</td></tr>
+            <tr><td><b>Readiness ohne Konsequenz</b> → Selbstüberschätzung, Schlaf-Schutz nicht durchgesetzt</td><td class="tight"><span class="sev m"></span>mittel</td><td class="tight"><span class="sev m"></span>mittel</td><td><code class="ev">web/js/today.js:74</code></td><td>„aim“ sanft an Tagesziel/Warnung koppeln.</td></tr>
+            <tr><td><b>Fehlende Fehlermeldungen</b> (nur <code class="k">console.warn</code>)</td><td class="tight"><span class="sev m"></span>mittel</td><td class="tight"><span class="sev m"></span>mittel</td><td><code class="ev">web/js/exam.js:48</code></td><td>Sichtbare Toasts/Inline-Fehler + Retry.</td></tr>
+            <tr><td><b>Unklare Verantwortlichkeit</b> (kein Login, aber User-Chip suggeriert Konto)</td><td class="tight"><span class="sev h"></span>hoch</td><td class="tight"><span class="sev m"></span>mittel</td><td><code class="ev">web/js/main.js:62</code></td><td>Entweder echtes Konto oder Chip entschärfen.</td></tr>
+            <tr><td><b>Fehlende Trust-Signale</b> (kein „gespeichert“, keine Datenschutz-Info, Branding Kairos/Focus Pomodoro gemischt)</td><td class="tight"><span class="sev h"></span>hoch</td><td class="tight"><span class="sev l"></span>gering</td><td><code class="ev">src/presentation/sidepanel.html:15</code></td><td>Konsistentes Branding, Save-Indikator, Datenschutz-Hinweis.</td></tr>
+            <tr><td><b>Extension überrascht/verunsichert</b> (Overlay überall, Auto-Lesezeichen, Max-Prio-Notifications)</td><td class="tight"><span class="sev h"></span>hoch</td><td class="tight"><span class="sev m"></span>mittel</td><td><code class="ev">src/content/overlay.js:24</code></td><td>Opt-in/Schließen; Lesezeichen entfernen; Notif-Prio senken.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ══════════ 11. DIAGRAMME ══════════ -->
+    <section class="s" id="s11">
+      <h2><span class="num">11</span> Diagramme &amp; Darstellungen</h2>
+      <p class="intro">Alle Diagramme sind aus dem realen Code abgeleitet. Wo die Aviation-Vorlage Konzepte vorsieht, die in Kairos fehlen, ist dies sichtbar markiert.</p>
+
+      <!-- A · Flowchart -->
+      <h3>A) User Journey Flowchart</h3>
+      <div class="flow">
+        <div class="node entry" style="border-color:var(--accent)">App öffnen<small>PWA / Extension</small></div>
+        <div class="arr"></div>
+        <div class="node">Dashboard „Today“ verstehen<small>Plan · Tasks · Timer · Tagesziel</small></div>
+        <div class="arr"></div>
+        <div class="node">Aufgabe anlegen<small>Text (+Diktat) → heute geplant</small></div>
+        <div class="arr"></div>
+        <div class="node">Route + Parameter<small>Uhrzeit/Dauer/Prio · Session-Länge</small></div>
+        <div class="arr"></div>
+        <div class="node alt">Readiness / Health prüfen<small>optional · meist leer</small></div>
+        <div class="arr"></div>
+        <div class="node">Aufgabe aktiv setzen<small>„Up next → Start focus“</small></div>
+        <div class="arr"></div>
+        <div class="node warn">Startentscheidung<small>KEINE Freigabe-/Blockade-Logik</small></div>
+        <div class="arr"></div>
+        <div class="node" style="border-color:var(--accent);background:var(--accent-tint)">Fokus starten<small>Server-Timer läuft weiter</small></div>
+        <div class="arr"></div>
+        <div class="node">Session läuft<small>Ring · Now-Linie · Push</small></div>
+        <div class="arr"></div>
+        <div class="node alt">Nach dem Block<small>Pause · Insights · (keine Reflexion)</small></div>
+      </div>
+      <p class="mini" style="color:var(--muted)">Rot = in einer echten „Start-Freigabe“-App eine Kontroll-/Blockade-Stelle; in Kairos bewusst durchlässig (Konzentration: „einfach anfangen“). Amber = optional/oft leer.</p>
+
+      <!-- B · Decision tree -->
+      <h3>B) Decision Tree — „Kann der Fokusblock gestartet werden?“</h3>
+      <div class="tree">
+<span class="q">Kann der Fokusblock gestartet werden?</span>
+├── Aufgabe gewählt?
+│   ├── <span class="yes">Ja</span> → als aktiv setzen (spent_ms wird gutgeschrieben)
+│   └── <span class="no">Nein</span> → <span class="mut">Start TROTZDEM möglich („No task selected“), Zeit zählt nur aufs Tagesziel</span>
+├── Aktuelle Phase = Fokus?
+│   ├── <span class="yes">Ja</span> → Fokus-Dauer
+│   └── <span class="no">Nein</span> → <span class="mut">Pause-Phase, Nutzer kann Tab „Focus“ wählen</span>
+├── Readiness ok? (Schlaf/Recovery)
+│   ├── <span class="yes">Ja/keine Daten</span> → „aim ~Xh“ nur als Hinweis
+│   └── <span class="no">Nein (reduce)</span> → <span class="mut">nur Empfehlung „Ease off today“ — KEIN Block</span>
+├── Überfällige geplante Blöcke offen?
+│   ├── <span class="yes">Nein</span> → nichts zu tun
+│   └── <span class="no">Ja</span> → Nachfrage: erledigt? / neuer Slot / später
+└── <span class="q">Ergebnis:</span> <span class="yes">Start ist IMMER möglich</span> <span class="mut">(kein harter Gate — anders als „Wetter blockiert Start“ in der Aviation-Vorlage)</span>
+      </div>
+      <p class="mini" style="color:var(--muted)">Belege: <code class="ev">web/js/timer.js:43</code>, <code class="ev">web/js/tasks.js:54</code>, <code class="ev">web/js/health.js:23</code>, <code class="ev">web/js/dayTimeline.js:132</code>.</p>
+
+      <!-- C · Swimlane -->
+      <h3>C) Swimlane Activity Diagram</h3>
+      <div class="swim">
+        <div class="swim__label user">USER</div>
+        <div class="swim__steps">
+          <span class="st u">Aufgabe eintippen</span><span class="sep">→</span>
+          <span class="st u">Zeit/Dauer geben</span><span class="sep">→</span>
+          <span class="st u">aktiv setzen</span><span class="sep">→</span>
+          <span class="st u">Start drücken</span><span class="sep">→</span>
+          <span class="st u">fokussieren</span><span class="sep">→</span>
+          <span class="st u">abhaken</span>
+        </div>
+        <div class="swim__label sys">SYSTEM</div>
+        <div class="swim__steps">
+          <span class="st s">Text validieren (400 wenn leer)</span><span class="sep">→</span>
+          <span class="st s">persistieren (SQLite)</span><span class="sep">→</span>
+          <span class="st s">volle Momentaufnahme</span><span class="sep">→</span>
+          <span class="st s">Server-Timer: endsAt</span><span class="sep">→</span>
+          <span class="st s">1-s-Tick akkumuliert Fokus</span><span class="sep">→</span>
+          <span class="st s">daily_metrics + sessions</span><span class="sep">→</span>
+          <span class="st s">Web-Push bei Phasenende</span>
+        </div>
+      </div>
+      <p class="mini" style="color:var(--muted)">Belege: <code class="ev">server/routes.js:66</code>, <code class="ev">server/timer.js:32</code>, <code class="ev">server/index.js:115</code>. Es gibt <b>keine</b> System-Schritte „Route validieren“, „Wetter prüfen“, „Risiko berechnen“, „Startfreigabe“ — diese existieren in Kairos nicht.</p>
+
+      <!-- D · Use case -->
+      <h3>D) Use-Case-Diagramm</h3>
+      <div class="usecase">
+        <div class="actor"><div class="fig">🧑‍🎓</div><div class="nm">Lernende:r</div></div>
+        <div class="cases">
+          <span class="uc">Aufgabe planen</span><span class="uc">Fokus starten</span><span class="uc">Prüfung/Themen pflegen</span>
+          <span class="uc">Notizen erfassen</span><span class="uc">Health manuell eintragen</span><span class="uc">Insights ansehen</span>
+        </div>
+      </div>
+      <div class="usecase">
+        <div class="actor sys"><div class="fig">⚙︎</div><div class="nm">Timer-Engine (System)</div></div>
+        <div class="cases">
+          <span class="uc">Zeit server-autoritativ zählen</span><span class="uc">Fokuszeit gutschreiben</span><span class="uc">Readiness berechnen</span><span class="uc">Snapshot liefern</span>
+        </div>
+      </div>
+      <div class="usecase">
+        <div class="actor ext"><div class="fig">⌚</div><div class="nm">Wearable / Health-Quelle</div></div>
+        <div class="cases">
+          <span class="uc">Tagesdaten importieren (API)</span><span class="uc gap">Live-Sync koppeln (fehlt)</span>
+        </div>
+      </div>
+      <div class="usecase">
+        <div class="actor ext"><div class="fig">🔔</div><div class="nm">Push-Service</div></div>
+        <div class="cases">
+          <span class="uc">Phasenwechsel benachrichtigen</span><span class="uc gap">Admin/Team verwalten (existiert nicht)</span>
+        </div>
+      </div>
+      <p class="mini" style="color:var(--muted)">Gestrichelt = in der Vorlage vorgesehen, in Kairos <b>nicht vorhanden</b>. Es gibt <b>keinen Admin-Akteur</b>.</p>
+
+      <!-- E · State diagrams -->
+      <h3>E) State Diagram</h3>
+      <h4>E.1 · Timer-Zustandsmaschine (real, <code class="ev">shared/pomodoro.js</code>)</h4>
+      <div class="fsm">
+        <span class="state init">IDLE</span>
+        <span class="to">→<small>start</small></span>
+        <span class="state">RUNNING</span>
+        <span class="to">⇄<small>pause/resume</small></span>
+        <span class="state">PAUSED</span>
+        <span class="to">→<small>phase complete</small></span>
+        <span class="state">FOCUS ⭢ SHORT/LONG-BREAK ⭢ FOCUS</span>
+        <span class="to">→<small>reset</small></span>
+        <span class="state term">IDLE</span>
+      </div>
+      <h4>E.2 · Aufgaben-Lebenszyklus (real) — Mapping zur Vorlage</h4>
+      <div class="fsm">
+        <span class="state init">OPEN<small style="display:block;font-size:9px">≈ DRAFT</small></span>
+        <span class="to">→<small>scheduledMin</small></span>
+        <span class="state">SCHEDULED<small style="display:block;font-size:9px">≈ PLANNED</small></span>
+        <span class="to">→<small>now∈slot</small></span>
+        <span class="state">NOW<small style="display:block;font-size:9px">≈ IN_PROGRESS</small></span>
+        <span class="to">→<small>ende</small></span>
+        <span class="state err">OVERDUE<small style="display:block;font-size:9px">≈ MISSING_DATA</small></span>
+        <span class="to">→<small>Prompt</small></span>
+        <span class="state term">DONE<small style="display:block;font-size:9px">≈ COMPLETED</small></span>
+      </div>
+      <p class="mini" style="color:var(--muted)">Die Vorlage nennt zusätzlich <code class="k">CANCELLED / BLOCKED / NEEDS_REVIEW</code>. In Kairos existiert davon nur ein informelles <b>OVERDUE</b> (offen &amp; Zeit vorbei → Nachfrage, kein „blockiert“-Status). <code class="k">BLOCKED</code> und <code class="k">NEEDS_REVIEW</code> gibt es nicht. Löschen ersetzt „CANCELLED“. Belege: <code class="ev">shared/daySchedule.js:61</code>, <code class="ev">web/js/dayTimeline.js:118</code>.</p>
+
+      <!-- F · IA map -->
+      <h3>F) Information Architecture Map (real)</h3>
+      <div class="ia">
+<span class="root">Kairos (PWA)</span>
+├── <span class="l1">Today</span> <span class="tag b b-ok">Default/Dashboard</span>
+│   ├── <span class="l2">Tages-Timeline (06–24, Now-Linie, Overdue-Prompt)</span>
+│   ├── <span class="l2">Tasks (offen/erledigt · Detail: Prio/Dauer/Zeit/Due/Subject/Subtasks)</span>
+│   ├── <span class="l2">Up next · Pinned Note · Focus-this-week · Tagesziel-Ring</span>
+├── <span class="l1">Week</span> <span class="l2">7-Tage-Board, Drag&amp;Drop, all-day + getaktet</span>
+├── <span class="l1">Exam</span> <span class="l2">Chips (Auswahl/Add) · Countdown · Pensum</span>
+│   ├── <span class="l2">Tab „Topics“ (Checkliste + Pace-Timeline)</span>
+│   └── <span class="l2">Tab „Notes“ (prüfungsbezogen)</span>
+├── <span class="l1">Notes</span> <span class="l2">Filter · Compose (Pin/Subject) · Grid · „→ plan it“</span>
+├── <span class="l1">Health</span> <span class="l2">Capacity · Source-Chips · Sleep/Recovery/Activity/Capacity/Body/Wellness · „Enter manually“</span>
+├── <span class="l1">Insights</span> <span class="l2">Woche · Streak · Tasks · Fächer · bester Tag</span>
+├── <span class="l1">[Persistent] Focus-Timer</span> <span class="tag b b-ok">immer sichtbar</span>
+├── <span class="l1">[Sidebar] Push-Toggle · Offline-Banner</span>
+└── <span class="l1">[Sidebar] User-Chip</span> <span class="tag b b-gap">Sackgasse — keine Profilseite</span>
+
+<span class="root">Chrome-Extension (separat)</span>
+├── <span class="l1">Side-Panel</span> <span class="l2">Timer + Todo (teilt Backend, wenn erreichbar)</span>
+├── <span class="l1">All-Sites-Overlay</span> <span class="tag b b-gap">auf jeder Seite, nicht schließbar</span>
+├── <span class="l1">Badge · Notifications · Bookmark-Ticker</span>
+      </div>
+
+      <!-- G · Priority matrix -->
+      <h3>G) Feature Priority Matrix</h3>
+      <div class="quad-wrap">
+        <div class="quad-grid">
+          <div class="axis-y">Nutzerwert →</div>
+          <div>
+            <div class="quad">
+              <div class="cell q1">
+                <h5 style="color:var(--accent-ink)">Hoher Wert · geringe Komplexität → Quick Wins</h5>
+                <span class="fchip">Onboarding + Demo-Daten</span>
+                <span class="fchip">Save-/Fehler-Feedback</span>
+                <span class="fchip">Profil-/Settings-Screen</span>
+                <span class="fchip">Branding/Sprache vereinheitlichen</span>
+                <span class="fchip">Overlay-Opt-out</span>
+                <span class="fchip">Leere Zustände mit CTA</span>
+              </div>
+              <div class="cell q2">
+                <h5 style="color:var(--amber-ink)">Hoher Wert · hohe Komplexität → strategisch</h5>
+                <span class="fchip">Auth + Datentrennung</span>
+                <span class="fchip">Mobile-Optimierung</span>
+                <span class="fchip miss">Machbarkeits-„Cushion“</span>
+                <span class="fchip miss">Echte Wearable-Kopplung</span>
+                <span class="fchip miss">FSRS-Review</span>
+                <span class="fchip miss">Auto-Scheduler</span>
+              </div>
+              <div class="cell q3">
+                <h5 style="color:var(--muted)">Geringer Wert · geringe Komplexität → optional</h5>
+                <span class="fchip">Notif-Prio senken</span>
+                <span class="fchip">„NTP/lokal“-Label übersetzen</span>
+                <span class="fchip">Notes-Redundanz reduzieren</span>
+              </div>
+              <div class="cell q4">
+                <h5 style="color:var(--rust-ink)">Geringer Wert · hohe Komplexität → meiden/entfernen</h5>
+                <span class="fchip">Bookmark-Bar-Ticker</span>
+                <span class="fchip">3. „Pace“-Timeline</span>
+                <span class="fchip">Zweite Timer-Engine</span>
+                <span class="fchip miss">Admin/Team</span>
+              </div>
+            </div>
+            <div class="axis-x">Technische Komplexität →</div>
+          </div>
+        </div>
+        <p class="mini" style="color:var(--muted)">Durchgezogen = existiert/klein · gestrichelt = noch nicht gebaut. Empfehlung: erst das grüne Quadrant (Quick Wins), dann das amber (strategisch), rotes Quadrant abbauen.</p>
+      </div>
+
+      <!-- H · UX Gap matrix -->
+      <h3>H) UX Gap Matrix</h3>
+      <div class="tbl-wrap">
+        <table class="compact">
+          <thead><tr><th>Nutzerbedürfnis</th><th>Aktueller Stand</th><th>Risiko</th><th>Empfehlung</th><th>Prio</th></tr></thead>
+          <tbody>
+            <tr><td>„Ich will sofort loslegen können.“</td><td>Erfüllt (3 CTAs, persistenter Timer)</td><td><span class="sev l"></span>gering</td><td>So lassen; leere Zustände füllen</td><td><span class="b b-ok">P3</span></td></tr>
+            <tr><td>„Ich will verstehen, was die App tut.“</td><td>Kein Onboarding, leerer Start</td><td><span class="sev h"></span>hoch</td><td>Onboarding + Demo-Daten</td><td><span class="b b-gap">P1</span></td></tr>
+            <tr><td>„Meine (Gesundheits-)Daten sollen privat sein.“</td><td>Unauth API, CORS *, PII lesbar</td><td><span class="sev h"></span>hoch</td><td>Auth + Tenancy + Härtung</td><td><span class="b b-gap">P1</span></td></tr>
+            <tr><td>„Reicht meine Zeit bis zur Prüfung?“</td><td>Nur Countdown + Pensum-Feld</td><td><span class="sev m"></span>mittel</td><td>Machbarkeits-„Cushion“</td><td><span class="b b-part">P2</span></td></tr>
+            <tr><td>„Ich will wissen, ob gespeichert wurde.“</td><td>Silent; Fehler nur in Konsole</td><td><span class="sev m"></span>mittel</td><td>Save-Indikator + Fehler-Toasts</td><td><span class="b b-part">P2</span></td></tr>
+            <tr><td>„Ich will mein Profil/meine Einstellungen pflegen.“</td><td>Nur API, kein Screen</td><td><span class="sev m"></span>mittel</td><td>Profil-/Settings-View</td><td><span class="b b-part">P2</span></td></tr>
+            <tr><td>„Die App soll mich nicht auf jeder Website stören.“</td><td>Overlay überall, nicht schließbar</td><td><span class="sev h"></span>hoch</td><td>Opt-out/Schließen; Ticker entfernen</td><td><span class="b b-gap">P1</span></td></tr>
+            <tr><td>„Ich will auf dem Handy arbeiten.“</td><td>Mobile ungeprüft</td><td><span class="sev h"></span>hoch</td><td>Responsive testen/optimieren</td><td><span class="b b-gap">P1</span></td></tr>
+            <tr><td>„Ich will wiederholen, was ich gelernt habe.“</td><td>Nur Themen-Checkliste</td><td><span class="sev l"></span>gering</td><td>FSRS-Review (später)</td><td><span class="b b-info">P3</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- I · Nav flow map -->
+      <h3>I) Navigation Flow Map — wo Nutzer hängen bleiben</h3>
+      <div class="navflow">
+        <div class="col">
+          <div class="nfnode entry"><div class="hd">▶ Today (Entry)</div><div class="st">Alles startet hier. Klarer CTA.</div></div>
+          <div class="nfnode"><div class="hd">Aufgabe anlegen → Start</div><div class="st">Kern-Loop, flüssig.</div></div>
+        </div>
+        <div class="col">
+          <div class="nfnode"><div class="hd">Week</div><div class="st">Drag&amp;Drop, klar.</div></div>
+          <div class="nfnode"><div class="hd">Exam → Topics/Notes</div><div class="st">Tab-Wechsel ok; Pensum ↔ Aufgaben nicht verrechnet.</div></div>
+        </div>
+        <div class="col">
+          <div class="nfnode stuck"><div class="hd">⚠ Health (leer)</div><div class="st">Ohne Wearable nur „Enter manually“ → Dead End.</div></div>
+          <div class="nfnode stuck"><div class="hd">⚠ Insights (leer)</div><div class="st">Ohne Historie kein Inhalt, keine nächste Handlung.</div></div>
+        </div>
+        <div class="col">
+          <div class="nfnode stuck"><div class="hd">⚠ User-Chip</div><div class="st">Sieht nach Konto aus → führt nirgendwohin.</div></div>
+          <div class="nfnode stuck"><div class="hd">⚠ Notes ×3</div><div class="st">Ansicht / Exam-Tab / Pinned — „welche ist die echte?“</div></div>
+        </div>
+      </div>
+      <p class="mini" style="color:var(--muted)">Grün = Einstieg · rot = wahrscheinliche Hänge-/Sackgassen-Punkte. Belege: <code class="ev">web/js/health.js:194</code>, <code class="ev">web/js/insights.js:15</code>, <code class="ev">web/js/main.js:62</code>.</p>
+    </section>
+
+    <!-- ══════════ 12. EMPFEHLUNGEN ══════════ -->
+    <section class="s" id="s12">
+      <h2><span class="num">12</span> Konkrete Empfehlungen</h2>
+
+      <div class="grid g2">
+        <div class="card">
+          <h4>Top 10 UX-Fixes</h4>
+          <ol style="margin:6px 0 0">
+            <li>Onboarding (3 Schritte) + Demo-Daten beim Erststart.</li>
+            <li>Leere Ansichten (Health/Insights) mit erklärendem CTA statt Sackgasse.</li>
+            <li>Sichtbares Save-Feedback + freundliche Fehler-Toasts.</li>
+            <li>Profil-/Settings-Screen (Name, Body, Chronotyp, Gerät, Consent).</li>
+            <li>Branding &amp; Sprache vereinheitlichen (Kairos, eine Sprache pro Locale).</li>
+            <li>Extension-Overlay: Schließen/Deaktivieren + pro-Site-Opt-in.</li>
+            <li>Schnell-Felder (Zeit/Dauer) direkt beim Anlegen, nicht nur im Detail.</li>
+            <li>Readiness sichtbar an „Today“-Ziel koppeln (nicht nur Pille).</li>
+            <li>Notes-Redundanz reduzieren / klar kennzeichnen.</li>
+            <li>Mobile-Layout real testen &amp; fixen.</li>
+          </ol>
+        </div>
+        <div class="card">
+          <h4>Top 10 Produktlücken</h4>
+          <ol style="margin:6px 0 0">
+            <li>Authentifizierung + Datentrennung (Migration aktivieren/fertigbauen).</li>
+            <li>Onboarding-Flow.</li>
+            <li>Profil-/Settings-UI.</li>
+            <li>Machbarkeits-„Cushion“ (Zeit vs. Pensum vs. Deadline).</li>
+            <li>Echte Wearable-Kopplung (Import-/OAuth-UI).</li>
+            <li>Post-Session-Reflexion.</li>
+            <li>Daten-Export (JSON/CSV/ICS).</li>
+            <li>Spaced Repetition (FSRS) auf Themen.</li>
+            <li>Auto-Scheduler / Kalender-Sync.</li>
+            <li>KI-Assistent (Consent-Feld vorhanden, Funktion fehlt).</li>
+          </ol>
+        </div>
+        <div class="card">
+          <h4>Top 10: entfernen / vereinfachen</h4>
+          <ol style="margin:6px 0 0">
+            <li>Zweite Pomodoro-Engine (Extension) → auf <code class="k">shared/</code> vereinheitlichen.</li>
+            <li>Bookmark-Bar-Ticker entfernen (fragil, überraschend).</li>
+            <li>All-Sites-Overlay entschärfen (Opt-in statt <code class="k">&lt;all_urls&gt;</code>).</li>
+            <li>Dritte „Pace“-Timeline in Day/Week integrieren oder streichen.</li>
+            <li>Geparkte Multi-Tenant-Migration: aktivieren oder sauber als „geplant“ markieren.</li>
+            <li><code class="k">*.pre-auth-backup</code>-DB aus dem Repo/Daten-Ordner aufräumen.</li>
+            <li>Max-Prio-Notifications auf normal.</li>
+            <li>Entwickler-Sprache im UI („NTP/lokal“, „test“) übersetzen.</li>
+            <li>Divergierende Clamps/Defaults zwischen den Engines beseitigen.</li>
+            <li>Notes-Dreifach-Darstellung konsolidieren.</li>
+          </ol>
+        </div>
+        <div class="card">
+          <h4>Empfohlene nächste Produktversion (v1.1 „vertrauenswürdig &amp; verständlich“)</h4>
+          <ul style="margin:6px 0 0">
+            <li><b>Sicherheit zuerst:</b> Magic-Link-Auth aktivieren, API hinter Login, Tenancy-Scoping, Proxy-Härtung.</li>
+            <li><b>Verständlichkeit:</b> Onboarding, Demo-Daten, Profil-Screen, Save-/Fehler-Feedback.</li>
+            <li><b>Aufräumen:</b> Extension entschärfen, Duplikate entfernen, Branding/Sprache glätten.</li>
+            <li><b>Mobile</b> verifizieren.</li>
+            <li><i>Bewusst später:</i> FSRS, Auto-Scheduler, Wearable-Live, KI.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout co-ok">
+        <h4>Minimaler MVP-Flow (der „Happy Path“, der zwingend rund sein muss)</h4>
+        <div class="flow" style="margin-top:8px">
+          <div class="node entry" style="border-color:var(--accent)">Login (Magic-Link)</div>
+          <div class="arr"></div>
+          <div class="node">Onboarding: Name · Tagesziel · erste Aufgabe/Prüfung</div>
+          <div class="arr"></div>
+          <div class="node">Aufgabe anlegen &amp; (optional) terminieren</div>
+          <div class="arr"></div>
+          <div class="node" style="border-color:var(--accent);background:var(--accent-tint)">„Start focus“ — ein Klick</div>
+          <div class="arr"></div>
+          <div class="node">Fokus läuft · Phasenwechsel · Fortschritt aufs Tagesziel</div>
+          <div class="arr"></div>
+          <div class="node alt">Abschluss: kurze Reflexion → Insights</div>
+        </div>
+        <p style="margin-bottom:0" class="mini">Heute fehlen davon <b>Login</b> und <b>Onboarding</b> ganz, und die <b>Reflexion</b> am Ende. Der mittlere Teil (Anlegen → Start → Fokus) ist bereits solide.</p>
+      </div>
+    </section>
+
+    <!-- ══════════ 13. VERDICT ══════════ -->
+    <section class="s" id="s13">
+      <h2><span class="num">13</span> Senior Product Verdict</h2>
+
+      <div class="grid g2">
+        <div class="card"><h4>Ist die App für echte Nutzer verständlich?</h4><p style="margin-bottom:0"><b>Der Kern-Loop ja, das Gesamtprodukt nein.</b> „Aufgabe → Start focus → Fokus“ ist vorbildlich niedrigschwellig und Konzentration-gerecht. Aber ohne Onboarding, ohne Profilseite und mit mehreren leeren Ansichten wirkt der Erststart unfertig. <span class="b b-part">bedingt</span></p></div>
+        <div class="card"><h4>Ist der Planungsflow vollständig?</h4><p style="margin-bottom:0"><b>Teilweise.</b> Der Fokus-/Timing-Loop ist komplett. Der Planungs-Loop ist rein manuell (kein Auto-Scheduling, keine Machbarkeits-Prüfung). Und der <b>Hand-off zur externen Ausführung</b> — das Verlinken/Öffnen der Lern-Seite pro Aufgabe — fehlt als eigene Funktion. <em>Aktives Lernen selbst ist bewusst extern und daher kein Mangel.</em> <span class="b b-part">Brücke fehlt</span></p></div>
+        <div class="card"><h4>Kann ein Nutzer „sicher“ starten?</h4><p style="margin-bottom:0"><b>Funktional immer, datenschutz-technisch nein.</b> Der Start eines Fokusblocks ist jederzeit möglich (kein Gate). „Sicher“ im Sinne von Datensicherheit ist es <b>nicht</b>: unauthentifizierte API, <code class="k">CORS *</code>, sensible Gesundheits-/Personendaten offen lesbar. <span class="b b-gap">Risiko</span></p></div>
+        <div class="card"><h4>Was verhindert aktuell Produktreife?</h4><p style="margin-bottom:0">(1) <b>Fehlende Auth/Tenancy</b> — der größte Blocker (nur geparkte Migration). (2) <b>Kein Onboarding</b>. (3) <b>Ungeprüftes Mobile</b>. (4) <b>Vision-Reality-Gap</b> (Spec ≫ Web-Build). (5) <b>Inkonsistentes Branding/Sprache</b> &amp; überraschende Extension.</p></div>
+      </div>
+
+      <div class="callout co-risk">
+        <h4>Zwingend vor einem (Multi-User-)Release</h4>
+        <ol style="margin:0; padding-left:20px">
+          <li><b>Authentifizierung &amp; Datentrennung</b> aktivieren (Magic-Link-Schema ist entworfen) und die API absichern — <b>nicht verhandelbar</b>, weil Gesundheitsdaten im Spiel sind (<code class="ev">server/routes.js:153</code>, <code class="ev">docs/DEPLOY.md:122</code>).</li>
+          <li><b>Onboarding + Leerzustände + Profil-Screen</b>.</li>
+          <li><b>Sichtbares Speicher-/Fehler-Feedback</b> statt stiller <code class="k">console.warn</code>.</li>
+          <li><b>Extension entschärfen</b>: Overlay-Opt-out, Bookmark-Ticker entfernen, Notif-Prio senken, Permissions minimieren.</li>
+          <li><b>Branding &amp; Sprache vereinheitlichen</b>; <b>Mobile</b> real testen.</li>
+          <li><b>Die Brücke bauen</b>: erstklassige Verlinkung/Hand-off zu den externen Lern-Seiten (Link-Feld, klickbar, „Ressource öffnen“, Overlay an die Aufgabe koppeln) — für eine Planungs-App, die extern ausführt, ist <b>das</b> das eigentliche Kernversprechen.</li>
+        </ol>
+      </div>
+
+      <div class="callout co-ok">
+        <h4>Gesamturteil</h4>
+        <p><b>Kairos ist ein handwerklich starker, liebevoll Konzentration-zentrierter Single-User-Fokusplaner — aber noch kein produktreifes Produkt.</b> Die Domänenlogik, der server-autoritative Timer, die erklärbare Readiness-Berechnung und die Test-Disziplin auf Backend-Ebene sind über dem Durchschnitt. Die Produktreife scheitert nicht am Können, sondern an der <b>Reihenfolge der Investitionen</b>: Es wurde tief in Backend/Domäne und in zwei Zusatz-Frontends (Extension) investiert, bevor die <b>Grundlagen für echte Nutzer</b> — Anmeldung, Datenschutz, Onboarding, Mobile, ein ehrlich eingelöstes Leistungsversprechen — standen.</p>
+        <p style="margin-bottom:0"><b>Empfehlung:</b> Einen fokussierten „Trust &amp; Clarity“-Zyklus fahren (Auth, Onboarding, Aufräumen, Mobile), das Feature-Wachstum kurz pausieren — dann ist aus einem sehr guten persönlichen Werkzeug ein veröffentlichbares Produkt.</p>
+      </div>
+    </section>
+
+    <!-- ══════════ 14. USER STORIES · LEBENSZYKLUS ══════════ -->
+    <section class="s" id="s14">
+      <h2><span class="num">14</span> User Stories über den Klausur-Lebenszyklus</h2>
+      <p class="intro">Aus der Sicht eines echten Studenten — <b>was wird pro Phase wirklich gebraucht, und was nicht?</b> Vier Phasen: vor der Lernphase (Planung) · in der Lernphase (Tun) · kurz vor den Klausuren (Endspurt) · nach den Klausuren (Abschluss). Scope-korrekt: <b>Kairos plant &amp; timet, die Ausführung passiert extern</b> — „Ausführungs-Stories“ lösen sich daher in einen <b>Hand-off/Link</b> statt in eine eigene Lern-Engine auf.</p>
+      <div class="legend">
+        <span><b>Braucht der Student das?</b></span>
+        <span><span class="b b-info">Must</span> unverzichtbar</span>
+        <span><span class="b b-part">Should</span> deutlicher Mehrwert</span>
+        <span><span class="b b-muted">Nice</span> optional</span>
+        <span><span class="b b-nv">nicht nötig</span> weglassen/vereinfachen</span>
+        <span>·&nbsp; Kairos: <span class="st-ok">✅ da</span> <span class="st-part">⚠︎ dünn</span> <span class="st-gap">❌ fehlt</span></span>
+      </div>
+
+      <!-- PHASE 1 -->
+      <div class="phase-band"><span class="pnum">1</span><h3>Vor der Lernphase — Planung &amp; Setup</h3><span class="psub">„Der Berg ist riesig — wo fange ich an?“</span></div>
+      <div class="tbl-wrap">
+        <table class="compact">
+          <thead><tr><th>US</th><th>User Story</th><th>Braucht?</th><th>Kairos heute</th><th>Scope</th></tr></thead>
+          <tbody>
+            <tr><td class="usid">1.1</td><td>Als Student möchte ich <b>alle Klausuren mit Datum erfassen</b>, um Dringlichkeit &amp; Reihenfolge zu sehen.</td><td><span class="b b-info">Must</span></td><td><span class="st-ok">✅</span> Exam + Countdown <code class="ev">exam.js:141</code></td><td>In-App</td></tr>
+            <tr><td class="usid">1.2</td><td>…den <b>Stoff in Themen zerlegen</b>, um den Umfang greifbar zu machen.</td><td><span class="b b-info">Must</span></td><td><span class="st-ok">✅</span> Themen-Checkliste <code class="ev">topics.js</code></td><td>In-App</td></tr>
+            <tr><td class="usid">1.3</td><td>…<b>abschätzen, ob meine Zeit bis zur Klausur reicht</b>, um realistisch statt nach Wunsch zu planen.</td><td><span class="b b-info">Must</span></td><td><span class="st-gap">❌</span> kein Machbarkeits-Check <code class="ev">docs/SPEC.md:314</code></td><td>In-App <em>(fehlt)</em></td></tr>
+            <tr><td class="usid">1.4</td><td>…<b>große Aufgaben in kleine, startbare Schritte</b> zerlegen, um die (Konzentration-)Startschwelle zu senken.</td><td><span class="b b-info">Must</span></td><td><span class="st-ok">✅</span> Subtasks <code class="ev">tasks.js:219</code></td><td>In-App</td></tr>
+            <tr><td class="usid">1.5</td><td>…meine <b>Lern-Ressourcen (Skript, Anki, Video, LMS) an ein Thema/eine Aufgabe hängen</b>, um beim Start sofort dort zu sein.</td><td><span class="b b-info">Must</span></td><td><span class="st-gap">❌</span> kein Link-Feld <code class="ev">notes.js:158</code></td><td><b>Brücke</b> <em>(fehlt)</em></td></tr>
+            <tr><td class="usid">1.6</td><td>…Aufgaben auf <b>Tage/Uhrzeiten verteilen</b>, um einen sichtbaren Plan zu haben.</td><td><span class="b b-part">Should</span></td><td><span class="st-ok">✅</span> Day/Week + Drag&amp;Drop (manuell) <code class="ev">week.js:103</code></td><td>In-App</td></tr>
+            <tr><td class="usid">1.7</td><td>…<b>NICHT gezwungen sein</b>, für jede Aufgabe Prio/Dauer/Datum auszufüllen, um nicht in Planung zu versinken.</td><td><span class="b b-info">Must</span> <span class="b b-nv">Anti-Feature</span></td><td><span class="st-ok">✅</span> optional / Progressive Disclosure <code class="ev">tasks.js:235</code></td><td>In-App <em>(gut so)</em></td></tr>
+            <tr><td class="usid">1.8</td><td>…<b>KEIN Wearable-/Health-Setup</b> machen müssen, nur um mit dem Lernen anzufangen.</td><td><span class="b b-nv">nicht nötig</span></td><td><span class="st-part">⚠︎</span> Health optional, aber prominent → Prokrastinationsrisiko</td><td>de-priorisieren</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- PHASE 2 -->
+      <div class="phase-band"><span class="pnum">2</span><h3>In der Lernphase — tägliches Tun</h3><span class="psub">„Hinsetzen und dranbleiben.“</span></div>
+      <div class="tbl-wrap">
+        <table class="compact">
+          <thead><tr><th>US</th><th>User Story</th><th>Braucht?</th><th>Kairos heute</th><th>Scope</th></tr></thead>
+          <tbody>
+            <tr><td class="usid">2.1</td><td>Als Student möchte ich täglich <b>EINEN klaren nächsten Schritt</b> sehen, um ohne Entscheidungslähmung zu starten.</td><td><span class="b b-info">Must</span></td><td><span class="st-ok">✅</span> „Up next“ <code class="ev">tasks.js:360</code></td><td>In-App <em>(stark)</em></td></tr>
+            <tr><td class="usid">2.2</td><td>…mit <b>einem Klick einen Fokusblock starten</b> und die Zeit sichtbar ablaufen sehen, um im Fokus zu bleiben.</td><td><span class="b b-info">Must</span></td><td><span class="st-ok">✅</span> Timer/Ring/Now-Linie <code class="ev">timer.js</code></td><td>In-App <em>(stark)</em></td></tr>
+            <tr><td class="usid">2.3</td><td>…beim Start <b>direkt auf der richtigen externen Seite</b> landen (Anki/Skript/Video), um reibungslos loszulegen.</td><td><span class="b b-info">Must</span></td><td><span class="st-gap">❌</span> kein Hand-off <code class="ev">overlay.js</code></td><td><b>Brücke</b> <em>(fehlt)</em></td></tr>
+            <tr><td class="usid">2.4</td><td>…dass <b>verpasste Blöcke neu eingeplant statt bestraft</b> werden, um Scham/Vermeidung zu verhindern.</td><td><span class="b b-info">Must</span></td><td><span class="st-ok">✅</span> Overdue-Prompt (scham-frei) <code class="ev">dayTimeline.js:132</code></td><td>In-App <em>(stark)</em></td></tr>
+            <tr><td class="usid">2.5</td><td>…sehen, <b>wie viel ich heute/diese Woche fokussiert</b> habe, um Fortschritt zu spüren.</td><td><span class="b b-part">Should</span></td><td><span class="st-ok">✅</span> Tagesziel-Ring + Insights <code class="ev">insights.js</code></td><td>In-App</td></tr>
+            <tr><td class="usid">2.6</td><td>…<b>schnell einen Gedanken/eine offene Frage festhalten</b>, ohne den Flow zu verlieren.</td><td><span class="b b-part">Should</span></td><td><span class="st-ok">✅</span> Notizen + Diktat + „→ plan it“ <code class="ev">notes.js</code></td><td>In-App</td></tr>
+            <tr><td class="usid">2.7</td><td>…<b>NICHT täglich HRV/Readiness deuten</b> müssen, um einfach zu lernen.</td><td><span class="b b-nv">nicht nötig</span></td><td><span class="st-part">⚠︎</span> Signal ohne Konsequenz <code class="ev">today.js:74</code></td><td>de-priorisieren</td></tr>
+            <tr><td class="usid">2.8</td><td>…<b>NICHT auf jeder Website</b> ein nicht-schließbares Timer-Overlay + Auto-Lesezeichen ertragen.</td><td><span class="b b-nv">nicht nötig</span> <span class="b b-nv">Anti</span></td><td><span class="st-gap">❌</span> Overlay ohne Opt-out <code class="ev">overlay.js:24</code></td><td>entschärfen</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- PHASE 3 -->
+      <div class="phase-band"><span class="pnum">3</span><h3>Kurz vor den Klausuren — Endspurt</h3><span class="psub">„Konsolidieren, Lücken schließen, Schlaf halten.“</span></div>
+      <div class="tbl-wrap">
+        <table class="compact">
+          <thead><tr><th>US</th><th>User Story</th><th>Braucht?</th><th>Kairos heute</th><th>Scope</th></tr></thead>
+          <tbody>
+            <tr><td class="usid">3.1</td><td>Als Student möchte ich sehen, <b>welche Themen ich noch NICHT beherrsche</b>, um gezielt Lücken zu schließen.</td><td><span class="b b-info">Must</span></td><td><span class="st-part">⚠︎</span> nur binär done/offen, keine Konfidenz <code class="ev">topics.js:60</code></td><td>In-App <em>(dünn)</em></td></tr>
+            <tr><td class="usid">3.2</td><td>…den <b>Live-Countdown (Tage/Std)</b> sehen, um die Dringlichkeit körperlich zu spüren.</td><td><span class="b b-part">Should</span></td><td><span class="st-ok">✅</span> Countdown-Ring + HMS <code class="ev">exam.js:175</code></td><td>In-App</td></tr>
+            <tr><td class="usid">3.3</td><td>…in den letzten Tagen <b>nur wiederholen (nichts Neues)</b>, um zu konsolidieren.</td><td><span class="b b-part">Should</span></td><td><span class="st-gap">❌</span> kein „Exam-Mode“, aber manuell planbar <code class="ev">docs/SPEC.md:243</code></td><td>Plan In-App · Review extern</td></tr>
+            <tr><td class="usid">3.4</td><td>…meine <b>Notizen/Fehler zur Klausur an einem Ort</b> durchgehen, um Schwächen zu wiederholen.</td><td><span class="b b-part">Should</span></td><td><span class="st-ok">✅</span> Exam-Notes-Tab <code class="ev">exam.js:158</code> · <span class="st-gap">❌</span> keine Links zu externen Decks</td><td>In-App + <b>Brücke</b></td></tr>
+            <tr><td class="usid">3.5</td><td>…dass die App <b>meinen Schlaf schützt</b> und mich nicht zum Durchmachen verleitet.</td><td><span class="b b-part">Should</span></td><td><span class="st-part">⚠︎</span> Readiness nur Anzeige, kein Schutz <code class="ev">today.js:74</code></td><td>In-App <em>(halb)</em></td></tr>
+            <tr><td class="usid">3.6</td><td>…in dieser Phase <b>KEINE Statistik/Umbauten/Ablenkung</b> — nur Countdown, Lückenliste, Wiederholung.</td><td><span class="b b-nv">nicht nötig</span></td><td><span class="st-part">⚠︎</span> Insights bleibt gleich präsent, kein Phasen-Fokus</td><td>Fokus-Modus fehlt</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- PHASE 4 -->
+      <div class="phase-band"><span class="pnum">4</span><h3>Nach den Klausuren — Abschluss &amp; Reset</h3><span class="psub">„Abhaken, kurz reflektieren, aufräumen.“</span></div>
+      <div class="tbl-wrap">
+        <table class="compact">
+          <thead><tr><th>US</th><th>User Story</th><th>Braucht?</th><th>Kairos heute</th><th>Scope</th></tr></thead>
+          <tbody>
+            <tr><td class="usid">4.1</td><td>Als Student möchte ich eine <b>erledigte Klausur abschließen/archivieren</b> (ohne Historie zu verlieren), um Platz für die nächste zu schaffen.</td><td><span class="b b-part">Should</span></td><td><span class="st-part">⚠︎</span> nur Löschen (verliert Kontext), kein „Archiv/Completed“ <code class="ev">repo.js:119</code></td><td>In-App <em>(Lücke)</em></td></tr>
+            <tr><td class="usid">4.2</td><td>…sehen, <b>was gut lief</b> (Fokus-Muster/Fächer/bester Tag), um es beim nächsten Mal besser zu machen.</td><td><span class="b b-part">Should</span></td><td><span class="st-ok">✅</span> Insights <code class="ev">insights.js</code> · <span class="st-part">⚠︎</span> keine pro-Klausur-Retro</td><td>In-App</td></tr>
+            <tr><td class="usid">4.3</td><td>…meine <b>Daten exportieren/sichern</b>, um nichts zu verlieren.</td><td><span class="b b-muted">Nice</span></td><td><span class="st-gap">❌</span> kein Export-UI <code class="ev">docs/README-Lernuhr.md:99</code></td><td>In-App <em>(fehlt)</em></td></tr>
+            <tr><td class="usid">4.4</td><td>…meine <b>Streak/Fokus-Historie behalten</b>, auch wenn ich alte Aufgaben/Themen entferne, um motiviert zu bleiben.</td><td><span class="b b-muted">Nice</span></td><td><span class="st-ok">✅</span> daily_metrics bleibt getrennt <code class="ev">repo.js:272</code></td><td>In-App</td></tr>
+            <tr><td class="usid">4.5</td><td>…<b>KEINE aufwändige Post-Mortem-Analytik/Kalibrierung</b>, um nach der Klausur nicht erschlagen zu werden.</td><td><span class="b b-nv">nicht nötig</span></td><td><span class="st-ok">✅</span> nicht gebaut — <em>richtig so</em> (gehört zu „Pace“)</td><td>extern/Pace</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- RELEVANZ-MATRIX -->
+      <h3>Feature × Phase — wann verdient sich ein Feature seinen Platz?</h3>
+      <p class="mini" style="color:var(--muted)">Kritische Einschätzung der <b>Relevanz je Phase</b> aus Studentensicht: <span class="rel h"></span> hoch · <span class="rel m"></span> mittel · <span class="rel l"></span> gering. Das zeigt, dass manches nur <em>zeitweise</em> zählt (Insights v. a. danach) und manches durchgehend wichtig wäre, aber fehlt (der Hand-off).</p>
+      <div class="tbl-wrap">
+        <table class="compact">
+          <thead><tr><th>Feature</th><th style="text-align:center">Vor</th><th style="text-align:center">Während</th><th style="text-align:center">Kurz&nbsp;davor</th><th style="text-align:center">Danach</th><th>Kritische Anmerkung</th></tr></thead>
+          <tbody>
+            <tr><td>Klausuren + Countdown</td><td style="text-align:center"><span class="rel h"></span></td><td style="text-align:center"><span class="rel m"></span></td><td style="text-align:center"><span class="rel h"></span></td><td style="text-align:center"><span class="rel l"></span></td><td>Kern-Anker; danach nur noch „abschließen“.</td></tr>
+            <tr><td>Themen-Checkliste</td><td style="text-align:center"><span class="rel h"></span></td><td style="text-align:center"><span class="rel h"></span></td><td style="text-align:center"><span class="rel h"></span></td><td style="text-align:center"><span class="rel l"></span></td><td>Durchgehend wertvoll — bräuchte Konfidenz statt nur ✓.</td></tr>
+            <tr><td>Aufgaben + Subtasks</td><td style="text-align:center"><span class="rel h"></span></td><td style="text-align:center"><span class="rel h"></span></td><td style="text-align:center"><span class="rel m"></span></td><td style="text-align:center"><span class="rel l"></span></td><td>Rückgrat des Tuns.</td></tr>
+            <tr><td>Tages-/Wochenplan</td><td style="text-align:center"><span class="rel h"></span></td><td style="text-align:center"><span class="rel h"></span></td><td style="text-align:center"><span class="rel m"></span></td><td style="text-align:center"><span class="rel l"></span></td><td>Eine Darstellung reicht — aktuell drei.</td></tr>
+            <tr><td><b>Fokus-Timer</b></td><td style="text-align:center"><span class="rel l"></span></td><td style="text-align:center"><span class="rel h"></span></td><td style="text-align:center"><span class="rel h"></span></td><td style="text-align:center"><span class="rel l"></span></td><td>DER Motor der Lernphase — stark umgesetzt.</td></tr>
+            <tr><td>Shame-free Reschedule</td><td style="text-align:center"><span class="rel l"></span></td><td style="text-align:center"><span class="rel h"></span></td><td style="text-align:center"><span class="rel m"></span></td><td style="text-align:center"><span class="rel l"></span></td><td>Konzentration-Herzstück — genau richtig gebaut.</td></tr>
+            <tr><td><b>Ressourcen-Link / Hand-off</b></td><td style="text-align:center"><span class="rel h"></span></td><td style="text-align:center"><span class="rel h"></span></td><td style="text-align:center"><span class="rel h"></span></td><td style="text-align:center"><span class="rel l"></span></td><td><b>Durchgehend hoch — aber fehlt komplett.</b> Größte echte Lücke.</td></tr>
+            <tr><td>Machbarkeits-Check</td><td style="text-align:center"><span class="rel h"></span></td><td style="text-align:center"><span class="rel m"></span></td><td style="text-align:center"><span class="rel m"></span></td><td style="text-align:center"><span class="rel l"></span></td><td>Fehlt; besonders vor der Lernphase wichtig.</td></tr>
+            <tr><td>Notizen</td><td style="text-align:center"><span class="rel m"></span></td><td style="text-align:center"><span class="rel h"></span></td><td style="text-align:center"><span class="rel m"></span></td><td style="text-align:center"><span class="rel m"></span></td><td>Solide; Links darin sollten klickbar sein.</td></tr>
+            <tr><td>Insights / Statistik</td><td style="text-align:center"><span class="rel l"></span></td><td style="text-align:center"><span class="rel m"></span></td><td style="text-align:center"><span class="rel l"></span></td><td style="text-align:center"><span class="rel h"></span></td><td>Erst <em>danach</em> wirklich wertvoll — kurz davor eher Ablenkung.</td></tr>
+            <tr><td>Health / Readiness</td><td style="text-align:center"><span class="rel l"></span></td><td style="text-align:center"><span class="rel l"></span></td><td style="text-align:center"><span class="rel m"></span></td><td style="text-align:center"><span class="rel l"></span></td><td>Durchgehend niedrig; echter Wert nur als <em>Schlaf-Schutz</em> kurz davor.</td></tr>
+            <tr><td>Extension-Overlay</td><td style="text-align:center"><span class="rel l"></span></td><td style="text-align:center"><span class="rel m"></span></td><td style="text-align:center"><span class="rel m"></span></td><td style="text-align:center"><span class="rel l"></span></td><td>Nur wertvoll, <em>wenn</em> an die aktive Aufgabe/Seite gekoppelt.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- SYNTHESE -->
+      <h3>Kritische Synthese — was du wirklich brauchst, was nicht</h3>
+      <div class="grid g2">
+        <div class="callout co-ok card--flat">
+          <h4>✓ Wirklich gebraucht (der schlanke Kern)</h4>
+          <ol style="margin:0; padding-left:20px">
+            <li><b>Klausuren + Countdown + Themenliste</b> — Umfang &amp; Dringlichkeit greifbar.</li>
+            <li><b>Aufgaben zerlegen (Subtasks) + auf Tage legen.</b></li>
+            <li><b>Ein nächster Schritt + 1-Klick-Timer + sichtbare Zeit</b> — der Ausführungs-Trigger.</li>
+            <li><b>Shame-free Reschedule</b> — verpasst ≠ versagt.</li>
+            <li><b>Ressourcen-Link / Hand-off</b> an Aufgabe/Thema — der Übergang zur externen Ausführung (<b>#1-Lücke</b>).</li>
+            <li><b>Machbarkeits-Check</b> — „reicht die Zeit?“.</li>
+            <li><b>Fortschritt sichtbar</b> (Tagesziel/Streak) + <b>kurze Retro danach</b>.</li>
+            <li><b>Schnelle Notizen</b> mit klickbaren Links.</li>
+          </ol>
+        </div>
+        <div class="callout co-risk card--flat">
+          <h4>✗ (So) nicht gebraucht — weglassen oder radikal vereinfachen</h4>
+          <ol style="margin:0; padding-left:20px">
+            <li><b>Tiefe Health/Readiness-Analytik ohne Konsequenz</b> — durchgehend niedriger Wert; höchstens „Schlaf-Schutz“ kurz vor der Klausur.</li>
+            <li><b>Drei Zeitdarstellungen</b> — eine kohärente reicht.</li>
+            <li><b>All-Sites-Overlay + Bookmark-Ticker</b> in aktueller Form — stört, solange nicht an die Aufgabe gekoppelt.</li>
+            <li><b>Pflicht-Detailfelder</b> pro Aufgabe — optional lassen (heute gut gelöst, nicht verschärfen).</li>
+            <li><b>Kalibrierungs-/Post-Mortem-Analytik</b> — Overkill; gehört (wenn) in den „Pace“-Track.</li>
+            <li><b>Eigene Lern-/Review-Engine im Web</b> — bewusst extern, korrekt so.</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="callout co-info">
+        <h4>Fazit dieser Studenten-Analyse</h4>
+        <p style="margin-bottom:0"><b>Der ehrliche MVP für einen Studenten ist <em>kleiner</em> als das, was heute gebaut ist — plus dem einen fehlenden Stück.</b> Kairos hat eher <b>zu viele Nebenflächen</b> (tiefes Health, All-Sites-Overlay, dritte Timeline) als zu wenige Kernfunktionen. Der Kern-Loop (planen → ein Schritt → Fokus → scham-frei nachplanen) trifft die Studenten-Bedürfnisse quer durch alle vier Phasen sehr gut. Was durchgehend fehlt und den größten Hebel hat, ist die <b>Brücke zur externen Ausführung (Ressourcen-Link/Hand-off)</b> — gefolgt vom <b>Machbarkeits-Check</b> (Planungsphase) und einem <b>Phasen-Fokus</b> (kurz vor der Klausur nur Countdown + Lücken + Wiederholung statt voller Statistik).</p>
+      </div>
+    </section>
+
+    <div class="foot">
+      <p><b>Methodik &amp; Belege.</b> Dieser Bericht basiert ausschließlich auf dem im Repository sichtbaren Code, Routen, State-Modell, DB-Schema, Tests und Docs (Branch <code class="k">feat/multi-tenant-auth</code>, Stand 2026-07-10). Analysiert wurden u. a. <code class="k">web/js/*</code> (PWA-Module), <code class="k">shared/*</code> (Domäne), <code class="k">server/*</code> (Backend, Routen, Repo, Health, Timer), <code class="k">src/*</code> (Chrome-Extension), <code class="k">tests/*</code> und <code class="k">docs/*</code>. Jede Aussage ist mit <code class="ev">Datei:Zeile</code> belegt; Unklarheiten sind als <span class="b b-nv">Needs manual verification</span> markiert. Es wurden keine Features erfunden.</p>
+      <p style="margin-bottom:0"><b>Scope-Erinnerung:</b> Die Aufgabenvorlage war für eine Flugplanungs-App formuliert; das reale Projekt ist der Konzentration-Lernplaner <b>Kairos</b>. Aviation-Begriffe wurden transparent auf die Lern-Domäne übertragen (siehe Scope-Hinweis oben).</p>
+    </div>
+  </main>
+</div>
+</body>
+</html>

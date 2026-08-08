@@ -1,0 +1,96 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   Kairos · Sage — Insights-Ansicht. Top-Row (Streak-Hero + Focus this month
+   + Recall retention) · Chart-Row (Focus hours + Time by subject).
+   Gerendert von /js/insights.js.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.insights-grid { display: flex; flex-direction: column; gap: 16px; margin-top: 22px; flex: 1; min-height: 0; overflow-y: auto; padding-bottom: 4px; }
+.ins-stat-row { display: flex; gap: 16px; flex: none; }
+.ins-chart-row { display: flex; gap: 16px; flex: 1; min-height: 300px; }
+
+.ins-card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 18px; display: flex; flex-direction: column; }
+
+/* ── Streak-Hero (grün) ─────────────────────────────────── */
+.ins-hero { flex: 1; background: var(--accent); border: none; color: var(--on-accent); }
+.ins-hero__eyebrow { font: 600 10px var(--font); letter-spacing: .12em; text-transform: uppercase; color: #bfe0ce; }
+.ins-hero__num { display: flex; align-items: baseline; gap: 6px; font: 800 34px/1 var(--font); margin-top: 8px; }
+.ins-hero__unit { font: 600 13px var(--font); color: #cfe8da; }
+.ins-hero__strip { display: flex; gap: 4px; margin-top: 14px; }
+.ins-hero__seg { flex: 1; height: 22px; border-radius: 3px; background: #5b9a78; }
+.ins-hero__seg.is-on { background: #cfe8da; }
+/* Gnadentag-Hinweis: Icon + Text auf einer Grundlinie (Abstand über gap, nicht über Leerzeichen). */
+.ins-hero__grace { display: flex; align-items: center; gap: 6px; }
+
+/* ── Stat-Karten (Focus this month / Recall) ────────────── */
+.ins-stat-card { flex: 1; }
+.ins-stat-card__eyebrow { font: 600 10px var(--font); letter-spacing: .12em; text-transform: uppercase; color: var(--muted-3); }
+.ins-stat-card__row { display: flex; align-items: baseline; gap: 6px; margin-top: 8px; }
+.ins-stat-card__num { font: 800 34px/1 var(--font); color: var(--ink-strong); }
+.ins-stat-card__unit { font-size: 18px; }
+/* Trend-Delta: Icon + Prozentwert auf einer Linie (Abstand über gap, nicht über Leerzeichen). */
+.ins-delta { display: inline-flex; align-items: center; gap: 3px; font: 600 12px var(--font); }
+.ins-delta.is-up { color: var(--accent); }
+.ins-delta.is-down { color: var(--danger); }
+/* Ein Icon für beide Richtungen: „runter" ist der gespiegelte Trend — Farbe bleibt aus .is-down. */
+.ins-delta.is-down .ico { transform: scaleY(-1); }
+.ins-stat-card__sub { font: 500 11.5px var(--font); color: var(--muted-3); margin-top: 14px; }
+
+/* Confidence-Ring (echt: gefüllt bei Themen, sonst ehrlich leer) */
+.ins-recall { display: flex; align-items: center; gap: 14px; margin-top: 10px; }
+.ins-recall__ring { width: 56px; height: 56px; flex: none; --ring-color: var(--accent); --ring-track: #EAE8E0; }
+.ins-recall__hole { width: 42px; height: 42px; font: 800 13px var(--font); color: var(--muted-3); }
+.ins-recall__ring.is-live .ins-recall__hole { color: var(--ink-strong); }
+.ins-recall__note { font: 500 11.5px var(--font); color: var(--muted-3); line-height: 1.4; }
+
+/* ── Chart-Karten ───────────────────────────────────────── */
+.ins-chart-card { flex: 1; min-width: 0; }
+.ins-chart-card--wide { flex: 1.4; }
+.ins-chart-card__title { font: 700 14px var(--font); color: var(--ink); }
+.ins-chart-card__sub { font: 500 11.5px var(--font); color: var(--muted-3); margin-top: 3px; }
+
+/* Focus hours across the day (Struktur + ehrlicher Leerzustand) */
+.ins-hours { position: relative; flex: 1; min-height: 120px; margin-top: 16px; }
+.ins-hours__bars { display: flex; align-items: flex-end; gap: 5px; height: 100%; }
+.ins-hourbar { flex: 1; height: 12px; background: #e2e6db; border-radius: 3px; }
+.ins-hours__empty { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 0 24px; font: 500 12px var(--font); color: var(--muted-3); }
+.ins-hours__axis { display: flex; justify-content: space-between; margin-top: 8px; }
+.ins-hours__axis span { font: 500 10px var(--font); color: var(--faint); }
+
+/* Time by subject */
+.ins-subj-list { display: flex; flex-direction: column; gap: 13px; margin-top: 16px; }
+.ins-subj__top { display: flex; justify-content: space-between; font: 600 12px var(--font); }
+.ins-subj__top .ins-subj__name { color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ins-subj__top .ins-subj__hrs { color: var(--muted-3); flex: none; }
+.ins-subj__track { height: 8px; border-radius: 5px; background: #EEECE4; margin-top: 6px; overflow: hidden; }
+.ins-subj__bar { height: 100%; border-radius: 5px; background: var(--sc, var(--accent)); transition: width .35s ease; }
+.ins-subj-foot { margin-top: auto; background: var(--accent-tint); border-radius: 12px; padding: 11px 13px; font: 500 11.5px var(--font); color: #3f7a5e; line-height: 1.45; }
+
+/* ── Schätzung vs. Realität (Pace je Schwierigkeit) ─────── */
+.ins-pace-list { display: flex; flex-direction: column; gap: 11px; margin-top: 16px; }
+.ins-pace { display: flex; align-items: center; gap: 10px; }
+.ins-pace__lbl { width: 64px; flex: none; font: 600 12px var(--font); color: var(--ink-2); }
+.ins-pace__track { flex: 1; height: 8px; border-radius: 5px; background: #EEECE4; overflow: hidden; }
+.ins-pace__bar { height: 100%; border-radius: 5px; background: var(--accent-chart); }
+.ins-pace__bar.is-over { background: var(--amber); }
+.ins-pace__val { width: 110px; flex: none; text-align: right; font: 600 11px var(--font); color: var(--muted-3); }
+
+/* Aufgabenfluss: bewusst neutral, ohne Warnrot oder Dringlichkeits-Badges. */
+.ins-flow-card { flex:1; min-width:0; }
+.ins-flow { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:16px; }
+.ins-flow__stat { min-width:0; padding:12px; border-radius:11px; background:var(--card-inset); }
+.ins-flow__stat b { display:block; color:var(--ink-strong); font:750 22px/1 var(--font); }
+.ins-flow__stat span { display:block; margin-top:6px; color:var(--muted-3); font:600 10.5px/1.3 var(--font); }
+
+/* ── „Focus this week"-Mini-Widget (nur falls #focusRhythm existiert) ───── */
+.ins-chart { display: flex; flex-direction: column; gap: 7px; }
+.ins-chart__bars { display: flex; align-items: flex-end; gap: 5px; height: 44px; }
+.ins-bar { flex: 1; min-width: 0; background: var(--accent-chart); border-radius: 3px; transition: height .35s ease; }
+.ins-bar.is-hot { background: var(--accent); }
+.ins-bar.is-empty { height: 3px; background: var(--track); align-self: flex-end; }
+
+/* ── Responsiv ──────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .ins-stat-row, .ins-chart-row { flex-wrap: wrap; }
+  .ins-chart-card, .ins-chart-card--wide { flex: 1 1 100%; }
+}
+@media (max-width: 560px) { .ins-flow { grid-template-columns:1fr 1fr; } }

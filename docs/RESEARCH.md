@@ -1,7 +1,7 @@
 # RESEARCH — Wissenschaftliche & Markt-Grundlage für einen adaptiven Lernplaner
 
 > Konsolidierte, faktengeprüfte Recherche als Fundament für [`SPEC.md`](./SPEC.md).
-> Erstellt: 2026-06-26. Vier parallele Recherche-Stränge (Lernwissenschaft, ostasiatische Methoden, Konkurrenzanalyse, ADHD-Design + macOS-Technik). Alle tragenden Effektstärken und Algorithmus-Formeln wurden gegen Primärquellen adversarial verifiziert; widerlegte oder populäre-aber-dünne Behauptungen sind **explizit als solche markiert**, nicht still entfernt.
+> Erstellt: 2026-06-26. Vier parallele Recherche-Stränge (Lernwissenschaft, ostasiatische Methoden, Konkurrenzanalyse, Focus-Design + macOS-Technik). Alle tragenden Effektstärken und Algorithmus-Formeln wurden gegen Primärquellen adversarial verifiziert; widerlegte oder populäre-aber-dünne Behauptungen sind **explizit als solche markiert**, nicht still entfernt.
 
 ## Wie man die Evidenz liest — drei Stufen
 
@@ -172,27 +172,27 @@ Wiederlesen, Markieren, Zusammenfassen erzeugen **Fluency-Illusionen** (Material
 
 ---
 
-# TEIL C — ADHD-Design-Prinzipien → konkrete Features
+# TEIL C — Focus-Design-Prinzipien → konkrete Features
 
-> Roter Faden der glaubwürdigen Evidenz (Barkley): **ADHD ist eine Störung der Selbst-Regulation *über Zeit*, nicht der Aufmerksamkeit per se.** Kern-Job der App: **Zeit externalisieren, Gedächtnis externalisieren, die nächste Entscheidung externalisieren** — ohne je Scham zu erzeugen.
+> Roter Faden der glaubwürdigen Evidenz (Barkley): **Focus ist eine Störung der Selbst-Regulation *über Zeit*, nicht der Aufmerksamkeit per se.** Kern-Job der App: **Zeit externalisieren, Gedächtnis externalisieren, die nächste Entscheidung externalisieren** — ohne je Scham zu erzeugen.
 
 > Evidenz-Legende: `[Stark]` peer-reviewed/Primär · `[Moderat]` klinischer Konsens/seriös sekundär · `[Schwach]` populär, richtungsweisend aber nicht als Fakt zitierbar. (3-Vote-adversarial verifiziert; zwei populäre Fakten widerlegt: „35 000 Entscheidungen/Tag" und die saubere Body-Doubling-Mechanismus-Story.)
 
 | # | Prinzip | Evidenz | App-Feature(s) |
 |---|---|---|---|
-| 1 | **Zeitblindheit / Zeit externalisieren.** ADHD erlebt Zeit als „jetzt vs. nicht-jetzt" | Barkley „temporal now" `[Stark]`; ADHD-Kinder brauchten ~50 ms längere Intervalle zur Unterscheidung (Smith 2002) `[Stark]`. ⚠️ „unterschätzt Zeit um 30–40 %" = Blog, nicht zitieren | (a) **Analoger schrumpfender Keil**-Countdown pro Session (verschwindende Farbscheibe, nicht nur Ziffern) (b) **persistente „Restzeit"-Menübar/Ambient-Anzeige** |
+| 1 | **Zeitblindheit / Zeit externalisieren.** Focus erlebt Zeit als „jetzt vs. nicht-jetzt" | Barkley „temporal now" `[Stark]`; Focus-Kinder brauchten ~50 ms längere Intervalle zur Unterscheidung (Smith 2002) `[Stark]`. ⚠️ „unterschätzt Zeit um 30–40 %" = Blog, nicht zitieren | (a) **Analoger schrumpfender Keil**-Countdown pro Session (verschwindende Farbscheibe, nicht nur Ziffern) (b) **persistente „Restzeit"-Menübar/Ambient-Anzeige** |
 | 2 | **Task-Initiation / Aktivierungsenergie.** Langweilig/unklar/fern-belohnt ist schwer zu *starten* | Dopamin-getriebenes Initiations-Defizit `[Moderat]`; Implementation Intentions `[Moderat]` | (a) **Auto-Chunking** in lächerlich kleine erste Schritte (b) **One-Tap „Jetzt starten"** → startet sofort konkrete erste Aktion + Timer |
 | 3 | **Dringlichkeit/Deadlines** — Gehirn reagiert auf unmittelbare, nicht ferne Stakes | Dopamin unterwichtet ferne Belohnung `[Stark]` | (a) **Deadline-„in-die-Gegenwart-ziehen"-View** (Einheiten/Tage übrig) (b) manufakturierte Mikro-Deadlines pro Session |
-| 4 | **Body Doubling / „Study with me".** Co-Präsenz hebt On-Task | VR-Studie 2025 (n=12, ADHD): ~27–30 % schneller mit Body-Double `[Schwach, Preprint]`. ⚠️ Dopamin/PFC/Spiegelneuron-Mechanismus = Blog, **widerlegt** — Effekt beschreiben, nicht Mechanismus | (a) **Co-Working-Modus**: Ambient-Timer + optionale „3 lernen gerade"-Präsenz (b) virtueller Body-Double / Study-With-Me-Spur synchron zum Timer |
+| 4 | **Body Doubling / „Study with me".** Co-Präsenz hebt On-Task | VR-Studie 2025 (n=12, Focus): ~27–30 % schneller mit Body-Double `[Schwach, Preprint]`. ⚠️ Dopamin/PFC/Spiegelneuron-Mechanismus = Blog, **widerlegt** — Effekt beschreiben, nicht Mechanismus | (a) **Co-Working-Modus**: Ambient-Timer + optionale „3 lernen gerade"-Präsenz (b) virtueller Body-Double / Study-With-Me-Spur synchron zum Timer |
 | 5 | **Dopamin-freundliches Feedback** — sofortige sichtbare Fortschritte | Sofort-Belohnung + Fortschritts-Sichtbarkeit `[Moderat]`; Gamification verblasst via Hedonic Adaptation | (a) **Sofort-Belohnungen** pro Chunk (b) tägliche/wöchentliche „done"-Balken; variable/Überraschungs-Belohnungen gegen Gewöhnung |
-| 6 | **Streak/Gamification-*Risiken*** — punitive Mechanik schadet hier | Gamification→Angst peer-reviewed `[Moderat]`; ADHD-Spezifik = Inferenz `[Schwach]`, aber sicherer Hedge | (a) **Vergebende Streaks**: Freezes/Grace-Days; Streak *biegt sich, bricht nie sichtbar* (b) kein Scham-UI: kein rotes „überfällig", kein Reset, keine öffentlichen Leaderboards by default |
-| 7 | **Scham-freies, flexibles Rescheduling** — *das* Adhärenz-Make-or-Break | Scham→Vermeidungs-Kaskade `[Moderat]`; ADHD-Planer reschedulen „vor der Scham-Spirale" `[Moderat]` | (a) **Automatic Forgiveness**: Tasks „scheitern" nie — ein verpasster Block fließt lautlos in künftige freie Zeit (b) **„Woche neu planen" One-Tap**, neutral geframt („hier dein aktualisierter Plan"), nicht als Schuld-Abarbeiten |
+| 6 | **Streak/Gamification-*Risiken*** — punitive Mechanik schadet hier | Gamification→Angst peer-reviewed `[Moderat]`; Focus-Spezifik = Inferenz `[Schwach]`, aber sicherer Hedge | (a) **Vergebende Streaks**: Freezes/Grace-Days; Streak *biegt sich, bricht nie sichtbar* (b) kein Scham-UI: kein rotes „überfällig", kein Reset, keine öffentlichen Leaderboards by default |
+| 7 | **Scham-freies, flexibles Rescheduling** — *das* Adhärenz-Make-or-Break | Scham→Vermeidungs-Kaskade `[Moderat]`; Focus-Planer reschedulen „vor der Scham-Spirale" `[Moderat]` | (a) **Automatic Forgiveness**: Tasks „scheitern" nie — ein verpasster Block fließt lautlos in künftige freie Zeit (b) **„Woche neu planen" One-Tap**, neutral geframt („hier dein aktualisierter Plan"), nicht als Schuld-Abarbeiten |
 | 8 | **Hyperfokus & Übergänge** — Unterbrechung mitten im Hyperfokus dysreguliert; Einzel-Alarm scheitert | Gestaffelte Warnungen schlagen einen Alarm `[Moderat]` | (a) **Laddered Transition-Warnungen** (10/5/2 Min), eskalierend (b) **Hyperfokus-Guard**: Überlauf erkennen, „15 Min verlängern oder abschließen?" statt hartem Schnitt; Übergangs-Ritual |
-| 9 | **Tageszeit-Energie** — ADHD neigt zu **Abend-Chronotyp**; früher Zwang kämpft gegen Biologie | **Abend-Chronotyp-Prädominanz = der einzige sauber gestützte zirkadiane Befund** (Systematik, 62 Studien) `[Stark]`. ⚠️ spezifische %-Zahlen cherry-picked, weglassen | (a) **Energie-Profil**: Nutzer markiert (oder App *lernt*) Peak-Fenster; Scheduler legt anspruchsvolles Lernen ins Hoch-Fenster (b) **keine erzwungenen frühen Slots** |
+| 9 | **Tageszeit-Energie** — Focus neigt zu **Abend-Chronotyp**; früher Zwang kämpft gegen Biologie | **Abend-Chronotyp-Prädominanz = der einzige sauber gestützte zirkadiane Befund** (Systematik, 62 Studien) `[Stark]`. ⚠️ spezifische %-Zahlen cherry-picked, weglassen | (a) **Energie-Profil**: Nutzer markiert (oder App *lernt*) Peak-Fenster; Scheduler legt anspruchsvolles Lernen ins Hoch-Fenster (b) **keine erzwungenen frühen Slots** |
 | 10 | **Executive-Function-/Entscheidungs-Last reduzieren** | Höhere neuronale Kosten/Entscheidung `[Moderat]`; Hicks Law. ⚠️ „35 000 Entscheidungen/Tag" = **widerlegt**, nicht nutzen | (a) **„Was kommt als Nächstes?"-Single-Task-Screen**: App zeigt genau *eine* Sache (b) minimale, default-reiche UI, ≤3 Optionen pro Entscheidungspunkt |
 | 11 | **Schätzprobleme („Zeit-Agnosie")** | Zeit-Schätz-Defizite real, aufgaben-abhängig `[Moderat/Stark]` | (a) **echte vs. geschätzte Dauer lernen** und künftige Schätzungen auto-korrigieren („du sagtest 30, dauert bei dir ~50") (b) gelernte Dauern in den Scheduler einspeisen |
 
-**Design-Nordstern:** Die App soll den Plan **entscheiden und neu-entscheiden**, Zeit **physisch zeigen**, **sofort belohnen** und **automatisch vergeben** — und damit die vier Dinge minimieren, die ADHD teuer macht: Starten, Zeit verfolgen, Erinnern, Entscheiden.
+**Design-Nordstern:** Die App soll den Plan **entscheiden und neu-entscheiden**, Zeit **physisch zeigen**, **sofort belohnen** und **automatisch vergeben** — und damit die vier Dinge minimieren, die Focus teuer macht: Starten, Zeit verfolgen, Erinnern, Entscheiden.
 
 ---
 
@@ -202,31 +202,31 @@ Wiederlesen, Markieren, Zusammenfassen erzeugen **Fluency-Illusionen** (Material
 
 Die fünf Säulen: **(1) busy-aware Auto-Scheduling · (2) evidenzbasierte Spaced Repetition · (3) scham-freies adaptives Rescheduling · (4) Lern-Metriken die echten Pace lernen · (5) macOS-first + lokal/privat.**
 
-| Produkt | Kategorie | Apple-Cal 2-Wege | Auto-sched busy-aware | Pace-Learn | SRS | ADHD/Student | macOS nativ | Preis/Jahr |
+| Produkt | Kategorie | Apple-Cal 2-Wege | Auto-sched busy-aware | Pace-Learn | SRS | Focus/Student | macOS nativ | Preis/Jahr |
 |---|---|---|---|---|---|---|---|---|
-| **Motion** | KI-Scheduler | nur Events | ✅ autonom | reaktiv | ❌ | ADHD-vermarktet | ✅ | $29/mo |
+| **Motion** | KI-Scheduler | nur Events | ✅ autonom | reaktiv | ❌ | Focus-vermarktet | ✅ | $29/mo |
 | **Reclaim.ai** | KI-Scheduler | ❌ | ✅ autonom | reaktiv | ❌ | informell | ❌ web | gratis/$8 |
 | **Sunsama** | KI-Scheduler | ✅ | ✅ (nur heute) | manuell | ❌ | ✅ explizit | ✅ | $20/mo |
 | **Sorted³** | Apple-Scheduler | ✅ iCloud | ✅ Auto-Schedule | ❌ | ❌ | informell | ✅ | $15–25 einmalig |
 | **Structured** | Apple-Scheduler | ✅ inbound | ✅ Replan | nur Replan | ❌ | ✅ Top-Pick | ✅ | $20/$65 |
 | **Shovel** | Studenten-Planer | ❌ (nur LMS) | ❌ (Machbarkeit) | teils manuell | ❌ | implizit | ✅ Apple Silicon | $35 |
-| **Tiimo** | ADHD-Planer | nur inbound | ❌ | nur Roadmap | ❌ | ✅ built-for | ❌ | $42–55 |
-| **Amazing Marvin** | ADHD-Task-Mgr | ✅ 2-Wege (best) | ❌ (manuell) | ✅ Kapazitäts-Ø | ❌ | ✅ +50 % Student | ✅ | $96 |
-| **Routinery** | ADHD-Routinen | ❌ | ❌ | ❌ | ❌ | ✅ scham-frei | ✅ M1 | $27–40 |
+| **Tiimo** | Focus-Planer | nur inbound | ❌ | nur Roadmap | ❌ | ✅ built-for | ❌ | $42–55 |
+| **Amazing Marvin** | Focus-Task-Mgr | ✅ 2-Wege (best) | ❌ (manuell) | ✅ Kapazitäts-Ø | ❌ | ✅ +50 % Student | ✅ | $96 |
+| **Routinery** | Focus-Routinen | ❌ | ❌ | ❌ | ❌ | ✅ scham-frei | ✅ M1 | $27–40 |
 | **Anki** | Spaced Repetition | ❌ | ❌ | ✅ Recall-Pace | ✅ FSRS/SM-2 | Student | ✅ (lokal) | gratis/$25 iOS |
 | **SpaceRep** ⭐ | SRS+Kalender | ❌ (nur Google) | ✅ für Reviews | ? | ✅ Black-Box | ❌ | ❌ web | $7–17/mo |
-| **Doable** ⭐ | ADHD-Scheduler | ✅ iCloud 2-Wege | ✅ energie-aware | KI-basiert | ❌ | ✅ AuDHD-built | ✅ (+Watch/Vision) | gratis/$60 |
+| **Doable** ⭐ | Focus-Scheduler | ✅ iCloud 2-Wege | ✅ energie-aware | KI-basiert | ❌ | ✅ AuDHD-built | ✅ (+Watch/Vision) | gratis/$60 |
 | **Morgen** ⭐ | Unified-Planer | ✅ iCloud | KI-Vorschlag (Freigabe) | ❌ | ❌ | informell | ✅ | $180 |
 
 **Die weiße Stelle (= dieses Produkt):** Eine **macOS-native, offline/lokal-first** App, die (a) den Kalender **zwei-Wege** liest und belegte Blöcke als belegt behandelt, (b) **fächer-/aufgaben-/deadline-/schwierigkeits-/seitenzahl-gewichtete** Lern-Sessions in freie Slots **auto-platziert**, (c) eine **FSRS**-Retrieval-Engine für Review-Arbeit hat, (d) echte Fokuszeit & Erledigung misst, um den **realen Durchsatz pro Fach** zu lernen und neu zu schätzen, (e) **scham-frei** neu plant, wenn der Kalender sich verschiebt oder der Nutzer zurückfällt.
 
 **Wer am nächsten dran ist & was fehlt:**
-- **Doable** — am nächsten gesamt (ADHD, Apple-nativ inkl. Mac, 2-Wege, energie-aware Auto-Schedule). **Fehlt:** SRS, Fach-/Seitenzahl-/Schwierigkeits-Modell, Lern-Pace-Metriken.
+- **Doable** — am nächsten gesamt (Focus, Apple-nativ inkl. Mac, 2-Wege, energie-aware Auto-Schedule). **Fehlt:** SRS, Fach-/Seitenzahl-/Schwierigkeits-Modell, Lern-Pace-Metriken.
 - **Motion** — am nächsten bei autonomem busy-aware Rescheduling. **Fehlt:** SRS, echtes Pace-Learning, Lern-Modell, lokal/privat, scham-freier Ton (über-packt still).
-- **Shovel** — am nächsten bei Studenten-Workload mit Seiten/Lesezeit + Machbarkeits-„Cushion". **Fehlt:** Auto-Placement, Kalender-Sync, SRS, ML-Pace, ADHD.
-- **Sorted³/Structured** — am nächsten bei Apple-nativem busy-aware Auto-Scheduling mit ADHD-freundlicher Zeit-Visualisierung. **Fehlt:** SRS, Fach-/Pace-Modell.
-- **SpaceRep** — einziges das SRS + konflikt-bewussten Kalender fusioniert. **Fehlt:** Apple/macOS-lokal, transparenter Algorithmus, ADHD, Pace-Metriken.
-- **Amazing Marvin** — einziges mit echtem Pace-Learning + Apple-2-Wege + ADHD-Tiefe. **Fehlt:** Auto-Placement, SRS.
+- **Shovel** — am nächsten bei Studenten-Workload mit Seiten/Lesezeit + Machbarkeits-„Cushion". **Fehlt:** Auto-Placement, Kalender-Sync, SRS, ML-Pace, Focus.
+- **Sorted³/Structured** — am nächsten bei Apple-nativem busy-aware Auto-Scheduling mit Focus-freundlicher Zeit-Visualisierung. **Fehlt:** SRS, Fach-/Pace-Modell.
+- **SpaceRep** — einziges das SRS + konflikt-bewussten Kalender fusioniert. **Fehlt:** Apple/macOS-lokal, transparenter Algorithmus, Focus, Pace-Metriken.
+- **Amazing Marvin** — einziges mit echtem Pace-Learning + Apple-2-Wege + Focus-Tiefe. **Fehlt:** Auto-Placement, SRS.
 - **Anki** — einzige lokale/private, evidenzbasierte, pace-adaptive Engine. **Fehlt:** Kalender, Planer, Busy-Awareness (sein lokales API **AnkiConnect** auf `:8765` ist der natürliche Integrationspunkt, um so einen Planer zu *füttern*).
 
 **Strategische Notizen:** Apple-natives Auto-Scheduling ist der verteidigbarste Beachhead (Sorted³/Structured/Doable beweisen Nachfrage, lassen SRS+Pace weg); **FSRS ist Open-Source/einbettbar**; Ankis Daten via AnkiConnect erreichbar; der emotionale Differentiator (**scham-frei**, Routinery/Inflow-Stil) ist von jedem kalender-nativen Scheduler unterversorgt — sie defaulten alle zu angst-induzierendem Über-Packen.
@@ -287,7 +287,7 @@ Kalender-Cache + Lern-Metriken (Dauern, Erledigungen, Energie-Profil) **on-devic
 **Empfehlung:** **SwiftData** für App-Modelle + **direktes Lesen von EventKit** als Kalender-Wahrheit (EventKit = Source of Truth, nur cachen was nötig). Alle Analytik bleibt lokal → stärkste Privacy-Story, kein Server.
 
 ## E5. Stack-Empfehlung — SwiftUI + EventKit vs. Electron
-**Empfehlung: natives SwiftUI + EventKit für einen macOS-first ADHD-Planer.** Entscheidende Gründe:
+**Empfehlung: natives SwiftUI + EventKit für einen macOS-first Focus-Planer.** Entscheidende Gründe:
 - **Electron kann EventKit physisch nicht aufrufen** — nativ-only Apple-Framework, keine JS-Bindings. Electron bräuchte einen nativen Helper/N-API-Addon oder XPC-Bridge, oder fällt auf Google-Calendar-API / CalDAV/ICS zurück — und verliert den größten Vorteil (eine API über alle existierenden Kalender). **Harter Blocker, kein Trade-off.**
 - **Ressourcen-Profil** für eine Always-on-Fokus/Timer-App: nativ ≈ 3–20 MB RAM / ~0,3 s Start vs. Electron ~150–500 MB / mehrere Sekunden.
 - Nativ liefert erstklassige **Menübar-/Ambient-Timer**, Notifications, laddered Alarme sauber.
@@ -296,7 +296,7 @@ Kalender-Cache + Lern-Metriken (Dauern, Erledigungen, Energie-Profil) **on-devic
 ---
 
 # Drei Caveats, die ins Spec mitwandern
-1. Der meiste ADHD-*Design*-Rat ist klinischer Konsens, **nicht** RCT-Grade — mit Mechanismus (Barkley) und den wenigen starken Befunden (50-ms-Studie, Abend-Chronotyp) führen; spezifische Prozente skeptisch behandeln.
+1. Der meiste Focus-*Design*-Rat ist klinischer Konsens, **nicht** RCT-Grade — mit Mechanismus (Barkley) und den wenigen starken Befunden (50-ms-Studie, Abend-Chronotyp) führen; spezifische Prozente skeptisch behandeln.
 2. **Full** EventKit-Access ist Pflicht (Write-only kann busy/free nicht lesen).
 3. Natives SwiftUI+EventKit ist der klare Stack — Electrons EventKit-Unfähigkeit ist ein **architektonischer Blocker**, keine Präferenz.
 
@@ -310,6 +310,6 @@ Kalender-Cache + Lern-Metriken (Dauern, Erledigungen, Energie-Profil) **on-devic
 **Neueste:** Kestin et al. 2025 (Sci. Rep., AI-Tutoring) · RAG-Tutoring 2025 · AI-Over-Reliance 2024/25.
 **Korea:** 오답노트 (gguge/namu) · 백지복습 (edubong, PCOM-Dissertation) · 회독 (namu) · 수능 만점자 (segye) · SKY (yoons) · 자기주도학습 · 메타인지 · 열품타 (namu, csw.live) · 타임스프레드 (Play) · 스터디플래너 (Edrawsoft) · 인강 배속 (KISTI) · Study-With-Me (ajunews) · **4당5락** (SBS) · **엉덩이 힘** (eduinnews).
 **China:** Gaokao (Acquire/Harvard GSE) · **Hengshui Zhongxue** (Chinosity/Wikipedia/RealTimeMandarin „in decline") · Cuotiben (PMC9203230, Annual Reviews) · Ebbinghaus/Momo (Woshipm, App Store) · Tihai zhanshu (Tandfonline, Shuangjian Sage) · Siwei daotu (PMC10369705) · Fanqie ToDo/Forest/Tide (Woshipm/sspai) · **Daka** (Woshipm, Banyuetan, PKU).
-**ADHD/Technik:** Barkley (russellbarkley.org; PubMed 9276836) · Smith 2002 (PubMed 12030598) · Evening-Chronotyp (Springer 10.1007/s12402-016-0214-5) · „35 000 Entscheidungen" widerlegt (didtheresearch) · Body-Doubling (arXiv 2509.12153, MedicalNewsToday) · EventKit TN3153/TN3152, `.EKEventStoreChanged`, WWDC23-10052 · Reclaim P1–P4 · Motion-Review (Unite.AI) · SwiftData-Caveats (fatbobman) · Native-vs-Electron (OpenMark) · eventkit-node (Electron-Bridge-Notwendigkeit).
+**Focus/Technik:** Barkley (russellbarkley.org; PubMed 9276836) · Smith 2002 (PubMed 12030598) · Evening-Chronotyp (Springer 10.1007/s12402-016-0214-5) · „35 000 Entscheidungen" widerlegt (didtheresearch) · Body-Doubling (arXiv 2509.12153, MedicalNewsToday) · EventKit TN3153/TN3152, `.EKEventStoreChanged`, WWDC23-10052 · Reclaim P1–P4 · Motion-Review (Unite.AI) · SwiftData-Caveats (fatbobman) · Native-vs-Electron (OpenMark) · eventkit-node (Electron-Bridge-Notwendigkeit).
 
 > Vollständige URL-Liste in den vier Roh-Recherche-Berichten (Session-Transkript). Bei Bedarf liefere ich die granularen Links pro Behauptung nach.

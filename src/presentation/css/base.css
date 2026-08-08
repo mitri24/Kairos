@@ -1,34 +1,72 @@
+/* ── Hanken Grotesk, selbst gehostet (aus web/fonts/ kopiert — die Extension
+   lädt gebündelte Ressourcen als same-origin, kein Manifest-Eintrag nötig) ── */
+@font-face {
+  font-family: "Hanken Grotesk";
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url("../fonts/hanken-grotesk-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191,
+    U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Hanken Grotesk";
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url("../fonts/hanken-grotesk-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
 /* ── Design-Tokens (aus web/css/tokens.css dupliziert — die Extension kann
-   tokens.css nicht laden) ─────────────────────────────────────────────── */
+   tokens.css nicht laden) · "Sage"-Palette ───────────────────────────────
+   Salbeigrün = Primär/Fokus, Bernstein = Pausen sekundär,
+   Terrakotta = jetzt/dringend/entfernen, Salbei-Ton = Erfolg/erledigt. */
 :root {
-  /* Farben — warmes Papier + Terrakotta-Akzent + salbeigrün für Pausen/Erfolg */
-  --accent:        #a9524a;
-  --accent-dark:   #8f423b;
-  --accent-soft:   rgba(169, 82, 74, 0.08);
-  --accent-soft2:  rgba(169, 82, 74, 0.12);
-  --accent-border: rgba(169, 82, 74, 0.32);
+  color-scheme: light;
 
-  --green:         #5E8577;
-  --green-dark:    #4d7266;
-  --green-soft:    rgba(94, 133, 119, 0.12);
+  /* Akzent — Salbeigrün (Primär/Fokus) */
+  --accent:        #3E7D5E;
+  --accent-dark:   #2F6349;
+  --accent-soft:   rgba(62, 125, 94, 0.10);
+  --accent-soft2:  rgba(62, 125, 94, 0.16);
+  --accent-border: rgba(62, 125, 94, 0.34);
 
-  --ink:           #38332C;
-  --ink-soft:      #4A4437;
-  --muted:         #9A9086;
-  --muted-2:       #A89D90;
+  /* Bernstein — sekundär (Pausen) */
+  --amber:         #C89A4C;
+  --amber-dark:    #8A6D3B;
+  --amber-soft:    rgba(200, 154, 76, 0.16);
 
-  --paper:         #FBF7F0;
-  --paper-2:       #FCFAF5;
-  --shell:         #F3EEE6;
-  --warm:          #F6E9D9;
-  --warm-2:        #EBE6DE;
+  /* Salbei-Ton — Erfolg/erledigt */
+  --green:         #3E7D5E;
+  --green-dark:    #2F6349;
+  --green-soft:    rgba(62, 125, 94, 0.12);
 
-  --line:          rgba(150, 138, 124, 0.28);
-  --line-soft:     rgba(150, 138, 124, 0.2);
-  --line-strong:   #D0C6B6;
-  --track:         #E6DFD3;
+  --ink:           #1E211D;
+  --ink-soft:      #5C5F57;
+  --muted:         #93978B;
+  --muted-2:       #A2A698;
 
-  --danger:        #b5514a;
+  --paper:         #FFFFFF;
+  --paper-2:       #FBFAF6;
+  --shell:         #F3F1EA;
+  --warm:          #F6EFDF;
+  --warm-2:        #EFE9DD;
+  --face:          #FBFAF6;
+
+  --line:          #EAE8E0;
+  --line-soft:     #F0EEE7;
+  --line-strong:   #E3E1D8;
+  --track:         #E7E5DC;
+
+  --danger:        #C2603F;
+
+  /* Typografie */
+  --font: "Hanken Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, "Helvetica Neue", Arial, sans-serif;
 
   /* Radien */
   --r-card:  22px;
@@ -42,9 +80,28 @@
   --shadow-soft: 0 1px 2px rgba(56,51,44,0.05);
 }
 
-/* Dezenter Dark-Mode (parallel zur PWA) */
+/* Dezenter Dark-Mode (parallel zur PWA) — warm-dunkel, Akzent etwas heller. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    /* Akzent — helleres Salbeigrün auf dunklem Grund */
+    --accent:        #5FA07C;
+    --accent-dark:   #4E8A69;
+    --accent-soft:   rgba(95, 160, 124, 0.16);
+    --accent-soft2:  rgba(95, 160, 124, 0.22);
+    --accent-border: rgba(95, 160, 124, 0.34);
+
+    /* Bernstein — helleres Amber für Pausen */
+    --amber:         #D4AC63;
+    --amber-dark:    #B08B45;
+    --amber-soft:    rgba(212, 172, 99, 0.18);
+
+    /* Salbei-Ton — Erfolg/erledigt */
+    --green:         #5FA07C;
+    --green-dark:    #4E8A69;
+    --green-soft:    rgba(95, 160, 124, 0.16);
+
     --ink:         #ECE4D8;
     --ink-soft:    #D8CFBF;
     --muted:       #A79C8C;
@@ -54,12 +111,14 @@
     --shell:       #1B1815;
     --warm:        #322820;
     --warm-2:      #2C2620;
+    --face:        #2E2823;
     --line:        rgba(190, 176, 156, 0.18);
     --line-soft:   rgba(190, 176, 156, 0.12);
     --line-strong: #4A4237;
     --track:       #3A332B;
-    --accent-soft:  rgba(200, 110, 100, 0.14);
-    --accent-soft2: rgba(200, 110, 100, 0.2);
+
+    --danger:      #D07A5A;
+
     --shadow-card: 0 1px 2px rgba(0,0,0,0.3), 0 12px 30px rgba(0,0,0,0.35);
   }
 }
@@ -76,7 +135,7 @@ body {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font);
 }
 
 body {
@@ -105,6 +164,12 @@ body {
   min-width: 0;
 }
 
+/* ── Icons (Strich-SVGs aus js/icons.js) ─────── */
+.ico {
+  flex: none;
+  vertical-align: -0.18em;
+}
+
 /* ── Header ──────────────────────────────────── */
 .head {
   display: flex;
@@ -118,6 +183,14 @@ body {
 .head h1 {
   font-size: clamp(1.25rem, 4.2vw, 1.45rem);
   letter-spacing: -0.02em;
+}
+
+/* Markenzeichen (Brand-Kit): erbt die Textfarbe über currentColor. */
+.head__mark {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  color: var(--accent);
 }
 
 /* ── Vollansicht-Link ────────────────────────── */

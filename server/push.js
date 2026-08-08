@@ -13,14 +13,14 @@ let vapidCache = null;
 export function getVapid() {
   if (vapidCache) return vapidCache;
 
-  const subject = process.env.VAPID_SUBJECT || "mailto:lernuhr@localhost";
+  const subject = process.env.VAPID_SUBJECT || "mailto:kairos@localhost";
   const envPublic = process.env.VAPID_PUBLIC_KEY || null;
   const envPrivate = process.env.VAPID_PRIVATE_KEY || null;
   // Nur EIN ENV-Schlüssel gesetzt ⇒ mit hoher Wahrscheinlichkeit Fehlkonfiguration.
   // Deutlich warnen statt still ein anderes Paar zu verwenden (bricht sonst Abos).
   if (Boolean(envPublic) !== Boolean(envPrivate)) {
     console.warn(
-      "[Lernuhr] WARNUNG: Nur EINER von VAPID_PUBLIC_KEY/VAPID_PRIVATE_KEY ist gesetzt — " +
+      "[Kairos] WARNUNG: Nur EINER von VAPID_PUBLIC_KEY/VAPID_PRIVATE_KEY ist gesetzt — " +
       "beide werden ignoriert. Setze beide oder keinen (dann DB/Autogen)."
     );
   }
@@ -75,15 +75,18 @@ export function unsubscribe(endpoint) {
 
 // ── Broadcast an alle Abonnements ────────────────
 // Tote Endpunkte (404/410) werden automatisch entfernt.
+// Broadcast an die Abos des AKTUELLEN Nutzers (ALS-Kontext, z. B. Test-Push).
 export async function broadcast(payload, opts = {}) {
+  return deliverToSubs(repo.listSubscriptions(), payload, opts);
+}
+// Broadcast an einen EXPLIZITEN Nutzer (Tick-Schleife läuft ohne ALS pro Nutzer).
+async function broadcastToUser(userId, payload, opts = {}) {
+  return deliverToSubs(repo.listSubscriptionsForUser(userId), payload, opts);
+}
+async function deliverToSubs(subs, payload, opts = {}) {
   const vapid = getVapid();
-  const subs = repo.listSubscriptions();
   const json = typeof payload === "string" ? payload : JSON.stringify(payload);
-
-  const results = await Promise.allSettled(
-    subs.map((s) => deliver(s, json, vapid, opts))
-  );
-
+  const results = await Promise.allSettled(subs.map((s) => deliver(s, json, vapid, opts)));
   let sent = 0;
   let pruned = 0;
   let failed = 0;
@@ -115,7 +118,7 @@ async function deliver(sub, json, vapid, opts) {
     console.warn(`[push] HTTP ${res.statusCode} for …${sub.endpoint.slice(-24)}: ${res.body?.slice(0, 120) || ""}`);
     return { failed: true };
   } catch (err) {
-    console.warn(`[Lernuhr] Push-Versand fehlgeschlagen: ${err.message}`);
+    console.warn(`[Kairos] Push-Versand fehlgeschlagen: ${err.message}`);
     return { failed: true };
   }
 }
@@ -127,8 +130,8 @@ const LABEL = {
   "long-break": "Long break",
 };
 
-// Wird vom Server-Tick aufgerufen, sobald eine Phase real abläuft.
-export async function notifyPhaseComplete({ from, to } = {}) {
+// Wird vom Server-Tick aufgerufen, sobald eine Phase real abläuft (pro Nutzer).
+export async function notifyPhaseComplete({ userId, from, to } = {}) {
   const fromLabel = LABEL[from] || LABEL.focus;
   const toLabel = LABEL[to] || LABEL.focus;
   const focusDone = from === "focus";
@@ -136,27 +139,75 @@ export async function notifyPhaseComplete({ from, to } = {}) {
   const payload = {
     title: `${fromLabel} done`,
     body: focusDone
-      ? `Nice work! Now ${toLabel}. Take a breath 🌿`
-      : `Break over — back to ${toLabel}. You've got this 💪`,
-    tag: "lernuhr-phase",
+      ? `Nice work! Now ${toLabel} — take a breath.`
+      : `Break over — back to ${toLabel}. You've got this.`,
+    tag: "kairos-phase",
     renotify: true,
     requireInteraction: focusDone, // Fokus-Ende bleibt stehen, bis quittiert
     phase: to,
     url: "/",
     timestamp: nowMs(),
   };
-  return broadcast(payload, { urgency: "high", ttl: 5 * 60, topic: "lernuhr-phase" });
+  if (userId == null) return { total: 0, sent: 0, pruned: 0, failed: 0 };
+  return broadcastToUser(userId, payload, { urgency: "high", ttl: 5 * 60, topic: "kairos-phase" });
+}
+
+// Wird vom Server-Tick aufgerufen, wenn eine Pause abgelaufen ist, der Fokus aber
+// noch nicht wieder gestartet wurde (Pausen-Overrun). Pro Nutzer, DND-respektierend
+// (der Tick unterdrückt den Aufruf in den Ruhezeiten).
+export async function notifyBreakOverrun({ userId, minutesOver = 0 } = {}) {
+  if (userId == null) return { total: 0, sent: 0, pruned: 0, failed: 0 };
+  const payload = {
+    title: "Break's over",
+    body: minutesOver >= 1
+      ? `Your break ended ${minutesOver} min ago — ready for the next focus?`
+      : "Your break just ended — ready for the next focus?",
+    tag: "kairos-break-overrun",
+    renotify: true,
+    requireInteraction: false,
+    phase: "focus",
+    url: "/",
+    timestamp: nowMs(),
+  };
+  return broadcastToUser(userId, payload, { urgency: "high", ttl: 5 * 60, topic: "kairos-break-overrun" });
+}
+
+// Erinnerung an eine getimte Aufgabe (Vorlauf/Start) — von der Erinnerungs-
+// Schleife pro Nutzer aufgerufen (DND wird DORT geprüft, nicht hier).
+export async function notifyTaskReminder({ userId, task, kind, minutes = 0 } = {}) {
+  if (userId == null || !task) return { total: 0, sent: 0, pruned: 0, failed: 0 };
+  const label = task.subject ? `${task.text} · ${task.subject}` : task.text;
+  const payload = kind === "start"
+    ? {
+        title: "Time to start",
+        body: `Now: ${label}`,
+        tag: `kairos-task-${task.id}`,
+        renotify: true,
+        requireInteraction: true,   // Start-Moment darf stehen bleiben, bis quittiert
+        url: "/",
+        timestamp: nowMs(),
+      }
+    : {
+        title: `Up next in ${minutes} min`,
+        body: label,
+        tag: `kairos-task-${task.id}`,
+        renotify: true,
+        requireInteraction: false,
+        url: "/",
+        timestamp: nowMs(),
+      };
+  return broadcastToUser(userId, payload, { urgency: "high", ttl: 10 * 60, topic: `kairos-task-${task.id}` });
 }
 
 // Testbenachrichtigung (z. B. Button in der PWA nach dem Aktivieren).
 export async function sendTest() {
   const payload = {
-    title: "🔔 Test · Kairos",
+    title: "Test · Kairos",
     body: "Notifications are working — even when the app is closed.",
-    tag: "lernuhr-test",
+    tag: "kairos-test",
     renotify: true,
     url: "/",
     timestamp: nowMs(),
   };
-  return broadcast(payload, { urgency: "high", ttl: 2 * 60, topic: "lernuhr-test" });
+  return broadcast(payload, { urgency: "high", ttl: 2 * 60, topic: "kairos-test" });
 }

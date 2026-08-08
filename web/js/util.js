@@ -1,9 +1,10 @@
 // Formatierungs- & Label-Helfer, geteilt von allen Feature-Modulen.
+import { icon } from "/js/icons.js";
 export { formatDurationHM, PHASES, STATUS, phaseLabelJa, phaseLabelDe } from "/shared/pomodoro.js";
 // Tages-Zeitstrahl-Helfer durchreichen, damit Feature-Module nur "/js/util.js" kennen.
 export {
   minToClock, clockToMin, nowMinOfDay, fractionOfDay, slotStatus, isOverdue,
-  nextFreeSlot, roundToStep, ceilToStep, DAY_START_MIN, DAY_END_MIN, SLOT_STEP_MIN,
+  nextFreeSlot, rescheduleWithinDay, roundToStep, ceilToStep, DAY_START_MIN, DAY_END_MIN, SLOT_STEP_MIN,
 } from "/shared/daySchedule.js";
 
 export function pad2(n) { return String(n).padStart(2, "0"); }
@@ -102,6 +103,35 @@ export function mondayOf(key) {
   return dayKeyOf(ms - dow * 86_400_000);
 }
 
+// ── Fach-Farben ───────────────────────────────────────────
+// Deterministische Zuordnung Fachname → eine von 6 Sage-Paletten-Farben.
+// Nutzung: Element bekommt class `subj-N` (CSS setzt --sc/--sc-ink/--sc-tint);
+// wo Inline-Farbe nötig ist (absolut positionierte Blöcke), liefern .color/.ink/.tint.
+const SUBJECT_COLORS = [
+  { color: "#3E7D5E", ink: "#2F6349", tint: "#EBF1EC" },
+  { color: "#C89A4C", ink: "#8A6D3B", tint: "#F6EFDF" },
+  { color: "#7C9AC2", ink: "#4A678C", tint: "#E8EEF5" },
+  { color: "#C98AA6", ink: "#B06A8A", tint: "#F5E6EE" },
+  { color: "#C2603F", ink: "#A24E32", tint: "#F5E3DB" },
+  { color: "#8A7CC2", ink: "#5E4F8C", tint: "#ECE8F5" },
+];
+export function subjectColor(name) {
+  const s = String(name || "").trim().toLowerCase();
+  if (!s) return { idx: -1, cls: "subj-none", color: "#C4C7BE", ink: "#93978B", tint: "#F3F1EA" };
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  const idx = h % SUBJECT_COLORS.length;
+  return { idx, cls: `subj-${idx}`, ...SUBJECT_COLORS[idx] };
+}
+
+// Datumsteile für Kopfzeilen: Wochentag + „9 July 2026".
+export function weekdayLong(epochMs) {
+  return new Date(epochMs).toLocaleDateString("en-GB", { weekday: "long" });
+}
+export function dateLong(epochMs) {
+  return new Date(epochMs).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+}
+
 export function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, (c) => (
     { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] // keep entity map
@@ -118,4 +148,32 @@ export function fromDatetimeLocal(value) {
   if (!value) return null;
   const ms = new Date(value).getTime();
   return Number.isFinite(ms) ? ms : null;
+}
+
+// ── Lern-Ressourcen-Helfer (geteilt: topics, tasks, session — der Hand-off) ──
+// Icons aus /js/icons.js (einmal gebaut, danach nur noch der String) — dieselben
+// Zeichnungen wie überall sonst; die Größe setzt weiterhin das CSS der Aufrufer.
+const RES_ICON_LINK = icon("link");
+const RES_ICON_PLAY = icon("play");
+const RES_ICON_DOC = icon("doc");
+
+// Nur http(s) zulassen (kein javascript:/data: → sicher als href). https:// wird ergänzt.
+export function safeUrl(raw) {
+  const u = String(raw || "").trim();
+  if (!u) return null;
+  const withScheme = /^[a-z][a-z0-9+.-]*:\/\//i.test(u) ? u : `https://${u}`;
+  try {
+    const p = new URL(withScheme);
+    return (p.protocol === "http:" || p.protocol === "https:") ? p.href : null;
+  } catch { return null; }
+}
+export function prettyUrl(url) {
+  try { const u = new URL(url); return (u.hostname + u.pathname).replace(/^www\./, "").replace(/\/$/, ""); }
+  catch { return String(url || ""); }
+}
+export function resourceIcon(res) {
+  const s = `${res.kind || ""} ${res.url || ""} ${res.title || ""}`.toLowerCase();
+  if (/notebooklm|audio|podcast|youtu|video|vimeo/.test(s)) return RES_ICON_PLAY;
+  if (/\.pdf|slides|folien|drive|notion|doc|report|skript|exam|klausur/.test(s)) return RES_ICON_DOC;
+  return RES_ICON_LINK;
 }

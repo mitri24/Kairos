@@ -3,7 +3,7 @@
 > Ein lokal-privater Mac-Lernplaner, der deinen Kalender liest, freie Zeit erkennt und daraus einen wissenschaftlich fundierten, sich selbst anpassenden Lernplan baut — der **deinen echten Lern-Durchsatz lernt**, mit **Spaced Repetition** wiederholt und sich **scham-frei** neu plant, wenn das Leben dazwischenkommt.
 >
 > Status: **Entwurf v0.1** · Datum: 2026-06-26 · Evidenzbasis: [`RESEARCH.md`](./RESEARCH.md)
-> Verhältnis zum bestehenden Repo: Der vorhandene **ADHD-Pomodoro-Timer** (Chrome-Extension, `src/domain/pomodoroDomain.js`) wird zur **Fokus-Engine** dieses Produkts — seine reine, zustandslose Domänenlogik und Clean-Architecture-Trennung portieren direkt nach Swift (siehe §12.6).
+> Verhältnis zum bestehenden Repo: Der vorhandene **Focus-Pomodoro-Timer** (Chrome-Extension, `src/domain/pomodoroDomain.js`) wird zur **Fokus-Engine** dieses Produkts — seine reine, zustandslose Domänenlogik und Clean-Architecture-Trennung portieren direkt nach Swift (siehe §12.6).
 
 ---
 
@@ -29,7 +29,7 @@
 
 ## 1. Executive Summary & Marktlücke
 
-**Problem.** Studierende (besonders mit ADHD) scheitern selten an Intelligenz, sondern an **Selbst-Regulation über Zeit**: Sie planen unrealistisch, cramen statt zu verteilen, wiederlesen statt abzurufen, opfern Schlaf und werfen einen kollabierten Plan beschämt weg. Bestehende Tools lösen je nur ein Stück.
+**Problem.** Studierende (besonders mit Focus) scheitern selten an Intelligenz, sondern an **Selbst-Regulation über Zeit**: Sie planen unrealistisch, cramen statt zu verteilen, wiederlesen statt abzurufen, opfern Schlaf und werfen einen kollabierten Plan beschämt weg. Bestehende Tools lösen je nur ein Stück.
 
 **Lösung.** Eine macOS-native App, die fünf heute getrennte Fähigkeiten in einem lokal-privaten Produkt vereint:
 
@@ -41,7 +41,7 @@
 | 4 | **Pace-Learning** — lernt deinen echten Durchsatz pro Fach und schätzt neu | Amazing Marvin, Anki (je halb) | ✅ |
 | 5 | **macOS-first + lokal/privat** | nur Anki (ohne Planer) | ✅ |
 
-**Marktlücke (aus 33-App-Analyse, [`RESEARCH.md`](./RESEARCH.md) Teil D):** *Kein* ausgeliefertes Produkt kombiniert auch nur **vier** dieser fünf Säulen. Die Intersektion *(Pace-Learning des Lern-Durchsatzes) × (FSRS) × (busy-aware Auto-Placement)* ist leer; das Ganze *macOS-lokal/privat* zu tun, ist „leer im Quadrat". Am nächsten dran: **Doable** (kein SRS/Fach-Modell), **Shovel** (kein Auto-Placement/Kalender-Sync), **Motion** (Cloud, kein SRS), **SpaceRep** (nur Google, Black-Box, kein ADHD).
+**Marktlücke (aus 33-App-Analyse, [`RESEARCH.md`](./RESEARCH.md) Teil D):** *Kein* ausgeliefertes Produkt kombiniert auch nur **vier** dieser fünf Säulen. Die Intersektion *(Pace-Learning des Lern-Durchsatzes) × (FSRS) × (busy-aware Auto-Placement)* ist leer; das Ganze *macOS-lokal/privat* zu tun, ist „leer im Quadrat". Am nächsten dran: **Doable** (kein SRS/Fach-Modell), **Shovel** (kein Auto-Placement/Kalender-Sync), **Motion** (Cloud, kein SRS), **SpaceRep** (nur Google, Black-Box, kein Focus).
 
 **Differenzierungs-These.** Die App ist nicht „noch ein Timer" und nicht „noch ein Kalender". Sie ist der **erste Lernplaner, dessen Plan auf gemessenem, individuellem Lernverhalten beruht statt auf Wunschdenken** — und der bewusst **gegen Grind-Kultur** designt (Schlaf & Erholung als harte Constraints, Qualität statt Stunden).
 
@@ -80,18 +80,18 @@
 | Mind-Map (Elaboration → besser als Recall) | check-in *als Performance-Theater* |
 | 인강 (aktive vs. passive Zeit trennen) | **„Gesamtstunden" als primäre Erfolgs-Metrik** |
 
-### 3.3 ADHD-Nordstern
-Die App soll den Plan **entscheiden & neu-entscheiden**, Zeit **physisch zeigen**, **sofort belohnen** und **automatisch vergeben** — und so die vier Dinge minimieren, die ADHD teuer macht: **Starten, Zeit verfolgen, Erinnern, Entscheiden** *(Barkley: ADHD = Selbst-Regulation über Zeit; siehe RESEARCH Teil C, 11 Prinzipien).*
+### 3.3 Focus-Nordstern
+Die App soll den Plan **entscheiden & neu-entscheiden**, Zeit **physisch zeigen**, **sofort belohnen** und **automatisch vergeben** — und so die vier Dinge minimieren, die Focus teuer macht: **Starten, Zeit verfolgen, Erinnern, Entscheiden** *(Barkley: Focus = Selbst-Regulation über Zeit; siehe RESEARCH Teil C, 11 Prinzipien).*
 
 ---
 
 ## 4. Zielgruppe & Personas
 
-**Primär:** Studierende (Uni/Oberstufe) in Prüfungsphasen, die echte Termine im Kalender haben (Vorlesungen, Job, Sport) und um diese herum lernen müssen. ADHD/neurodivergent als **expliziter First-Class-Use-Case**, nicht als Nische — was für ADHD funktioniert (externalisierte Zeit, scham-frei, ein nächster Schritt), hilft allen.
+**Primär:** Studierende (Uni/Oberstufe) in Prüfungsphasen, die echte Termine im Kalender haben (Vorlesungen, Job, Sport) und um diese herum lernen müssen. Focus/neurodivergent als **expliziter First-Class-Use-Case**, nicht als Nische — was für Focus funktioniert (externalisierte Zeit, scham-frei, ein nächster Schritt), hilft allen.
 
 | Persona | Kontext | Schmerz | Was die App liefert |
 |---|---|---|---|
-| **Mira, 22, ADHD, Medizin** | volle Stundenplan-Wochen, 6 Fächer parallel, Klausuren gestaffelt | plant unrealistisch, cramt nachts, Plan kollabiert mittwochs → Scham → Vermeidung | realistische Slots, Anker-Aufgabe/Tag, lautloses Reschedule, Schlaf-Schutz |
+| **Mira, 22, Focus, Medizin** | volle Stundenplan-Wochen, 6 Fächer parallel, Klausuren gestaffelt | plant unrealistisch, cramt nachts, Plan kollabiert mittwochs → Scham → Vermeidung | realistische Slots, Anker-Aufgabe/Tag, lautloses Reschedule, Schlaf-Schutz |
 | **Junho, 19, diszipliniert** | will Bestnote, nutzt schon Anki & Timer getrennt | Tools reden nicht miteinander; Reviews kollidieren mit Terminen | FSRS-Reviews *in den Kalender* gelegt, konflikt-bewusst |
 | **Sara, 25, berufsbegleitend** | wenig, fragmentierte Zeit | weiß nie, ob der Stoff *zeitlich überhaupt aufgeht* | Machbarkeits-„Cushion" (schafft es das mathematisch bis zur Deadline?) |
 
@@ -163,7 +163,7 @@ Material {
 - F2.2 Task/Assignment mit **Deadline**, Typ, Priorität.
 - F2.3 **Material-Erfassung (deine „fragt nach Seiten/Folien/Schwierigkeit"-Anforderung):** beim Anlegen fragt die App Umfang + Einheit (48 Folien / 30 Seiten / 25 Aufgaben / 90 Lecture-Min) und Schwierigkeit. Daraus → `estimatedMinutes` über das PaceModel (anfangs Heuristik-Defaults, dann personalisiert).
 - F2.4 **Reverse-Exam-Kalender** (수능-Methode): aus Klausurdatum + Material rückwärts geplante Spacing-Touchpoints; schwere/umfangreiche Fächer starten früher.
-- F2.5 Schnell-Capture (Menübar/Hotkey/Reminders-Import) gegen Erfassungs-Reibung (ADHD).
+- F2.5 Schnell-Capture (Menübar/Hotkey/Reminders-Import) gegen Erfassungs-Reibung (Focus).
 
 ### F3 — Auto-Scheduler (Kern, Details §8)
 - F3.1 Liest belegte Blöcke aus EventKit, berechnet **freie Slots** (Lücken zwischen `.busy`-Events innerhalb der Tagesgrenzen).
@@ -173,7 +173,7 @@ Material {
 - F3.5 Schreibt geplante Sessions als **Events zurück in den lokalen Kalender** (eigener „Pace"-Kalender, farblich getrennt) → deine „Export in lokalen Calender"-Anforderung.
 
 ### F4 — Fokus-Session-Ausführung (die Pomodoro-Engine, wiederverwendet)
-- F4.1 Session startet mit **One-Tap** und konkretem erstem Schritt (Auto-Chunking; ADHD-Task-Initiation). Kein „was mache ich jetzt".
+- F4.1 Session startet mit **One-Tap** und konkretem erstem Schritt (Auto-Chunking; Focus-Task-Initiation). Kein „was mache ich jetzt".
 - F4.2 **Analoger schrumpfender Keil**-Timer + persistente Menübar-Restzeit (Zeit-Externalisierung). Dauern **personalisierbar**, Flowtime-Modus gleichwertig (keine 25/5-Dogmatik — RESEARCH A5).
 - F4.3 **Retrieval-first:** Lern-Blöcke enden mit einem aktiven Abruf (Free-Recall „Brain-Dump" oder Selbsttest); „Lösung/Notizen zeigen" erst nach Abrufversuch.
 - F4.4 **Laddered Transition-Warnungen** (10/5/2 Min) + Hyperfokus-Guard („15 Min verlängern oder abschließen?").
@@ -308,7 +308,7 @@ function schedule(freeSlots, tasks, reviewQueue, profile, constraints, anchors):
 
 ### 8.4 Re-Solve-Trigger (inkrementell)
 - `.EKEventStoreChanged` (externer Kalender) · verpasste/verkürzte/verlängerte Session · neue/geänderte Task oder Deadline · PaceModel-Update (Schätzung korrigiert) · „Pause bis …" · FSRS-Note (Item neu fällig).
-- **Inkrementell:** Anker + bereits begonnene Sessions behalten, nur Zukunfts-Sessions neu fließen → minimaler Plan-Churn (wichtig gegen ADHD-Überforderung). Kein „der ganze Plan sieht jeden Morgen anders aus".
+- **Inkrementell:** Anker + bereits begonnene Sessions behalten, nur Zukunfts-Sessions neu fließen → minimaler Plan-Churn (wichtig gegen Focus-Überforderung). Kein „der ganze Plan sieht jeden Morgen anders aus".
 - **Grund-bewusst (F8a):** manuelles Löschen/Verschieben löst ein Re-Flow aus, dessen Politik der **Grund** bestimmt — „brauche Freizeit" triggert **kein** Backfill (Slot wird geschützt), „nicht wichtig" zieht den nächstbesten Task vor. Gepinnte/manuelle Blöcke bleiben bei jedem Re-Solve erhalten.
 
 ### 8.5 Machbarkeits-„Cushion"
@@ -360,7 +360,7 @@ Anfangs Literatur-Defaults (Heuristik nach Materialtyp/Schwierigkeit); ab wenige
 
 ## 11. UX-Prinzipien & Schlüssel-Screens
 
-**Prinzipien (ADHD-Nordstern):** ein nächster Schritt sichtbar · Zeit physisch · ≤3 Optionen pro Entscheidungspunkt · default-reich · scham-frei (kein Rot, kein Reset) · sofortige Belohnung.
+**Prinzipien (Focus-Nordstern):** ein nächster Schritt sichtbar · Zeit physisch · ≤3 Optionen pro Entscheidungspunkt · default-reich · scham-frei (kein Rot, kein Reset) · sofortige Belohnung.
 
 | Screen | Zweck | Kern-Elemente |
 |---|---|---|
@@ -406,7 +406,7 @@ Dependency Injection wie in `PomodoroService` (Adapter werden injiziert) → Dom
 Gepflegte Implementierung (Swift-Port von `rs-fsrs`/`ts-fsrs` oder via Rust-Lib `fsrs-rs` eingebunden). *Eine* Version, Kurve+Intervall gematcht. Optimizer auf Nutzer-Log ab ~300 Reviews. Nicht selbst neu erfinden.
 
 ### 12.6 Wiederverwendung des bestehenden Pomodoro-Timers
-Die vorhandene Domänenlogik (`src/domain/pomodoroDomain.js`: `startPhase`/`pausePhase`/`advanceToNextPhase`/`computeRemainingMs`, immutable State-Updates, Sleep-Recovery in `pomodoroService.js`) ist **rein und sauber** — sie portiert 1:1 als Swift-Struct-Domäne der Fokus-Engine. Die Adapter-Idee (`badge`, `bookmarkTicker`, `soundPlayer`, `scheduler` injiziert) wird zu `MenuBarTicker`, `NotificationScheduler`, `SoundPlayer`. **Konzepte & Tests wandern mit; nur die Sprache wechselt.** Die Chrome-Extension kann als Leichtgewicht-Companion bestehen bleiben, ist aber nicht der Mac-Kern.
+Die vorhandene Domänenlogik (`src/domain/pomodoroDomain.js`: `startPhase`/`pausePhase`/`advanceToNextPhase`/`computeRemainingMs`, immutable State-Updates, Sleep-Recovery in `pomodoroService.js`) ist **rein und sauber** — sie portiert 1:1 als Swift-Struct-Domäne der Fokus-Engine. Die Adapter-Idee (`badge`, `soundPlayer`, `scheduler` injiziert) wird zu `MenuBarTicker`, `NotificationScheduler`, `SoundPlayer`. **Konzepte & Tests wandern mit; nur die Sprache wechselt.** Die Chrome-Extension kann als Leichtgewicht-Companion bestehen bleiben, ist aber nicht der Mac-Kern.
 
 ### 12.7 Hintergrund-Betrieb
 Menübar-App (`LSUIElement`/`MenuBarExtra`), läuft persistent für Timer + `.EKEventStoreChanged`-Beobachtung; lokale Notifications für Transition-Warnungen und fällige Reviews.
@@ -464,7 +464,7 @@ Bauen als **native SwiftUI+EventKit-Menübar-App**, MVP wie §14, Pomodoro-Domä
 | **Planen-als-Prokrastination** — das Schreiben des Plans gibt einen Dopamin-Hit, der Ausführung ersetzt | Setup minimal halten; Erfolg = ausgeführte Sessions, nicht hübsche Pläne; Anker-Aufgabe sofort startbar |
 | **Über-Schätzung** kollabiert Pläne | bewusstes Unter-Planen; Pace-Learning korrigiert; Cushion warnt früh |
 | **Schätz-Kaltstart** ungenau | Literatur-Defaults + Transparenz + schnelle Personalisierung |
-| ADHD-Design-Evidenz ist meist Konsens, nicht RCT | mit Mechanismus (Barkley) + starken Befunden führen; %-Zahlen meiden |
+| Focus-Design-Evidenz ist meist Konsens, nicht RCT | mit Mechanismus (Barkley) + starken Befunden führen; %-Zahlen meiden |
 | EventKit Full-Access-Hürde / Ablehnung | klare Begründung; Graceful-Degradation (read-only Vorschau) |
 | Plan-Churn überfordert | nur inkrementell re-solven; Anker fix; „der Plan ändert sich nicht ständig" |
 

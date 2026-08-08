@@ -1,0 +1,13 @@
+{
+  "name": "Kairos",
+  "short_name": "Kairos",
+  "description": "Der richtige nächste Schritt.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F7F7F2",
+  "theme_color": "#F7F7F2",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

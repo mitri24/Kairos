@@ -95,6 +95,22 @@ export function nextFreeSlot(occupied, durationMin, from, options = {}) {
   return cursor; // hinter allen Blöcken (ggf. jenseits dayEnd – bewusst)
 }
 
+// Reschedule-Ziel für eine überfällige/verschobene Aufgabe: der nächste freie Slot,
+// der NOCH IN DEN TAG PASST. `nextFreeSlot` darf bewusst hinter dayEnd zeigen — hier
+// wird daraus eine ehrliche Entscheidung: passt der Block (start + Dauer) nicht mehr
+// vor dayEnd, gilt der Tag als voll → { overflow:true, startMin:dayStart } sagt dem
+// Aufrufer, die Aufgabe auf den NÄCHSTEN Tag zu legen, statt sie hinter Mitternacht
+// (24:00) zu stranden, wo sie vom Zeitstrahl verschwindet.
+export function rescheduleWithinDay(occupied, durationMin, from, options = {}) {
+  const step = options.step ?? SLOT_STEP_MIN;
+  const dayStart = options.dayStart ?? DAY_START_MIN;
+  const dayEnd = options.dayEnd ?? DAY_END_MIN;
+  const d = Math.max(step, Math.round(durationMin || DEFAULT_DURATION_MIN));
+  const startMin = nextFreeSlot(occupied, d, from, { step, dayEnd });
+  if (startMin + d <= dayEnd) return { startMin, overflow: false };
+  return { startMin: dayStart, overflow: true };
+}
+
 // Überschneiden sich zwei Slots? (Halb-offen: [start, end))
 export function slotsOverlap(a, b) {
   const ae = a.startMin + Math.max(1, a.durationMin || DEFAULT_DURATION_MIN);

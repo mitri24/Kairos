@@ -1,4 +1,4 @@
-# BUILD — Contract für ADHD-Lernuhr-Feature-Module
+# BUILD — Contract für Focus-Lernuhr-Feature-Module
 
 Diese Datei ist der **verbindliche Vertrag**. Halte dich exakt daran, damit alle Module
 zusammenpassen. Kernfundament (Store, API, Util, HTML-Shell, Tokens, Timer, Clock) existiert
@@ -133,3 +133,68 @@ Japanische Labels wie im Mockup + deutsche Ergänzung sind ok (die App ist bilin
 - Liste `#topicList` (Themen der aktiven Prüfung, sonst alle), Zähler `#topicCount` (erledigt/gesamt),
   Leer-Text `#topicEmpty`. Pro Zeile: Checkbox (toggle done), Text, Löschen. Erledigte nach unten, durchgestrichen.
 ```
+
+## Wave 6 — Lernprofil, Methoden, Bibliothek, Teilen, KI (Kurzreferenz)
+
+Neue Module folgen dem bestehenden Vertrag (`init*(ctx)` via `safeInit`, Render in `#…Root`-Shells):
+`adapt` (Darstellung/Zugänglichkeit aus `prefs`), `webview` (In-App-Viewer + globale Link-Übernahme),
+`knowledge`, `journal`, `library` (+ globales Referenz-Panel), `path`, `aibot`, `share` (Import-Flow).
+Server: `migrations/wave6.mjs` (user_prefs, materials, shares, reviews, ai_config — einzige Schema-Quelle),
+`share.js` (öffentliche `/s/:token`-Seite + Import), `ai.js` (Provider-Proxy, Key verschlüsselt).
+Upload-Sonderweg: `POST /api/materials/upload` liest den Roh-Body (25 MB) VOR der JSON-Route-Tabelle.
+Snapshot-Erweiterung: `materials`, `prefs`, `reviews`, `reviewsDueToday`. Tests: `tests/wave6.test.js`.
+
+## Marken-Assets (Kairos Brand Kit)
+
+Quelle ist ausschließlich `assets/kairos-brand-kit/` — dort nichts editieren, sondern bei einer
+neuen Kit-Lieferung die Ableitungen neu ziehen:
+
+- `web/icons/` = 1:1-Kopien aus dem Kit (`favicon.svg` schaltet Hell/Dunkel intern per
+  `prefers-color-scheme`, dazu `favicon.ico`, `apple-touch-icon.png`, `icon-192/512(-dark).png`,
+  `safari-pinned-tab.svg`, `mark.svg`). `badge-128.png` (= `kairos-symbol-moment-128.png`) ist der
+  Notification-Badge: einfarbig mit Alpha, weil das OS ihn maskiert.
+- `assets/icons/icon-{16,32,48,128}.png` für die Extension entstehen aus
+  `kairos-app-icon-light-1024.png`: `sips -Z <größe> <quelle> --out <ziel>`.
+- Das **Zeichen im UI** wird als Inline-SVG eingebettet (Moment-Variante, `stroke="currentColor"`),
+  damit es die Textfarbe erbt: `.brand__mark` (Sidebar, Overlay), `.onb__mark` (Onboarding),
+  `.head__mark` (Extension-Panel), dazu Login-Overlay (`web/js/auth.js`) und die geteilte Seite
+  (`server/share.js`). Neue Marken-Stellen bitte demselben Muster folgen — kein PNG einbetten.
+- `web/sw.js`: Icon-Pfade stehen in `APP_SHELL` und in den `showNotification`-Defaults. Nach jeder
+  Icon-Änderung `VERSION` hochzählen, sonst liefert der alte Cache die alten Dateien aus.
+- `<meta name="theme-color">` in `index.html` ist nur der System-Fallback; zur Laufzeit führt
+  `applyThemeColor()` in `web/js/adapt.js` die Farbe an `--page` des aufgelösten App-Themes nach.
+
+## Icons im UI — `web/js/icons.js` ist die einzige Quelle
+
+Die Oberfläche enthält **keine Emojis** (auch keine Haken/Kreuze/Pfeile als Textzeichen im Markup).
+Grund: Emojis rendern je Betriebssystem anders, lassen sich nicht einfärben und ignorieren damit
+Dark-Mode, Akzentfarbe und Hochkontrast — genau die Optionen, die das Lernprofil anbietet.
+
+```js
+import { icon, fileIcon } from "/js/icons.js";
+
+`<button class="lib-act" title="${t.pin}">${icon("pin")}</button>`     // Icon-only → title/aria-label Pflicht
+`<span class="ico-row">${icon("card")}${esc(label)}</span>`            // Icon + Text → Icon bleibt aria-hidden
+`${icon(fileIcon(m.mime), { size: 18 })}`                              // Datei-Typ aus dem MIME
+```
+
+Regeln:
+
+- `icon(name, { size = 16, cls, label, stroke })` gibt einen SVG-String für Template-Literals zurück
+  (24er-Raster, `fill:none`, `stroke:currentColor`, Strichstärke 1.8 — identisch zu den Nav-Icons).
+  Ohne `label` ist das Icon `aria-hidden`; trägt es allein die Bedeutung, `label` setzen **oder** am
+  Button `aria-label`/`title` pflegen.
+- **Keine handgerollten Inline-SVGs** in Feature-Modulen und keine festen Farben (`stroke="#…"`) —
+  sonst bricht die Farbe in Dark-Mode/Hochkontrast weg. Fehlt ein Piktogramm, gehört es in `PATHS`.
+- Basisklassen in `base.css`: `.ico` (Ausrichtung), `.ico-btn` (zentriertes Icon-only-Element),
+  `.ico-row` (Icon + Text). Buttons, die vorher ein Glyph zentriert haben, brauchen `inline-flex`
+  statt `font-size`-Hacks.
+- Piktogramme für Lernmethoden/-stile stehen als `icon`-**Feld** in `shared/methods.js` (eine Quelle
+  für Knowledge, Onboarding und Profil) — dort den Namen pflegen, nicht in der Ansicht.
+- Statisches Markup (`web/index.html`) kann `icon()` nicht aufrufen: dort das SVG inline im selben
+  Stil einsetzen. Die Extension (`src/`) kann `/js/icons.js` nicht importieren und hält ihr eigenes,
+  stilgleiches Mini-Set.
+- Server-seitig gerendertes HTML (die geteilte Seite in `server/share.js`) importiert dasselbe Modul
+  über `../web/js/icons.js` — `icons.js` ist bewusst frei von DOM-Zugriffen.
+- Neues Icon → `PATHS` in `web/js/icons.js` ergänzen; `tests/icons.test.js` prüft Wohlgeformtheit,
+  `currentColor`, die Katalog-Namen und schlägt an, sobald ein Emoji zurück ins UI wandert.

@@ -39,6 +39,8 @@ function pick(obj, ...paths) {
 const msToMin = (ms) => (ms == null ? undefined : ms / 60000);
 const secToMin = (s) => (s == null ? undefined : s / 60);
 const kjToKcal = (kj) => (kj == null ? undefined : kj / 4.184);
+// HealthKit/Health-Connect liefern SpO₂ als Bruch 0..1 statt Prozent → skalieren.
+const asPercent = (v) => (v != null && v > 0 && v <= 1 ? v * 100 : v);
 // ISO-String ODER Epoch-ms/-s → Epoch-ms.
 function toEpochMs(v) {
   if (v == null || v === "") return undefined;
@@ -119,7 +121,7 @@ function fromWhoop(raw) {
     respiratoryRate: pick(raw, "sleep.score.respiratory_rate", "respiratoryRate"),
     spo2Avg: pick(raw, "recovery.score.spo2_percentage", "spo2Percentage"),
     skinTempC: pick(raw, "recovery.score.skin_temp_celsius", "skinTempCelsius"),
-    activeCalories: kjToKcal(pick(raw, "cycle.score.kilojoule", "kilojoule")),
+    totalCalories: kjToKcal(pick(raw, "cycle.score.kilojoule", "kilojoule")), // WHOOP = Gesamt-Energieumsatz
     recoveryScore: pick(raw, "recovery.score.recovery_score", "recoveryScore"),
     strainScore: pick(raw, "cycle.score.strain", "strain"),
   };
@@ -146,7 +148,7 @@ function fromAggregator(raw) {
     avgHr: pick(raw, "avgHr", "averageHeartRate"),
     hrvMs: pick(raw, "hrvMs", "heartRateVariabilitySDNN", "HKQuantityTypeIdentifierHeartRateVariabilitySDNN"),
     respiratoryRate: pick(raw, "respiratoryRate", "HKQuantityTypeIdentifierRespiratoryRate"),
-    spo2Avg: pick(raw, "spo2Avg", "oxygenSaturation", "HKQuantityTypeIdentifierOxygenSaturation"),
+    spo2Avg: asPercent(pick(raw, "spo2Avg", "oxygenSaturation", "HKQuantityTypeIdentifierOxygenSaturation")),
     steps: pick(raw, "steps", "stepCount", "HKQuantityTypeIdentifierStepCount"),
     activeCalories: pick(raw, "activeCalories", "activeEnergyBurned"),
     totalCalories: pick(raw, "totalCalories", "basalPlusActive"),
@@ -167,6 +169,12 @@ export function normalizeDaily(source, raw = {}) {
     case "apple_health":
     case "google_fit": canonical = fromAggregator(raw); break;
     default: canonical = compact(raw); // manual/generic: schon kanonische Keys
+  }
+  // Zeitstempel-Felder für ALLE Quellen vereinheitlichen (idempotent für die
+  // Geräte-Mapper, die bereits toEpochMs nutzen): manual/generic akzeptieren so
+  // ebenfalls ISO-Strings und Epoch-Sekunden, nicht nur Epoch-ms.
+  for (const k of ["sleepStart", "sleepEnd"]) {
+    if (canonical[k] !== undefined) canonical[k] = toEpochMs(canonical[k]);
   }
   const dayKey = resolveDayKey(raw, canonical.sleepEnd ?? canonical.sleepStart);
   const recordedAt = toEpochMs(pick(raw, "recordedAt", "recorded_at", "timestamp", "updated_at")) ?? canonical.sleepEnd;

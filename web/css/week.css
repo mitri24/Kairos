@@ -1,68 +1,313 @@
-/* ── Wochen-Navigation ───────────────────────────────────── */
-.week-nav { display: flex; align-items: center; gap: 8px; }
-.week-nav__btn {
-  width: 34px; height: 34px; border-radius: 10px; border: 1.5px solid var(--line);
-  background: var(--paper); color: var(--ink); font-size: 18px; line-height: 1; display: grid; place-content: center;
+/* ═══ Wochen-Board (durchgehende Zeitachse 08–24) ═════════════════════════ */
+
+/* ── Kopf-Cluster ──────────────────────────────────────── */
+.week-nav { display: flex; align-items: center; gap: 2px; }
+/* Pfeile tragen jetzt chevronLeft/chevronRight als SVG (kein ‹ › mehr) —
+   zentriert per inline-flex. Die font-Regel bleibt für .wk-navbtn--today,
+   das weiterhin Text ("This week") trägt. */
+.wk-navbtn {
+  border: 0; background: transparent; color: var(--muted-3);
+  font: 600 13px var(--font); width: 26px; height: 26px; border-radius: 8px;
+  cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0;
 }
-.week-nav__btn:hover { border-color: var(--accent); color: var(--accent); }
-.week-nav__today { height: 34px; padding: 0 12px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--paper); font-size: 12px; font-weight: 700; color: var(--muted); }
-.week-nav__today:hover { border-color: var(--green); color: var(--green); }
-.week-nav__label { font-size: 13px; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; min-width: 130px; text-align: center; }
+.wk-navbtn--today { width: auto; padding: 0 8px; }
+.wk-navbtn:hover { background: var(--card-inset); color: var(--ink); }
 
-/* ── Wochen-Grid ─────────────────────────────────────────── */
-.week-grid { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
-
-.week-day {
-  min-height: 0; display: flex; flex-direction: column; gap: 8px;
-  background: var(--paper); border: 1.5px solid var(--line); border-radius: var(--r-inner);
-  padding: 10px 9px; box-shadow: var(--shadow-soft);
+.wk-planned {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--r-sm);
+  padding: 9px 15px; text-align: right;
 }
-.week-day.is-today { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft), var(--shadow-soft); }
+.wk-planned__lbl { font: 600 10px var(--font); letter-spacing: .1em; text-transform: uppercase; color: var(--muted-3); }
+.wk-planned__val { font: 800 16px var(--font); margin-top: 1px; color: var(--ink-strong); font-variant-numeric: tabular-nums; }
+.wk-planned__sub { font: 500 12px var(--font); color: var(--muted-3); }
 
-.week-day__head { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; flex: 0 0 auto; }
-.week-day__dow { font-size: 12px; font-weight: 800; color: var(--ink); }
-.week-day.is-today .week-day__dow { color: var(--accent); }
-.week-day__date { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+/* Auto-plan — ehrlich AUS (kein Backend); exakte 38×22-Pille wie im Design */
+.wk-autoplan { display: flex; align-items: center; gap: 10px; background: var(--accent-tint); border: 0; border-radius: var(--r-sm); padding: 10px 14px; cursor: default; }
+.wk-autoplan__lbl { font: 600 13px var(--font); color: var(--accent-strong); }
+.wk-autoplan__track { position: relative; width: 38px; height: 22px; border-radius: 12px; background: var(--track); flex: none; }
+.wk-autoplan__knob { position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: var(--card); box-shadow: 0 1px 2px rgba(30, 33, 29, .2); }
 
-.week-day__meta { flex: 0 0 auto; font-size: 11px; font-weight: 700; color: var(--green); }
-.week-day__meta--empty { color: var(--muted-2); font-weight: 400; }
-
-.week-day__tasks { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
-
-.wk-task { display: flex; align-items: center; gap: 5px; padding: 4px 5px; border-radius: 8px; background: var(--paper-2); border: 1px solid var(--line-soft); }
-.wk-task:hover { border-color: var(--line-strong); }
-.wk-task--done { background: transparent; border-color: transparent; }
-.wk-check { flex: 0 0 auto; width: 16px; height: 16px; border-radius: 5px; border: 1.5px solid var(--line-strong); background: var(--paper); font-size: 10px; color: #FDF6EE; display: grid; place-content: center; padding: 0; }
-.wk-check.is-done { background: var(--green); border-color: var(--green); }
-.wk-dot { flex: 0 0 auto; width: 7px; height: 7px; border-radius: 50%; }
-.wk-dot.chip--prio1 { background: var(--accent); }
-.wk-dot.chip--prio2 { background: var(--accent); opacity: .6; }
-.wk-dot.chip--prio3 { background: var(--green); }
-.wk-dot.chip--prio4 { background: var(--muted-2); }
-.wk-text { flex: 1; min-width: 0; font-size: 11.5px; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.3; }
-.wk-task--done .wk-text { text-decoration: line-through; color: var(--muted); }
-.wk-del { flex: 0 0 auto; border: none; background: transparent; color: var(--muted-2); font-size: 11px; width: 16px; height: 16px; border-radius: 4px; display: grid; place-content: center; opacity: 0; }
-.wk-task:hover .wk-del { opacity: 1; }
-.wk-del:hover { color: var(--danger); background: var(--accent-soft); }
-
-.wk-divider { height: 1px; background: var(--line-soft); margin: 3px 0; }
-.wk-empty { font-size: 11px; color: var(--muted-2); text-align: center; padding: 8px 0; }
-
-.wk-add {
-  flex: 0 0 auto; width: 100%; border: 1.5px dashed var(--line); background: transparent; color: var(--ink);
-  border-radius: 8px; padding: 6px 8px; font-size: 11.5px; outline: none;
+/* ── Legende + Interaktions-Hinweis ────────────────────── */
+.week-legendrow { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 18px; flex: none; }
+.week-legend { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.week-legend__all { font: 600 12px var(--font); color: var(--on-accent); background: var(--ink-strong); border-radius: 20px; padding: 7px 13px; }
+.week-legend__pill {
+  display: flex; align-items: center; gap: 6px; font: 600 12px var(--font);
+  color: var(--sc-ink, var(--accent-ink)); background: var(--sc-tint, var(--accent-tint));
+  border: 1px solid var(--sc-border, var(--line)); border-radius: 20px; padding: 6px 12px;
 }
-.wk-add::placeholder { color: var(--muted-2); }
-.wk-add:focus { border-style: solid; border-color: var(--accent); background: var(--paper-2); }
+.week-legend__dot { width: 8px; height: 8px; border-radius: 50%; background: var(--sc, var(--accent)); display: inline-block; flex: none; }
+.week-legend__count { font: 700 10px var(--font); color: var(--sc, var(--accent)); opacity: .7; }
+.week-hint { display: flex; align-items: center; gap: 7px; font: 500 11.5px var(--font); color: var(--muted-3); margin: 0; }
+.week-hint svg { width: 14px; height: 14px; flex: none; }
+/* Die beiden Inline-Icons im Hinweis: zentriert auf der Textzeile, etwas kleiner
+   als das führende Drag-Icon, Farbe weiterhin über das Token am <b>. */
+.week-hint b { display: inline-flex; align-items: center; }
+.week-hint b svg { width: 12px; height: 12px; }
+.week-hint b.add { color: var(--accent); }
+.week-hint b.rm { color: var(--now); }
 
-@media (max-width: 1080px) {
-  .week-grid { grid-template-columns: repeat(7, minmax(150px, 1fr)); overflow-x: auto; }
+/* ── Board-Karte ───────────────────────────────────────── */
+.week-board {
+  margin-top: 14px; flex: 1; min-height: 0; display: flex; flex-direction: column;
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg);
+  padding: 12px 16px 14px; overflow: hidden; box-shadow: var(--shadow-card);
+}
+.wkb-gutter { flex: 0 0 40px; width: 40px; }
+
+/* ── Tageskopf-Zeile ───────────────────────────────────── */
+.wkb-head { display: flex; align-items: stretch; flex: none; border-bottom: 1px solid var(--line-soft); padding-bottom: 10px; }
+.wkb-daycell { flex: 1 1 0; min-width: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 4px; height: 22px; cursor: pointer; position: relative; }
+.wkb-daycell__label { display: flex; align-items: baseline; gap: 5px; }
+.wkb-dow { font: 600 10px var(--font); letter-spacing: .06em; text-transform: uppercase; color: var(--muted-2); }
+.wkb-date { font: 700 13px var(--font); line-height: 1; color: var(--ink-strong); font-variant-numeric: tabular-nums; }
+.wkb-plus { display: grid; place-items: center; width: 18px; height: 18px; border-radius: 6px; background: var(--card-inset); color: var(--muted-3); flex: none; }
+.wkb-daycell.is-today { background: var(--accent-tint); border-radius: 8px 8px 0 0; }
+.wkb-daycell.is-today .wkb-dow { color: var(--accent); font-weight: 700; }
+.wkb-daycell.is-today .wkb-date { color: var(--accent); font-weight: 800; }
+.wkb-daycell.is-today .wkb-plus { background: var(--card); color: var(--accent); }
+.wkb-daycell.is-weekend .wkb-dow, .wkb-daycell.is-weekend .wkb-date { color: var(--faint); }
+
+/* ── All-day-Band (nur wenn ungetaktete Aufgaben) ──────── */
+.wkb-allday { display: flex; align-items: flex-start; flex: none; border-bottom: 1px solid var(--line-soft); padding: 6px 0; }
+.wkb-gutter--allday { display: flex; align-items: center; font: 500 9px var(--font); letter-spacing: .06em; text-transform: uppercase; color: var(--faint); }
+.wkb-allcell { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 4px; padding: 0 3px; }
+.wkb-chip { display: flex; align-items: center; gap: 5px; padding: 4px 7px; border-radius: 6px; border-left: 3px solid var(--sc); background: var(--sc-tint); color: var(--sc-ink); cursor: grab; }
+.wkb-chip__text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 600 10px var(--font); }
+/* Icon-Buttons (SVG statt Textglyphe): inline-flex zentriert, keine font-size nötig. */
+.wkb-chip__check, .wkb-chip__del { border: 0; background: none; color: inherit; cursor: pointer; padding: 0; display: inline-flex; align-items: center; justify-content: center; flex: none; opacity: .7; }
+.wkb-chip.is-done { opacity: .6; } .wkb-chip.is-done .wkb-chip__text { text-decoration: line-through; }
+.wkb-add { flex: none; border: 1px solid var(--line); border-radius: 7px; padding: 5px 8px; font: 500 12px var(--font); }
+
+/* ── Körper: Achse + 7 Tagesspalten ────────────────────── */
+.wkb-body { flex: 1 1 auto; min-height: 0; display: flex; align-items: stretch; position: relative; overflow: hidden; }
+.wkb-axis { position: relative; }
+.wkb-axis__lbl { position: absolute; right: 8px; transform: translateY(-50%); font: 500 10px var(--font); color: var(--faint); font-variant-numeric: tabular-nums; line-height: 1; pointer-events: none; }
+.wkb-track {
+  flex: 1 1 0; min-width: 0; position: relative; border-left: 1px solid var(--line-soft);
+  background-image: repeating-linear-gradient(180deg, var(--card-inset) 0 1px, transparent 1px 12.5%);
+}
+.wkb-track.is-today { background: #FBFCFB; background-image: repeating-linear-gradient(180deg, #EEF2EC 0 1px, transparent 1px 12.5%); }
+.wkb-track.is-weekend { background: #FCFBF8; }
+.wkb-track.is-drop { background-color: var(--accent-tint); }
+
+/* ── Blöcke ────────────────────────────────────────────── */
+/* left/width setzt das Spalten-Layout inline (überlappende Blöcke nebeneinander).
+   min-height sichert zu, dass IMMER eine Textzeile hineinpasst — vorher waren
+   kurze Blöcke so flach, dass der Titel komplett abgeschnitten war. */
+.wkb-block {
+  position: absolute; overflow: hidden; display: flex; align-items: center;
+  padding: 2px 6px; min-height: 20px; border-radius: 6px; border-left: 3px solid var(--sc);
+  background: var(--sc-tint); color: var(--sc-ink); cursor: grab;
+}
+.wkb-block__name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 600 11px var(--font); line-height: 1.25; }
+/* Aktionen liegen als Leiste über der rechten Blockkante und blenden sich erst
+   beim Hover ein. Der weiche Verlauf darunter trennt sie vom Titel, statt ihn
+   (wie vorher) zu überdecken. Häkchenfläche 13×13 = 10px innen wie das X. */
+.wkb-block__actions {
+  position: absolute; top: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: 2px;
+  padding: 0 3px 0 14px; border-radius: 0 6px 6px 0; opacity: 0; pointer-events: none;
+  background: linear-gradient(90deg, transparent, var(--sc-tint) 45%);
+  transition: opacity .12s;
+}
+.wkb-block:hover .wkb-block__actions,
+.wkb-block:focus-within .wkb-block__actions { opacity: 1; pointer-events: auto; }
+.wkb-block__check { width: 13px; height: 13px; border-radius: 4px; border: 1.5px solid currentColor; background: transparent; color: inherit; padding: 0; flex: none; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; opacity: .75; }
+.wkb-block__check:hover { opacity: 1; }
+.wkb-block__del { border: 0; background: transparent; color: var(--sc-ink); width: 13px; height: 13px; border-radius: 3px; padding: 0; flex: none; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+.wkb-block__del:hover { color: var(--danger); }
+.wkb-block.is-done { opacity: .6; } .wkb-block.is-done .wkb-block__name { text-decoration: line-through; }
+.wkb-block.is-active { box-shadow: 0 0 0 2px var(--accent); }
+.wkb-block.is-dragging { background: var(--accent); border-left-color: var(--accent); color: var(--on-accent); box-shadow: 0 8px 18px -6px rgba(62, 125, 94, .75); transform: rotate(-1deg); z-index: 5; }
+.wkb-block.is-dragging .wkb-block__name { color: #fff; }
+
+/* ── Now-Linie ─────────────────────────────────────────── */
+.wkb-now { position: absolute; left: 0; right: 0; height: 0; border-top: 2px solid var(--now); z-index: 6; pointer-events: none; }
+.wkb-now__dot { position: absolute; left: -3px; top: -4px; width: 7px; height: 7px; border-radius: 50%; background: var(--now); }
+
+/* ── Responsive ────────────────────────────────────────── */
+@media (max-width: 760px) {
+  .week-board { overflow-x: auto; }
+  .wkb-head, .wkb-body, .wkb-allday { min-width: 680px; }
+  .view__head-actions { flex-wrap: wrap; }
 }
 
-/* Handy: Tage untereinander statt horizontal scrollen (steht NACH base.css,
-   damit es die 1080px-Regel oben überschreibt). */
-@media (max-width: 720px) {
-  .week-grid { grid-template-columns: 1fr; overflow-x: visible; }
-  .week-day { min-height: auto; }
-  .week-day__tasks { overflow: visible; flex: 0 0 auto; }
+/* ═══ Week · eigenständiges Apple × Slack Redesign ═════════════════════
+   Ein Kalender-Arbeitsbereich, keine Ansammlung einzelner Widgets. */
+.view--week {
+  width:100%; max-width:1500px; margin-inline:auto; min-width:0;
+  display:flex; flex-direction:column; overflow:hidden;
+}
+/* macOS Calendar-artige Navigation: eine zusammenhängende Kontrolle. */
+.week-nav {
+  gap:0; padding:3px; border:1px solid color-mix(in srgb,var(--ink) 8%,transparent);
+  border-radius:11px; background:color-mix(in srgb,var(--card-inset) 75%,var(--card));
+}
+.wk-navbtn { width:31px;height:30px;border-radius:8px;color:var(--muted-2); }
+.wk-navbtn:hover { background:color-mix(in srgb,var(--ink) 5%,transparent); }
+.wk-navbtn--today {
+  width:auto; min-width:74px; padding-inline:11px; margin-inline:2px;
+  background:var(--card); color:var(--ink-strong);
+  box-shadow:0 1px 3px color-mix(in srgb,var(--ink) 12%,transparent);
+}
+
+/* Eine einzige große Kalenderfläche. */
+.week-surface {
+  position:relative; flex:1; min-height:0; display:flex; flex-direction:column; overflow:hidden;
+  border:1px solid color-mix(in srgb,var(--ink) 8%,transparent); border-radius:18px;
+  background:var(--card); box-shadow:0 1px 2px color-mix(in srgb,var(--ink) 4%,transparent),0 20px 52px -42px color-mix(in srgb,var(--ink) 45%,transparent);
+}
+.week-surface__toolbar {
+  min-height:58px; flex:none; display:flex; align-items:center; justify-content:space-between; gap:14px;
+  padding:10px 14px; border-bottom:1px solid color-mix(in srgb,var(--ink) 7%,transparent);
+  background:linear-gradient(180deg,color-mix(in srgb,var(--card) 94%,var(--accent-tint)),var(--card));
+}
+.week-surface__range { margin:0; color:var(--ink-strong); font:750 20px var(--font); letter-spacing:-.025em; }
+.week-legendrow {
+  min-height:47px; margin:0; padding:8px 14px; gap:10px;
+  border-bottom:1px solid color-mix(in srgb,var(--ink) 7%,transparent);
+  background:linear-gradient(180deg,color-mix(in srgb,var(--card) 96%,var(--accent-tint)),var(--card));
+}
+.week-legend { gap:5px; min-width:0; overflow-x:auto; flex-wrap:nowrap; scrollbar-width:none; }
+.week-legend::-webkit-scrollbar { display:none; }
+.week-legend__all,.week-legend__pill {
+  min-height:27px; flex:none; padding:5px 10px; border:0; border-radius:9px;
+  font-size:11px; box-shadow:none;
+}
+.week-legend__all { background:var(--ink-strong); color:var(--card); }
+.week-legend__pill { background:color-mix(in srgb,var(--sc-tint,var(--accent-tint)) 74%,var(--card)); }
+.week-legend__dot { width:6px;height:6px; }
+.week-legend__count { opacity:.55; }
+.week-gesture { flex:none; color:var(--muted-3); font:500 10.5px var(--font); }
+
+.wkb-block,.wkb-chip { cursor:pointer; }
+.week-event-detail { position:absolute;z-index:30;padding:15px;border:1px solid color-mix(in srgb,var(--ink) 11%,transparent);border-radius:14px;background:color-mix(in srgb,var(--card) 96%,transparent);box-shadow:0 18px 55px -18px color-mix(in srgb,var(--ink) 42%,transparent),0 2px 8px color-mix(in srgb,var(--ink) 10%,transparent);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px); }
+.week-event-detail__top { display:flex;align-items:center;justify-content:space-between;gap:12px; }
+.week-event-detail__close { width:25px;height:25px;display:grid;place-items:center;border:0;border-radius:50%;background:var(--card-inset);color:var(--muted-2);cursor:pointer; }
+.week-event-detail__eyebrow { display:flex;align-items:center;gap:6px;color:var(--muted-2);font:700 9px var(--font);letter-spacing:.08em;text-transform:uppercase; }
+.week-event-detail__eyebrow i { width:8px;height:8px;border-radius:50%;background:var(--calendar-color,var(--sc,var(--accent))); }
+.week-event-detail h2 { margin:9px 2px 14px;color:var(--ink-strong);font:720 18px/1.25 var(--font);letter-spacing:-.02em; }
+.week-event-detail__rows { display:flex;flex-direction:column;gap:0; }
+.week-event-detail__rows > div { display:grid;grid-template-columns:68px 1fr;gap:10px;padding:7px 2px;border-top:1px solid color-mix(in srgb,var(--ink) 6%,transparent); }
+.week-event-detail__rows span { color:var(--muted-3);font:500 10.5px var(--font); }
+.week-event-detail__rows strong { min-width:0;overflow:hidden;text-overflow:ellipsis;color:var(--ink-2);font:600 11px var(--font); }
+.week-event-detail__source { margin:10px 2px 0;color:var(--muted-3);font:500 9.5px/1.35 var(--font); }
+.week-event-detail__actions { display:flex;gap:5px;margin-top:12px;padding-top:10px;border-top:1px solid color-mix(in srgb,var(--ink) 7%,transparent); }
+.week-event-detail__actions button { flex:1;min-height:29px;border:0;border-radius:8px;background:var(--card-inset);color:var(--ink-2);font:600 10px var(--font);cursor:pointer; }
+.week-event-detail__actions button:hover { background:color-mix(in srgb,var(--ink) 7%,var(--card)); }
+.week-event-detail__actions .is-danger { color:var(--danger); }
+.week-tools { display:flex;align-items:center;gap:6px;flex:none; }
+.week-tool {
+  min-height:29px;padding:0 10px;border:1px solid color-mix(in srgb,var(--ink) 8%,transparent);
+  border-radius:8px;background:var(--card);color:var(--muted-2);font:600 10.5px var(--font);cursor:pointer;
+}
+.week-tool:hover { background:var(--card-inset);color:var(--ink); }
+.week-tool--danger { border-color:color-mix(in srgb,var(--danger) 18%,transparent);color:var(--danger);background:color-mix(in srgb,var(--danger) 5%,var(--card)); }
+.week-selection { color:var(--muted-2);font:600 10.5px var(--font); }
+.week-calendars {
+  position:relative;z-index:10;flex:none;padding:7px 10px;border-bottom:1px solid color-mix(in srgb,var(--ink) 7%,transparent);
+  background:color-mix(in srgb,var(--card-inset) 45%,var(--card));
+}
+.week-calendar-row { min-height:34px;display:grid;grid-template-columns:10px minmax(110px,1fr) minmax(90px,.65fr) auto;align-items:center;gap:9px;padding:3px 5px; }
+.week-calendar-row__color { width:8px;height:8px;border-radius:50%;background:var(--calendar-color);box-shadow:0 0 0 3px color-mix(in srgb,var(--calendar-color) 13%,transparent); }
+.week-calendar-row__name { min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink);font:600 11.5px var(--font); }
+.week-calendar-row__account { min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted-3);font:500 10.5px var(--font); }
+.week-calendar-row__remove { border:0;border-radius:7px;padding:5px 8px;background:transparent;color:var(--danger);font:600 10px var(--font);cursor:pointer; }
+.week-calendar-row__remove:hover { background:color-mix(in srgb,var(--danger) 8%,transparent); }
+.week-calendar-row__remove:disabled { opacity:.45;cursor:default; }
+.week-calendars__empty { margin:4px;color:var(--muted-3);font:500 11px var(--font); }
+.week-legend__calendar { display:inline-flex;align-items:center;gap:6px;min-height:27px;flex:none;padding:5px 9px;border-radius:9px;background:color-mix(in srgb,var(--calendar-color) 8%,var(--card));color:var(--ink);font:600 11px var(--font); }
+.week-legend__calendar i,.wkb-block__source i { width:6px;height:6px;flex:none;border-radius:50%;background:var(--calendar-color); }
+
+.week-board {
+  margin:0; padding:0; flex:1; min-height:0; border:0; border-radius:0;
+  background:var(--card); box-shadow:none; overflow:hidden;
+}
+.wkb-gutter { flex-basis:48px; width:48px; }
+
+/* Tagesköpfe: Datum als visuelle Hauptinformation, heute als Kreis. */
+.wkb-head { min-height:58px; padding:0; border-bottom:1px solid color-mix(in srgb,var(--ink) 7%,transparent); background:var(--card); }
+.wkb-daycell {
+  height:auto; padding:9px 9px 8px; align-items:center; border-left:1px solid color-mix(in srgb,var(--ink) 6%,transparent);
+}
+.wkb-daycell__label { align-items:center; gap:8px; }
+.wkb-dow { font-size:9.5px; letter-spacing:.09em; color:var(--muted-3); }
+.wkb-date { width:29px;height:29px;display:grid;place-items:center;border-radius:50%;font-size:12px; }
+.wkb-daycell.is-today { background:transparent; border-radius:0; }
+.wkb-daycell.is-today .wkb-dow { color:var(--accent); }
+.wkb-daycell.is-today .wkb-date { background:var(--accent);color:var(--on-accent);box-shadow:0 4px 12px -8px var(--accent-strong); }
+.wkb-plus { opacity:0;width:24px;height:24px;border-radius:7px;background:transparent;transition:opacity .15s,background .15s; }
+.wkb-daycell:hover .wkb-plus { opacity:1;background:var(--card-inset); }
+.wkb-daycell.is-today .wkb-plus { background:transparent; }
+.wkb-daycell.is-today:hover .wkb-plus { background:var(--accent-tint); }
+
+/* Ungetaktete Aufgaben: ruhige Inbox-Leiste, nicht „All day“-Alarm. */
+.wkb-allday { padding:7px 0; border-bottom:1px solid color-mix(in srgb,var(--ink) 7%,transparent); background:var(--card); }
+.wkb-gutter--allday { justify-content:flex-end;padding-right:8px;font-size:8px;letter-spacing:.08em; }
+.wkb-allcell { padding:0 5px; border-left:1px solid color-mix(in srgb,var(--ink) 6%,transparent); }
+.wkb-chip { padding:5px 7px;border:0;border-left:2px solid var(--sc);border-radius:7px;background:color-mix(in srgb,var(--sc-tint) 76%,var(--card)); }
+.wkb-add { width:100%; min-width:0; padding:7px 8px; border:1px solid color-mix(in srgb,var(--accent) 25%,transparent);border-radius:8px;background:var(--card);outline:0; }
+.wkb-add:focus { border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-tint); }
+
+/* Zeitraster: weiße Fläche, nur sehr feine Stundenlinien. */
+.wkb-body { background:var(--card); }
+.wkb-axis { background:var(--card); }
+.wkb-axis__lbl { right:10px;color:var(--muted-3);font-size:9px; }
+.wkb-track {
+  border-left:1px solid color-mix(in srgb,var(--ink) 6%,transparent);
+  background-color:var(--card);
+  background-image:repeating-linear-gradient(180deg,color-mix(in srgb,var(--ink) 5%,transparent) 0 1px,transparent 1px 12.5%);
+}
+.wkb-track.is-today {
+  background-color:color-mix(in srgb,var(--accent) 2.5%,var(--card));
+  background-image:repeating-linear-gradient(180deg,color-mix(in srgb,var(--accent) 8%,transparent) 0 1px,transparent 1px 12.5%);
+}
+.wkb-track.is-weekend { background-color:color-mix(in srgb,var(--ink) 1.5%,var(--card)); }
+.wkb-track.is-drop { background-color:color-mix(in srgb,var(--accent) 9%,var(--card));box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--accent) 32%,transparent); }
+
+/* Kalenderblöcke mit Titel + optionaler Zeit, wie Apple Calendar. */
+.wkb-block {
+  align-items:flex-start;justify-content:center;flex-direction:column; padding:4px 7px;
+  border:1px solid color-mix(in srgb,var(--sc) 18%,transparent);border-left:3px solid var(--sc);
+  border-radius:5px 9px 9px 5px;background:color-mix(in srgb,var(--sc-tint) 80%,var(--card));
+  box-shadow:0 1px 2px color-mix(in srgb,var(--ink) 5%,transparent);
+}
+.wkb-block__name { width:100%;font-size:10.5px;line-height:1.2; }
+.wkb-block__time { display:none;width:100%;margin-top:2px;color:color-mix(in srgb,var(--sc-ink) 68%,var(--muted-2));font:500 8.5px/1 var(--font);white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.wkb-block.has-time .wkb-block__time { display:block; }
+.wkb-select {
+  position:absolute;top:5px;left:5px;z-index:3;width:16px;height:16px;display:grid;place-items:center;padding:0;
+  border:1px solid color-mix(in srgb,var(--sc-ink,var(--ink)) 24%,transparent);border-radius:50%;
+  background:color-mix(in srgb,var(--card) 80%,transparent);color:var(--on-accent);cursor:pointer;opacity:0;transition:opacity .12s,background .12s;
+}
+.wkb-block:hover .wkb-select,.wkb-chip:hover .wkb-select,.wkb-select.is-selected { opacity:1; }
+.wkb-select.is-selected { border-color:var(--accent);background:var(--accent); }
+.wkb-block:has(.wkb-select.is-selected) { box-shadow:inset 0 0 0 2px var(--accent); }
+.wkb-chip { position:relative;padding-left:25px; }
+.wkb-chip .wkb-select { top:50%;left:5px;transform:translateY(-50%); }
+.wkb-chip--external { padding:5px 7px;border-left-color:var(--calendar-color);background:color-mix(in srgb,var(--calendar-color) 9%,var(--card));cursor:default; }
+.wkb-chip--external small { min-width:0;overflow:hidden;text-overflow:ellipsis;color:var(--muted-3);font:600 8px var(--font);white-space:nowrap; }
+.wkb-chip__source { width:6px;height:6px;border-radius:50%;background:var(--calendar-color);flex:none; }
+.wkb-block--external {
+  --sc:var(--calendar-color);--sc-tint:color-mix(in srgb,var(--calendar-color) 11%,var(--card));--sc-ink:var(--ink);
+  cursor:default;border-left-width:3px;background:var(--sc-tint);padding-top:4px;
+}
+.wkb-block__source { width:100%;display:flex;align-items:center;gap:4px;margin-bottom:2px;color:color-mix(in srgb,var(--calendar-color) 72%,var(--ink));font:700 7.5px/1 var(--font);text-transform:uppercase;letter-spacing:.035em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.wkb-block--external .wkb-block__name { padding-right:0; }
+.wkb-block--external.has-time .wkb-block__time { color:var(--muted-2); }
+.wkb-block__actions { border-radius:0 9px 9px 0;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--sc-tint) 94%,var(--card)) 38%); }
+.wkb-now { border-top-width:1.5px; }
+.wkb-now__dot { width:6px;height:6px;top:-3.5px; }
+
+:root[data-theme="dark"] .week-surface { background:var(--card);box-shadow:0 22px 55px -38px #000,inset 0 1px 0 color-mix(in srgb,#fff 5%,transparent); }
+:root[data-theme="dark"] .wkb-track.is-today { background-color:color-mix(in srgb,var(--accent) 5%,var(--card)); }
+
+@media(max-width:900px) {
+  .view--week { overflow:visible; }
+  .week-head { align-items:flex-end; }
+  .week-surface { min-height:680px; overflow-x:auto; }
+  .week-legendrow { min-width:680px; }
+  .week-tools { position:sticky;right:8px; }
+  .week-calendar-row { min-width:620px; }
+  .wkb-head,.wkb-body,.wkb-allday { min-width:680px; }
 }

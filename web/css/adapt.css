@@ -1,0 +1,154 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   Kairos · Adapt — nutzerdefinierte Darstellung (Akzent, Hell/Dunkel,
+   Schriftgröße, Dichte, Kontrast, Bewegung, Legasthenie, zahlenarm).
+   Gesteuert über data-Attribute auf <html> (web/js/adapt.js).
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Akzentfarben (sage = Standard aus tokens.css) ───────────────────── */
+:root[data-accent="amber"]      { --accent:#C89A4C; --accent-strong:#A87E38; --accent-ink:#8A6D3B; }
+:root[data-accent="terracotta"] { --accent:#C2603F; --accent-strong:#A24E32; --accent-ink:#A24E32; }
+:root[data-accent="blue"]       { --accent:#5D82AE; --accent-strong:#4A678C; --accent-ink:#4A678C; }
+:root[data-accent="pink"]       { --accent:#C98AA6; --accent-strong:#B06A8A; --accent-ink:#B06A8A; }
+:root[data-accent="violet"]     { --accent:#8A7CC2; --accent-strong:#6D5FA8; --accent-ink:#5E4F8C; }
+:root[data-accent="teal"]       { --accent:#3F8E86; --accent-strong:#2F6F69; --accent-ink:#2F6F69; }
+:root[data-accent="slate"]      { --accent:#5F6B77; --accent-strong:#49535D; --accent-ink:#49535D; }
+
+/* Tönungen/Charts/Schatten für alle Nicht-Standard-Akzente aus der Basisfarbe
+   ableiten (konsistent in hell UND dunkel, keine 8×8-Farbtabellen). */
+:root:not([data-accent="sage"]) {
+  --accent-tint:    color-mix(in srgb, var(--accent) 13%, var(--app));
+  --accent-tint-2:  color-mix(in srgb, var(--accent) 24%, var(--app));
+  --accent-chart:   color-mix(in srgb, var(--accent) 40%, var(--app));
+  --accent-chart-2: color-mix(in srgb, var(--accent) 30%, var(--app));
+  --shadow-accent:  0 8px 18px -8px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+/* ── Dunkles Thema ───────────────────────────────────────────────────── */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --page:        #161815;
+  --app:         #21241F;
+  --sidebar:     #1B1E1A;
+  --card:        #272B25;
+  --card-muted:  #232721;
+  --card-inset:  #1D201C;
+  --note-pin:    #2B2920;
+  --note-pin-bd: #45402C;
+
+  --ink:         #E8EAE3;
+  --ink-strong:  #F4F5F0;
+  --ink-2:       #B9BDB0;
+  --muted:       #9AA091;
+  --muted-2:     #828879;
+  --muted-3:     #70766A;
+  --faint:       #5B6156;
+  --label:       #8D9284;
+  --placeholder: #6B7164;
+
+  --line:        #343830;
+  --line-2:      #30342C;
+  --line-3:      #32362E;
+  --line-soft:   #2B2F28;
+  --line-strong: #3D4238;
+  --divider:     #3D4238;
+  --track:       #343830;
+
+  --shadow-card:   0 12px 30px -22px rgba(0, 0, 0, .9);
+  --shadow-pop:    0 16px 40px -16px rgba(0, 0, 0, .7);
+  --shadow-window: 0 50px 100px -35px rgba(0, 0, 0, .85), 0 0 0 1px var(--line-strong);
+
+  /* Akzent-Tönungen auf dunkler Fläche (gilt auch für sage). */
+  --accent-tint:    color-mix(in srgb, var(--accent) 20%, var(--app));
+  --accent-tint-2:  color-mix(in srgb, var(--accent) 30%, var(--app));
+  --accent-chart:   color-mix(in srgb, var(--accent) 42%, var(--app));
+  --accent-chart-2: color-mix(in srgb, var(--accent) 32%, var(--app));
+  --accent-ink:     color-mix(in srgb, var(--accent) 62%, #FFFFFF);
+
+  --amber-tint:   color-mix(in srgb, #C89A4C 18%, var(--app));
+  --amber-tint-2: color-mix(in srgb, #C89A4C 26%, var(--app));
+  --amber-ink:    color-mix(in srgb, #C89A4C 62%, #FFFFFF);
+  --amber-label:  color-mix(in srgb, #C89A4C 70%, #FFFFFF);
+  --blue-tint:    color-mix(in srgb, #7C9AC2 18%, var(--app));
+  --blue-ink:     color-mix(in srgb, #7C9AC2 62%, #FFFFFF);
+  --pink-tint:    color-mix(in srgb, #C98AA6 18%, var(--app));
+  --pink-ink:     color-mix(in srgb, #C98AA6 62%, #FFFFFF);
+}
+
+/* Fach-Farbchips: Tönung/Tinte im Dunkeln aus der Vollton-Farbe ableiten. */
+:root[data-theme="dark"] [class*="subj-"] {
+  --sc-tint:   color-mix(in srgb, var(--sc) 22%, var(--app));
+  --sc-ink:    color-mix(in srgb, var(--sc) 64%, #FFFFFF);
+  --sc-border: color-mix(in srgb, var(--sc) 38%, var(--app));
+}
+
+/* ── Schriftgröße (wirkt wie der System-Zoom bei Apple) ──────────────── */
+:root[data-fontscale="s"]  { zoom: 0.92; }
+:root[data-fontscale="l"]  { zoom: 1.08; }
+:root[data-fontscale="xl"] { zoom: 1.18; }
+
+/* ── Dichte ──────────────────────────────────────────────────────────── */
+:root[data-density="compact"] {
+  --pad-main: 18px;
+  --sidebar-w: 212px;
+  --r-lg: 14px;
+  --r-md: 12px;
+}
+
+/* ── Weniger Animationen ─────────────────────────────────────────────── */
+:root[data-reduce-motion="1"] *,
+:root[data-reduce-motion="1"] *::before,
+:root[data-reduce-motion="1"] *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+
+/* ── Hoher Kontrast ──────────────────────────────────────────────────── */
+:root[data-contrast="high"]:not([data-theme="dark"]) {
+  --ink:         #101310;
+  --ink-strong:  #000000;
+  --ink-2:       #2C2F2A;
+  --muted:       #3A3E38;
+  --muted-2:     #474B44;
+  --muted-3:     #52564E;
+  --faint:       #62665C;
+  --label:       #474B42;
+  --placeholder: #62665A;
+  --line:        #AEB1A6;
+  --line-2:      #AEB1A6;
+  --line-3:      #AEB1A6;
+  --line-strong: #999C91;
+  --divider:     #999C91;
+}
+:root[data-theme="dark"][data-contrast="high"] {
+  --ink:         #FFFFFF;
+  --ink-strong:  #FFFFFF;
+  --ink-2:       #E9EBE3;
+  --muted:       #D2D5CA;
+  --muted-2:     #BEC2B4;
+  --muted-3:     #A9AE9F;
+  --faint:       #90958A;
+  --label:       #C6CABC;
+  --placeholder: #9BA090;
+  --line:        #565B50;
+  --line-2:      #565B50;
+  --line-strong: #6A6F62;
+}
+
+/* ── Legasthenie-freundliche Typografie ──────────────────────────────── */
+:root[data-dyslexia="1"] body {
+  letter-spacing: .016em;
+  word-spacing: .09em;
+  line-height: 1.55;
+}
+:root[data-dyslexia="1"] p,
+:root[data-dyslexia="1"] li {
+  max-width: 68ch;
+}
+
+/* ── Zahlenarme Darstellung (Dyskalkulie): dichte Zahlen-Charts weg ──── */
+:root[data-numberfriendly="1"] #topicChart,
+:root[data-numberfriendly="1"] .workload-legend {
+  display: none;
+}

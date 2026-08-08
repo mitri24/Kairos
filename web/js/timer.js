@@ -1,39 +1,49 @@
-// Timer-Karte: Zifferblatt (echte Uhr-Zeiger + Timer-Fortschrittsring),
-// Digital-Zeit, Countdown, Phasen-Tabs, Steuerung und Session-Längen-Slider.
-import {
-  formatDurationHM, formatClock, PHASES, STATUS, phaseLabelJa,
-} from "/js/util.js";
+// Fokus-Timer-Widget (Sidebar): conic Fortschrittsring + Restzeit (MM:SS), aktuelle
+// Uhrzeit im Kopf, Phasen-Tabs, Steuerung (Start/Pause/Skip/Reset) und phasenbezogene
+// Dauer-Presets (Focus/Short/Long). Liest store.state, schreibt ausschließlich über api.
+import { formatClock, PHASES, STATUS, pad2 } from "/js/util.js";
 import { getPhaseDurationMs } from "/shared/pomodoro.js";
+import { icon } from "/js/icons.js";
 
-const R = 132;
-const CIRC = 2 * Math.PI * R;
-const FOCUS_PRESETS = [15, 25, 45, 60];
+// Presets pro Phase — die 15/25/45/60-Reihe im Design gehört zu Focus; Pausen bekommen
+// passende kürzere Werte. Damit ersetzen die Presets die alten Dauer-Slider 1:1 im Design.
+const PRESETS = {
+  [PHASES.FOCUS]: [15, 25, 45, 60],
+  [PHASES.SHORT_BREAK]: [3, 5, 10, 15],
+  [PHASES.LONG_BREAK]: [10, 15, 20, 30],
+};
+const SETTING_KEY = {
+  [PHASES.FOCUS]: "focusMinutes",
+  [PHASES.SHORT_BREAK]: "shortBreakMinutes",
+  [PHASES.LONG_BREAK]: "longBreakMinutes",
+};
+
+// Restzeit als MM:SS (Minuten zweistellig für ein stabiles Zifferbild).
+function formatMMSS(ms) {
+  const s = Math.max(0, Math.round(ms / 1000));
+  return `${pad2(Math.floor(s / 60))}:${pad2(s % 60)}`;
+}
 
 export function initTimer({ store, api }) {
   const el = (id) => document.getElementById(id);
-  const dialProgress = el("dialProgress");
-  const hourHand = el("hourHand"), minHand = el("minHand"), secHand = el("secHand");
+  const ring = el("timerRing");
   const digitalTime = el("digitalTime");
   const timeStr = el("timeStr"), modeLabel = el("modeLabel");
-  const toggleBtn = el("toggleBtn"), skipBtn = el("skipBtn"), resetBtn = el("resetBtn");
+  const toggleBtn = el("toggleBtn"), toggleLabel = el("toggleLabel");
+  const skipBtn = el("skipBtn"), resetBtn = el("resetBtn");
   const tabs = { [PHASES.FOCUS]: el("tabFocus"), [PHASES.SHORT_BREAK]: el("tabShort"), [PHASES.LONG_BREAK]: el("tabLong") };
-  const sessionRange = el("sessionRange"), sessionLabel = el("sessionLabel"), sessionPresets = el("sessionPresets");
-  const shortRange = el("shortRange"), shortLabel = el("shortLabel");
-  const longRange = el("longRange"), longLabel = el("longLabel");
-  // Mini-Timer in der Sidebar (immer sichtbar)
-  const miniTimer = el("miniTimer"), miniPhase = el("miniPhase"), miniTime = el("miniTime");
-  const miniToggle = el("miniToggle"), miniSkip = el("miniSkip"), miniTask = el("miniTask");
+  const presetGroup = el("sessionPresets");
 
-  dialProgress.style.strokeDasharray = String(CIRC);
-  dialProgress.style.transition = "stroke-dashoffset .3s linear, stroke .2s";
-
-  // Presets rendern
-  sessionPresets.innerHTML = "";
-  for (const m of FOCUS_PRESETS) {
-    const b = document.createElement("button");
-    b.className = "preset"; b.textContent = String(m); b.dataset.min = String(m);
-    b.addEventListener("click", () => { setFocusMinutes(m); persistSettings(); });
-    sessionPresets.appendChild(b);
+  // Start/Pause-Piktogramm: das statische <svg class="play-glyph"> aus index.html
+  // wird durch das Icon aus /js/icons.js ersetzt (Klasse bleibt, CSS greift weiter).
+  // So haben Play und Pause denselben Strichstil wie in Fokusmodus und Extension.
+  let toggleGlyph = toggleBtn?.querySelector(".play-glyph");
+  let toggleGlyphName = "";
+  function setToggleGlyph(name) {
+    if (!toggleGlyph || name === toggleGlyphName) return;
+    toggleGlyphName = name;
+    toggleGlyph.outerHTML = icon(name, { size: 13, cls: "play-glyph" });
+    toggleGlyph = toggleBtn.querySelector(".play-glyph");
   }
 
   // ── Aktionen ───────────────────────────────────
@@ -48,30 +58,31 @@ export function initTimer({ store, api }) {
     return act(api.timer.start);
   }
   toggleBtn.addEventListener("click", toggle);
-  skipBtn.addEventListener("click", () => act(api.timer.skip));
-  resetBtn.addEventListener("click", () => act(api.timer.reset));
-  miniToggle?.addEventListener("click", (e) => { e.stopPropagation(); toggle(); });
-  miniSkip?.addEventListener("click", (e) => { e.stopPropagation(); act(api.timer.skip); });
+  skipBtn?.addEventListener("click", () => act(api.timer.skip));
+  resetBtn?.addEventListener("click", () => act(api.timer.reset));
   for (const [phase, tab] of Object.entries(tabs)) {
-    tab.addEventListener("click", () => act(() => api.timer.phase(phase)));
+    tab?.addEventListener("click", () => act(() => api.timer.phase(phase)));
   }
 
-  // Slider: live Vorschau (input) + speichern (change)
-  sessionRange.addEventListener("input", () => setFocusMinutes(Number(sessionRange.value)));
-  sessionRange.addEventListener("change", persistSettings);
-  shortRange.addEventListener("input", () => { store.state.settings.shortBreakMinutes = Number(shortRange.value); renderSliders(); });
-  shortRange.addEventListener("change", persistSettings);
-  longRange.addEventListener("input", () => { store.state.settings.longBreakMinutes = Number(longRange.value); renderSliders(); });
-  longRange.addEventListener("change", persistSettings);
+  // Preset-Klick (Delegation): Dauer der AKTUELLEN Phase setzen + persistieren.
+  presetGroup?.addEventListener("click", (e) => {
+    const btn = e.target.closest(".preset");
+    if (!btn) return;
+    const min = Number(btn.dataset.min);
+    if (!Number.isFinite(min)) return;
+    setPhaseMinutes(store.state.timer.phase, min);
+    persistDurations();
+  });
 
-  function setFocusMinutes(m) {
+  function setPhaseMinutes(phase, min) {
     const s = store.state.settings;
-    s.focusMinutes = m;
+    s[SETTING_KEY[phase]] = min;
     const t = store.state.timer;
-    if (t.status !== STATUS.RUNNING && t.phase === PHASES.FOCUS) t.remainingMs = m * 60000;
+    // Ruhende Aktuelle-Phase sofort neu bemessen (Vorschau ohne Serverrundreise).
+    if (t.status !== STATUS.RUNNING && t.phase === phase) t.remainingMs = min * 60000;
     store.emit();
   }
-  function persistSettings() {
+  function persistDurations() {
     const s = store.state.settings;
     act(() => api.setSettings({
       focusMinutes: s.focusMinutes, shortBreakMinutes: s.shortBreakMinutes,
@@ -80,73 +91,65 @@ export function initTimer({ store, api }) {
   }
 
   // ── Rendering ──────────────────────────────────
-  function renderHands() {
-    const now = store.now();
-    const d = new Date(now);
-    const sec = d.getSeconds() + d.getMilliseconds() / 1000;
-    const min = d.getMinutes() + sec / 60;
-    const hr = (d.getHours() % 12) + min / 60;
-    secHand.setAttribute("transform", `rotate(${sec * 6} 140 140)`);
-    minHand.setAttribute("transform", `rotate(${min * 6} 140 140)`);
-    hourHand.setAttribute("transform", `rotate(${hr * 30} 140 140)`);
-    digitalTime.textContent = formatClock(now);
+  function renderClock() {
+    if (digitalTime) digitalTime.textContent = formatClock(store.now());
   }
 
   function renderRing() {
     const t = store.state.timer, s = store.state.settings;
     const total = getPhaseDurationMs(t.phase, s) || 1;
     const frac = Math.max(0, Math.min(1, t.remainingMs / total));
-    dialProgress.style.strokeDashoffset = String(CIRC * (1 - frac));
-    dialProgress.setAttribute("stroke", t.phase === PHASES.FOCUS ? "var(--accent)" : "var(--green)");
+    if (ring) {
+      ring.style.setProperty("--frac", String(frac));
+      ring.classList.toggle("is-break", t.phase !== PHASES.FOCUS);
+    }
   }
 
   function renderTimerText() {
-    const t = store.state.timer, s = store.state.settings;
-    timeStr.textContent = formatDurationHM(t.remainingMs, true);
-    let status = "";
-    if (t.status === STATUS.RUNNING) status = t.phase === PHASES.FOCUS ? "Focusing" : "On break";
-    else if (t.status === STATUS.PAUSED) status = "Paused";
-    else status = `${Math.round(getPhaseDurationMs(t.phase, s) / 60000)} min`;
-    modeLabel.textContent = `${phaseLabelJa(t.phase)} · ${status}`;
+    const t = store.state.timer;
+    timeStr.textContent = formatMMSS(t.remainingMs);
+    let sub;
+    if (t.status === STATUS.RUNNING) sub = t.phase === PHASES.FOCUS ? "focusing" : "on break";
+    else if (t.status === STATUS.PAUSED) sub = "paused";
+    else sub = "remaining";
+    if (modeLabel) modeLabel.textContent = sub;
 
-    if (t.status === STATUS.RUNNING) { toggleBtn.textContent = "⏸ Pause"; toggleBtn.classList.add("is-running"); }
-    else if (t.status === STATUS.PAUSED) { toggleBtn.textContent = "▶ Resume"; toggleBtn.classList.remove("is-running"); }
-    else { toggleBtn.textContent = "▶ Start"; toggleBtn.classList.remove("is-running"); }
+    if (t.status === STATUS.RUNNING) {
+      if (toggleLabel) toggleLabel.textContent = "Pause";
+      toggleBtn.classList.add("is-running");
+      setToggleGlyph("pause");
+    } else {
+      if (toggleLabel) toggleLabel.textContent = t.status === STATUS.PAUSED ? "Resume" : "Start";
+      toggleBtn.classList.remove("is-running");
+      setToggleGlyph("play");
+    }
   }
 
   function renderTabs() {
     const phase = store.state.timer.phase;
-    for (const [p, tab] of Object.entries(tabs)) tab.classList.toggle("is-active", p === phase);
+    for (const [p, tab] of Object.entries(tabs)) tab?.classList.toggle("is-active", p === phase);
   }
 
-  function renderSliders() {
-    const s = store.state.settings;
-    if (document.activeElement !== sessionRange) sessionRange.value = String(s.focusMinutes);
-    if (document.activeElement !== shortRange) shortRange.value = String(s.shortBreakMinutes);
-    if (document.activeElement !== longRange) longRange.value = String(s.longBreakMinutes);
-    sessionLabel.textContent = `${s.focusMinutes} min`;
-    shortLabel.textContent = `${s.shortBreakMinutes} min`;
-    longLabel.textContent = `${s.longBreakMinutes} min`;
-    for (const b of sessionPresets.children) b.classList.toggle("is-active", Number(b.dataset.min) === s.focusMinutes);
+  // Presets folgen der aktiven Phase; aktiver Preset = aktueller Dauerwert.
+  let presetSig = null;
+  function renderPresets() {
+    if (!presetGroup) return;
+    const s = store.state.settings, phase = store.state.timer.phase;
+    const values = PRESETS[phase] || PRESETS[PHASES.FOCUS];
+    const current = Number(s[SETTING_KEY[phase]]);
+    const sig = `${phase}|${values.join(",")}|${current}`;
+    if (sig === presetSig) return;
+    presetSig = sig;
+    presetGroup.innerHTML = values.map((m) =>
+      `<button type="button" class="preset${m === current ? " is-active" : ""}" data-min="${m}">${m}</button>`
+    ).join("");
   }
 
-  function renderMini() {
-    if (!miniTimer) return;
-    const t = store.state.timer;
-    miniPhase.textContent = phaseLabelJa(t.phase);
-    miniTime.textContent = formatDurationHM(t.remainingMs, true);
-    miniToggle.textContent = t.status === STATUS.RUNNING ? "⏸" : "▶";
-    miniTimer.classList.toggle("is-break", t.phase !== PHASES.FOCUS);
-    const active = store.state.tasks.find((x) => x.active);
-    miniTask.textContent = active ? active.text : "";
-  }
+  function render() { renderRing(); renderTimerText(); renderTabs(); renderPresets(); }
+  // Ring + Uhrzeit + Restzeit laufen jede Sekunde (getrennt vom Store-Emit).
+  function tick() { renderClock(); renderRing(); renderTimerText(); }
 
-  function render() { renderRing(); renderTimerText(); renderTabs(); renderSliders(); renderMini(); }
-
-  // Zeiger + Digital laufen jede Sekunde (auch getrennt vom Store-Emit).
-  function tick() { renderHands(); renderRing(); renderTimerText(); renderMini(); }
-
-  render(); renderHands();
+  render(); renderClock();
   store.subscribe(render);
   return { render, tick };
 }

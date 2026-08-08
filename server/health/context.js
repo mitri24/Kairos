@@ -44,8 +44,11 @@ export function computeHealthContext(rows = [], profile = {}, now = Date.now()) 
   const deficit = lastNightHours != null ? goalHours - lastNightHours : null;
 
   // ── HRV / Ruhepuls ggü. persönlicher Baseline ──────────────
-  const hrvBase = Number(profile.hrvBaselineMs) || avg(rows.slice(0, 14).map((r) => r.hrvMs).filter((x) => x != null));
-  const rhrBase = Number(profile.restingHrBaseline) || avg(rows.slice(0, 14).map((r) => r.restingHr).filter((x) => x != null));
+  // Auto-Baseline aus den VORTAGEN (rows.slice(1)) — nie der heutige Wert selbst,
+  // sonst dämpft er die eigene Abweichung (und wäre bei nur einem Tag exakt 0).
+  const priorRows = rows.slice(1, 15);
+  const hrvBase = Number(profile.hrvBaselineMs) || avg(priorRows.map((r) => r.hrvMs).filter((x) => x != null));
+  const rhrBase = Number(profile.restingHrBaseline) || avg(priorRows.map((r) => r.restingHr).filter((x) => x != null));
   const hrvDeltaPct = hrvBase && latest.hrvMs != null ? ((latest.hrvMs - hrvBase) / hrvBase) * 100 : null;
   const rhrDelta = rhrBase && latest.restingHr != null ? latest.restingHr - rhrBase : null;
 

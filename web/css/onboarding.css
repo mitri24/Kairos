@@ -1,0 +1,104 @@
+/* ═══ Onboarding — Erststart-Assistent (3 Schritte) ═══════════════════════════ */
+.onb-overlay {
+  position: fixed; inset: 0; z-index: 85;
+  background: rgba(35, 35, 28, .38); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+  display: grid; place-items: center; padding: 20px; animation: fade .16s ease;
+}
+.onb-overlay[hidden] { display: none !important; }
+.onb {
+  width: min(920px, 100%); height: min(600px, 90vh);
+  background: var(--app); border-radius: var(--r-lg); overflow: hidden;
+  box-shadow: var(--shadow-window); display: flex; animation: pop .18s ease;
+}
+
+/* ── Linke Fortschritts-Schiene ── */
+.onb__rail { width: 300px; flex: none; background: var(--accent-tint); padding: 40px 34px; display: flex; flex-direction: column; }
+.onb__brand { display: flex; align-items: center; gap: 10px; font: 800 20px var(--font); letter-spacing: -.4px; color: var(--accent-ink); }
+.onb__mark { width: 26px; height: 26px; flex: none; }
+.onb__headline { font: 800 28px var(--font); line-height: 1.12; margin-top: 24px; letter-spacing: -.5px; color: var(--ink-strong); }
+.onb__steps { display: flex; flex-direction: column; gap: 4px; margin-top: 32px; }
+.onb__step { display: flex; align-items: center; gap: 13px; padding: 9px 0; font: 600 14px var(--font); color: #5f7d6c; }
+.onb__num { width: 28px; height: 28px; border-radius: 50%; background: var(--card); border: 2px solid #bcd3c4; color: #7ba088; display: grid; place-items: center; font: 700 13px var(--font); flex: none; }
+.onb__conn-line { width: 1px; height: 14px; background: #bcd3c4; margin-left: 14px; }
+.onb__step.is-active { color: var(--accent-ink); font-weight: 700; }
+.onb__step.is-active .onb__num { background: var(--accent); border-color: var(--accent); color: #fff; }
+.onb__step.is-done .onb__num { background: var(--accent); border-color: var(--accent); color: #fff; }
+.onb__foot { margin-top: auto; font: 500 12.5px var(--font); color: #5f7d6c; line-height: 1.5; }
+
+/* ── Rechter Inhalt ── */
+.onb__main { flex: 1; min-width: 0; padding: 44px 48px; display: flex; flex-direction: column; }
+.onb__eyebrow { font: 600 11px var(--font); letter-spacing: .16em; text-transform: uppercase; color: var(--muted-3); }
+.onb__title { font: 800 28px var(--font); margin-top: 6px; letter-spacing: -.5px; color: var(--ink-strong); }
+.onb__lead { font: 500 14px var(--font); color: var(--ink-2); line-height: 1.55; margin-top: 14px; max-width: 460px; }
+.onb__panel { flex: 1; min-height: 0; }
+.onb__panel[hidden] { display: none; }
+.onb__fields { margin-top: 26px; display: flex; flex-direction: column; gap: 20px; max-width: 460px; }
+.onb__field label { font: 600 13px var(--font); color: var(--ink-2); display: block; }
+.onb__field input { margin-top: 8px; height: 46px; }
+.onb__field input[type="datetime-local"] { padding: 0 12px; }
+.onb__choices { display: flex; gap: 9px; margin-top: 8px; flex-wrap: wrap; }
+/* Icon + Beschriftung mittig nebeneinander (früher stand hier ein Emoji-Glyph). */
+.onb__choice { flex: 1; min-width: 78px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; text-align: center; padding: 12px 6px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); font: 600 13.5px var(--font); color: var(--ink-2); cursor: pointer; transition: border-color .15s, background .15s, color .15s; }
+.onb__choice:hover { border-color: var(--divider); }
+.onb__choice.is-active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+.onb__conns { margin-top: 22px; display: flex; flex-direction: column; gap: 10px; max-width: 460px; }
+.onb__conn { display: flex; align-items: center; gap: 11px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); }
+.onb__conn__ic { width: 30px; height: 30px; border-radius: 8px; background: var(--accent-tint); color: var(--accent); display: grid; place-items: center; font: 700 12px var(--font); flex: none; }
+.onb__conn__name { flex: 1; font: 600 13px var(--font); color: var(--ink-2); }
+.onb__conn__state { font: 600 11px var(--font); color: var(--muted-3); }
+
+.onb__actions { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 20px; }
+.onb__skip { border: 0; background: none; font: 600 14px var(--font); color: var(--muted-3); cursor: pointer; }
+.onb__skip:hover { color: var(--ink-2); }
+.onb__next { height: 46px; padding: 0 24px; }
+
+@media (max-width: 720px) {
+  .onb { flex-direction: column; height: min(88vh, 720px); }
+  .onb__rail { width: auto; padding: 24px 26px; }
+  .onb__headline { font-size: 22px; margin-top: 14px; }
+  .onb__steps { flex-direction: row; gap: 14px; margin-top: 18px; }
+  .onb__conn-line { display: none; }
+  .onb__step span:not(.onb__num) { display: none; }
+  .onb__foot { display: none; }
+  .onb__main { padding: 26px; }
+}
+
+/* ── Onboarding v2 (Lerntyp-Analyse, Wave 6) ───────────────────────────── */
+.onb__panelwrap { flex: 1; min-height: 0; overflow-y: auto; padding-right: 6px; }
+.onb__lead { margin: 4px 0 14px; color: var(--muted, #6F7268); font-size: 13.5px; line-height: 1.5; max-width: 52ch; }
+.onb__choices--wrap { flex-wrap: wrap; }
+.onb__choice--multi { position: relative; }
+.onb__actions-right { display: flex; gap: 10px; align-items: center; }
+
+.onb__swatches { display: flex; gap: 10px; flex-wrap: wrap; }
+.onb__swatch {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background: var(--sw);
+  cursor: pointer;
+  transition: transform .12s ease;
+}
+.onb__swatch:hover { transform: scale(1.08); }
+.onb__swatch.is-active {
+  border-color: var(--card, #fff);
+  outline: 2.5px solid var(--sw);
+}
+
+.onb__checks { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+.onb__check {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 13.5px;
+  color: var(--ink, #1E211D);
+  line-height: 1.45;
+  cursor: pointer;
+  background: var(--card-muted, #F4F2EC);
+  border: 1px solid var(--line, #EAE8E0);
+  border-radius: 12px;
+  padding: 11px 13px;
+}
+.onb__check input { margin-top: 2px; accent-color: var(--accent, #3E7D5E); }

@@ -24,7 +24,6 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: clamp(1.1rem, 4.8vw, 1.35rem);
   line-height: 1;
   padding: 0;
 }

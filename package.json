@@ -12,6 +12,8 @@
     "dev": "node --watch server/index.js",
     "test": "node --test",
     "gen:vapid": "node scripts/gen-vapid.mjs",
+    "seed": "node scripts/seed-demo.mjs",
+    "seed:reset": "node scripts/seed-demo.mjs --reset",
     "docker:build": "docker compose build",
     "docker:up": "docker compose up -d",
     "docker:proxy": "docker compose --profile proxy up -d",

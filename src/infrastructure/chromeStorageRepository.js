@@ -1,4 +1,4 @@
-const STORAGE_KEY = "adhdPomodoroState";
+const STORAGE_KEY = "focusPomodoroState";
 
 export class ChromeStorageRepository {
   async load() {

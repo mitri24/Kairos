@@ -3,6 +3,7 @@
 // überfällige & offene Todos fragen nach ("erledigt?" → Ja=fertig, Nein=neuer Slot).
 // Reine localStorage-Persistenz (kein Backend). Nutzt die geteilte Tagesplan-Logik.
 import { TODO_STORAGE_KEY } from "./constants.js";
+import { icon } from "./icons.js";
 import {
   minToClock, clockToMin, nowMinOfDay, slotStatus, isOverdue, nextFreeSlot,
   roundToStep, ceilToStep, DAY_START_MIN, DAY_END_MIN, SLOT_STEP_MIN,
@@ -62,7 +63,7 @@ function mirrorCurrentTask() {
   if (!store) return;
   const top = getSortedTodos().find((todo) => !todo.done);
   try {
-    store.set({ adhdCurrentTask: top ? { id: top.id, text: top.text } : null });
+    store.set({ focusCurrentTask: top ? { id: top.id, text: top.text } : null });
   } catch (_) { /* noop */ }
 }
 
@@ -146,7 +147,7 @@ function renderList() {
 
     const grip = document.createElement("span");
     grip.className = "todo-grip";
-    grip.textContent = "⠿";
+    grip.innerHTML = icon("grip", { size: 14, stroke: 2.4 });
     grip.title = "Drag onto the timeline";
     grip.setAttribute("draggable", "true");
     grip.addEventListener("dragstart", (e) => {
@@ -176,7 +177,8 @@ function renderList() {
     const prioritizeBtn = document.createElement("button");
     prioritizeBtn.type = "button";
     prioritizeBtn.className = "todo-priority-btn" + (todo.prioritized ? " active" : "");
-    prioritizeBtn.textContent = todo.prioritized ? "♥" : "♡";
+    // Icon-only-Button: Zustand steckt in der Klasse "active" und in title/aria-label.
+    prioritizeBtn.innerHTML = icon("pin", { size: 14 });
     prioritizeBtn.setAttribute("aria-label", `Prioritize: ${todo.text}`);
     prioritizeBtn.title = todo.prioritized ? "Unprioritize" : "Prioritize";
     prioritizeBtn.disabled = todo.done;
@@ -216,7 +218,7 @@ function renderTimeline() {
     const range = `${minToClock(t.startMin)}–${minToClock(t.startMin + dur)}`;
     h += `<div class="tl-item is-${status}${t.prioritized ? " is-prio" : ""}" data-id="${t.id}"
             draggable="true" style="top:${top}px;height:${height}px" title="${escapeAttr(t.text)} · ${range}">
-            <button class="tl-item__check" data-act="toggle" title="toggle done" aria-label="toggle done">${t.done ? "✓" : ""}</button>
+            <button class="tl-item__check" data-act="toggle" title="toggle done" aria-label="toggle done">${t.done ? icon("check", { size: 11, stroke: 2.6 }) : ""}</button>
             <div class="tl-item__body">
               <div class="tl-item__name">${escapeHtml(t.text)}</div>
               <div class="tl-item__range">${range}</div>
@@ -339,7 +341,7 @@ function ensureModal() {
       <div class="todo-modal__msg"></div>
       <div class="todo-modal__actions">
         <button class="btn" data-a="yes">Yes, done</button>
-        <button class="btn" data-a="no">No → new slot</button>
+        <button class="btn" data-a="no">No, new slot</button>
       </div>
       <button class="todo-modal__later" data-a="later">remind me later</button>
     </div>`;

@@ -1,82 +1,126 @@
-/* ── Design-Tokens — abgeleitet aus dem "ADHD Lernuhr"-Mockup ────────── */
+/* ═══════════════════════════════════════════════════════════════════════
+   Kairos · Sage — Design-Tokens (einzige Quelle der Wahrheit).
+   Abgeleitet aus dem "Kairos Sage - Full UI"-Mockup: warmes Papier,
+   Salbeigrün als Primärakzent, Bernstein sekundär, Terrakotta = jetzt/dringend.
+   Alle Komponenten referenzieren NUR diese Variablen.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Hanken Grotesk, selbst gehostet (offline-treu, ein Variable-Font je Subset) ── */
+@font-face {
+  font-family: "Hanken Grotesk";
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url("/fonts/hanken-grotesk-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191,
+    U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Hanken Grotesk";
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url("/fonts/hanken-grotesk-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
 :root {
-  /* Farben — warmes Papier + Terrakotta-Akzent + salbeigrün für Pausen/Erfolg */
-  --accent:        #a9524a;   /* Fokus / Primär */
-  --accent-dark:   #8f423b;   /* Hover */
-  --accent-soft:   rgba(169, 82, 74, 0.08);
-  --accent-soft2:  rgba(169, 82, 74, 0.12);
-  --accent-border: rgba(169, 82, 74, 0.32);
+  color-scheme: light;
 
-  --green:         #5E8577;   /* Pause / Erfolg / Prüfung */
-  --green-dark:    #4d7266;
-  --green-soft:    rgba(94, 133, 119, 0.12);
+  /* ── Flächen ─────────────────────────────────────────── */
+  --page:        #DDDBD3;   /* Fenster-Hintergrund (außerhalb der App) */
+  --app:         #FBFAF6;   /* App-Fläche / Hauptbereich */
+  --sidebar:     #F3F1EA;   /* Seitenleiste + eingesetzte Flächen */
+  --card:        #FFFFFF;   /* Standardkarte */
+  --card-muted:  #F4F2EC;   /* ruhige Karte / geplant (Timeline) */
+  --card-inset:  #F3F1EA;   /* Segmentierte Controls, Slider-Track-Fläche */
+  --note-pin:    #FBF6EC;   /* angepinnte Notiz */
+  --note-pin-bd: #ECDFC4;
 
-  --ink:           #38332C;   /* Haupttext */
-  --ink-soft:      #4A4437;
-  --muted:         #9A9086;   /* Sekundärtext */
-  --muted-2:       #A89D90;
+  /* ── Text / Tinte ────────────────────────────────────── */
+  --ink:         #1E211D;   /* Haupttext */
+  --ink-strong:  #26261F;   /* Überschriften */
+  --ink-2:       #5C5F57;   /* Sekundär, kräftig */
+  --muted:       #6F7268;   /* inaktive Nav */
+  --muted-2:     #93978B;   /* Metadaten */
+  --muted-3:     #A2A698;   /* schwächere Metadaten */
+  --faint:       #B6BAB0;   /* Achsenbeschriftung */
+  --label:       #8F8D82;   /* GROSSBUCHSTABEN-Kicker */
+  --placeholder: #B3B7AB;
 
-  --paper:         #FBF7F0;   /* Karten */
-  --paper-2:       #FCFAF5;   /* Innenflächen */
-  --shell:         #F3EEE6;   /* Seitenhintergrund */
-  --warm:          #F6E9D9;
-  --warm-2:        #EBE6DE;
+  /* ── Akzent: Salbeigrün ──────────────────────────────── */
+  --accent:       #3E7D5E;
+  --accent-strong:#2F6349;
+  --accent-ink:   #2F6349;
+  --accent-tint:  #EBF1EC;   /* aktive Nav, Chips, getönte Karten */
+  --accent-tint-2:#DFE6DA;
+  --accent-chart: #C3D4C7;
+  --accent-chart-2:#CFE0D4;
+  --on-accent:    #FFFFFF;
 
-  --line:          rgba(150, 138, 124, 0.28);
-  --line-soft:     rgba(150, 138, 124, 0.2);
-  --line-strong:   #D0C6B6;
-  --track:         #E6DFD3;
-  --face:          #FCFAF5;
+  /* ── Bernstein: sekundär ─────────────────────────────── */
+  --amber:        #C89A4C;
+  --amber-strong: #8A6D3B;
+  --amber-ink:    #7D6A49;
+  --amber-tint:   #EFE9DD;
+  --amber-tint-2: #F6EFDF;
+  --amber-label:  #B08B45;
 
-  --danger:        #b5514a;
+  /* ── Terrakotta: jetzt / dringend / entfernen ────────── */
+  --now:    #C2603F;
+  --danger: #C2603F;
 
-  /* Radien */
-  --r-card: 22px;
-  --r-inner: 16px;
-  --r-btn: 12px;
-  --r-chip: 8px;
-  --r-pill: 999px;
+  /* ── Blau / Pink (Fach & Zyklus) ─────────────────────── */
+  --blue:      #7C9AC2;
+  --blue-ink:  #4A678C;
+  --blue-tint: #E8EEF5;
+  --pink:      #C98AA6;
+  --pink-ink:  #B06A8A;
+  --pink-tint: #F5E6EE;
 
-  /* Schatten */
-  --shadow-card: 0 1px 2px rgba(56,51,44,0.05), 0 12px 30px rgba(56,51,44,0.06);
-  --shadow-soft: 0 1px 2px rgba(56,51,44,0.05);
+  /* ── Linien ──────────────────────────────────────────── */
+  --line:        #EAE8E0;   /* Kartenrand */
+  --line-2:      #E9E7DF;   /* Seitenleisten-Rand */
+  --line-3:      #E7E5DC;
+  --line-soft:   #F0EEE7;   /* zarte Raster */
+  --line-strong: #E3E1D8;
+  --divider:     #D8DCCF;
+  --track:       #E7E5DC;   /* Ring-/Fortschritts-Rille */
 
-  /* Typografie */
-  --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN",
-          "Noto Sans JP", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --num: "SF Mono", ui-monospace, "Cascadia Code", Menlo, monospace;
+  /* ── Radien ──────────────────────────────────────────── */
+  --r-lg:  18px;
+  --r-md:  16px;
+  --r-sm:  13px;
+  --r-xs:  9px;
+  --r-pill:999px;
 
-  --maxw: 1440px;
+  /* ── Schatten ────────────────────────────────────────── */
+  --shadow-card:   0 12px 30px -24px rgba(30, 33, 29, .55);
+  --shadow-pop:    0 16px 40px -16px rgba(30, 33, 29, .32);
+  --shadow-accent: 0 8px 18px -8px rgba(62, 125, 94, .55);
+  --shadow-window: 0 50px 100px -35px rgba(35, 35, 28, .5), 0 0 0 1px var(--line-strong);
+
+  /* ── Typografie ──────────────────────────────────────── */
+  --font: "Hanken Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* ── Layout ──────────────────────────────────────────── */
+  --sidebar-w: 236px;
+  --pad-main: 26px;
 }
 
-/* Dezenter Dark-Mode für abendliches Dauer-Offenlassen */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --ink:         #ECE4D8;
-    --ink-soft:    #D8CFBF;
-    --muted:       #A79C8C;
-    --muted-2:     #948A7B;
-    --paper:       #26221D;
-    --paper-2:     #2E2823;
-    --shell:       #1B1815;
-    --warm:        #322820;
-    --warm-2:      #2C2620;
-    --line:        rgba(190, 176, 156, 0.18);
-    --line-soft:   rgba(190, 176, 156, 0.12);
-    --line-strong: #4A4237;
-    --track:       #3A332B;
-    --face:        #2A251F;
-    --accent-soft:  rgba(200, 110, 100, 0.14);
-    --accent-soft2: rgba(200, 110, 100, 0.2);
-    --shadow-card: 0 1px 2px rgba(0,0,0,0.3), 0 12px 30px rgba(0,0,0,0.35);
-  }
-}
-
-:root[data-theme="dark"] {
-  --ink: #ECE4D8; --ink-soft: #D8CFBF; --muted: #A79C8C; --muted-2: #948A7B;
-  --paper: #26221D; --paper-2: #2E2823; --shell: #1B1815; --warm: #322820; --warm-2: #2C2620;
-  --line: rgba(190,176,156,0.18); --line-soft: rgba(190,176,156,0.12); --line-strong: #4A4237;
-  --track: #3A332B; --face: #2A251F;
-  --accent-soft: rgba(200,110,100,0.14); --accent-soft2: rgba(200,110,100,0.2);
-  --shadow-card: 0 1px 2px rgba(0,0,0,0.3), 0 12px 30px rgba(0,0,0,0.35);
-}
+/* ── Fach-Farbpalette ─────────────────────────────────────
+   JS (subjectColor() in util.js) hasht einen Fachnamen auf .subj-0…5.
+   Jede Klasse setzt drei lokale Variablen, die Chips/Blöcke/Punkte nutzen:
+   --sc (Volltonlinie/Punkt), --sc-ink (Text auf Tönung), --sc-tint (Tönung). */
+.subj-0 { --sc: #3E7D5E; --sc-ink: #2F6349; --sc-tint: #EBF1EC; --sc-border: #cfe0d4; }
+.subj-1 { --sc: #C89A4C; --sc-ink: #8A6D3B; --sc-tint: #F6EFDF; --sc-border: #ecdfc4; }
+.subj-2 { --sc: #7C9AC2; --sc-ink: #4A678C; --sc-tint: #E8EEF5; --sc-border: #d5e0ee; }
+.subj-3 { --sc: #C98AA6; --sc-ink: #B06A8A; --sc-tint: #F5E6EE; --sc-border: #ecd3e0; }
+.subj-4 { --sc: #C2603F; --sc-ink: #A24E32; --sc-tint: #F5E3DB; --sc-border: #ecccbd; }
+.subj-5 { --sc: #8A7CC2; --sc-ink: #5E4F8C; --sc-tint: #ECE8F5; --sc-border: #ddd6ee; }
+/* ohne Fach: neutral */
+.subj-none { --sc: #C4C7BE; --sc-ink: #93978B; --sc-tint: #F3F1EA; --sc-border: #E3E1D8; }

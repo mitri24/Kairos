@@ -1,0 +1,225 @@
+/* KI-Lernbuddy: FAB + seitliches Chat-Panel. */
+.aibot-fab {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 151;
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: var(--r-pill);
+  background: var(--ink-strong);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: var(--shadow-pop);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.aibot-fab:hover { transform: translateY(-1px); }
+
+.aibot {
+  position: fixed;
+  right: 22px;
+  bottom: 80px;
+  z-index: 151;
+  width: min(400px, calc(100vw - 44px));
+  height: min(560px, calc(100vh - 120px));
+  background: var(--app);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-window);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.aibot__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 15px;
+  background: var(--sidebar);
+  border-bottom: 1px solid var(--line-2);
+}
+/* Titel = Icon + Text: inline-flex, damit das Icon sauber auf der Textmitte sitzt. */
+.aibot__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-weight: 800;
+  color: var(--ink-strong);
+}
+.aibot__head-actions { display: flex; gap: 4px; }
+.aibot__hbtn {
+  border: none;
+  background: none;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-pill);
+  color: var(--muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.aibot__hbtn:hover { background: var(--card-inset); color: var(--ink); }
+
+/* Chat */
+.aibot__msgs {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ai-msg { display: flex; }
+.ai-msg--user { justify-content: flex-end; }
+.ai-msg__body {
+  max-width: 86%;
+  border-radius: var(--r-sm);
+  padding: 9px 13px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--card);
+  border: 1px solid var(--line);
+}
+.ai-msg--user .ai-msg__body {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+}
+.ai-msg__body p { margin: 0 0 6px; }
+.ai-msg__body p:last-child { margin-bottom: 0; }
+.ai-msg__body ul { margin: 4px 0; padding-left: 18px; }
+.ai-msg__body code {
+  background: var(--card-inset);
+  border-radius: 5px;
+  padding: 1px 5px;
+  font-size: 12.5px;
+}
+.ai-msg--user .ai-msg__body code { background: rgba(255, 255, 255, .2); }
+.ai-code {
+  background: var(--card-inset);
+  border-radius: var(--r-xs);
+  padding: 9px 11px;
+  overflow-x: auto;
+  font-size: 12px;
+  line-height: 1.45;
+  margin: 6px 0;
+  white-space: pre;
+}
+.ai-msg__body--busy { color: var(--muted); font-style: italic; }
+
+.aibot__ctx {
+  padding: 6px 14px;
+  font-size: 11.5px;
+  color: var(--accent-ink);
+  background: var(--accent-tint);
+  border-top: 1px solid var(--line-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.aibot__inputrow {
+  display: flex;
+  gap: 8px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--line-2);
+  background: var(--sidebar);
+  align-items: flex-end;
+}
+.aibot__input {
+  flex: 1;
+  resize: none;
+  max-height: 110px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  background: var(--card);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 13.5px;
+  line-height: 1.45;
+  padding: 9px 12px;
+}
+.aibot__input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+.aibot__send {
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: var(--r-pill);
+  background: var(--accent);
+  color: var(--on-accent);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.aibot__send svg { width: 17px; height: 17px; }
+.aibot__send:hover { background: var(--accent-strong); }
+.aibot__send:disabled { opacity: .5; cursor: default; }
+
+/* Setup */
+.aibot__setup { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.aibot__setup-title { font-weight: 800; font-size: 15px; color: var(--ink-strong); }
+.aibot__consent {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  font-size: 12.5px;
+  color: var(--ink-2);
+  line-height: 1.45;
+  cursor: pointer;
+  background: var(--amber-tint);
+  border: 1px solid var(--note-pin-bd);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+}
+.aibot__consent input { margin-top: 2px; accent-color: var(--accent); }
+.aibot__setup-intro { margin: 0; font-size: 12.5px; color: var(--muted); line-height: 1.45; }
+.aibot__providers { display: flex; flex-direction: column; gap: 8px; }
+.aibot__provider {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 3px 9px;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+  cursor: pointer;
+  background: var(--card);
+}
+.aibot__provider.is-active { border-color: var(--accent); background: var(--accent-tint); }
+.aibot__provider input { accent-color: var(--accent); }
+.aibot__provider-name { font-size: 13px; font-weight: 700; color: var(--ink-strong); }
+.aibot__provider-hint { grid-column: 2; font-size: 11.5px; color: var(--muted); line-height: 1.4; }
+.aibot__fields { display: flex; flex-direction: column; gap: 9px; }
+.aibot__fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--label);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+.aibot__setup-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 8px;
+}
+/* „zurück zum Chat": Pfeil links vor dem Text. Ausrichtung und Abstand liefert
+   bereits .btn (inline-flex + gap); hier zählt nur die kleinere Icon-Größe,
+   weil .btn svg sonst pauschal auf 16px zwingen würde. */
+.aibot__setup-foot #aiBack .ico { width: 13px; height: 13px; }
+
+@media (max-width: 560px) {
+  .aibot { right: 10px; left: 10px; width: auto; }
+}
