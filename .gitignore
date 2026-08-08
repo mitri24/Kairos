@@ -1,5 +1,6 @@
 node_modules/
 .DS_Store
+_site/
 
 # Deployment-Secrets (u. a. VAPID_PRIVATE_KEY, DOMAIN) — Template bleibt versioniert.
 # .env.* matcht auch .env.example, daher die Negation danach (Reihenfolge zählt).
