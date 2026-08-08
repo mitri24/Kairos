@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS profile (
   weight_kg          REAL,
   timezone           TEXT,
   chronotype         TEXT,
-  adhd               INTEGER NOT NULL DEFAULT 0,
+  focus               INTEGER NOT NULL DEFAULT 0,
   conditions         TEXT,
   primary_device     TEXT    NOT NULL DEFAULT 'ringconn',
   sleep_goal_hours   REAL    NOT NULL DEFAULT 8,
@@ -130,7 +130,7 @@ CREATE TABLE IF NOT EXISTS tasks (
   created_at   INTEGER NOT NULL,
   recurrence      TEXT,                                  -- ""/null | daily | weekdays | weekly | every:N
   recur_parent_id INTEGER,                               -- Ursprungs-Aufgabe der Serie (Verkettung)
-  postpone_count  INTEGER NOT NULL DEFAULT 0,            -- wie oft verschoben (ADHS-Signal „aufteilen?")
+  postpone_count  INTEGER NOT NULL DEFAULT 0,            -- wie oft verschoben (Konzentration-Signal „aufteilen?")
   FOREIGN KEY (exam_id) REFERENCES exams(id) ON DELETE SET NULL
 );
 
@@ -303,7 +303,7 @@ const COPY_SPECS = [
            "phase_started_at", "updated_at"] },
   { table: "profile", singleton: true,
     cols: ["display_name", "birth_date", "sex", "height_cm", "weight_kg", "timezone", "chronotype",
-           "adhd", "conditions", "primary_device", "sleep_goal_hours", "target_bedtime",
+           "focus", "conditions", "primary_device", "sleep_goal_hours", "target_bedtime",
            "target_wake_time", "resting_hr_baseline", "hrv_baseline_ms", "ai_enabled", "ai_notes",
            "data_consent_at", "updated_at"] },
   { table: "exams",

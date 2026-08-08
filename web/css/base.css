@@ -321,7 +321,7 @@ summary:focus-visible, .nav-item:focus-visible {
 }
 :focus:not(:focus-visible) { outline: none; }
 
-/* Respektiert System-Einstellung „Bewegung reduzieren" (Vestibular-/ADHS-freundlich). */
+/* Respektiert System-Einstellung „Bewegung reduzieren" (Vestibular-/Konzentration-freundlich). */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: .001ms !important;

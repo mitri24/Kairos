@@ -23,7 +23,7 @@ export function initInsights({ store }) {
 
   // ── Top-Row · Streak-Hero (grün) ─────────────────
   function heroStreak(metrics, todayKey) {
-    // ADHS-freundlich: ein einzelner Fehltag bricht die Serie nicht (Gnadentag).
+    // Konzentration-freundlich: ein einzelner Fehltag bricht die Serie nicht (Gnadentag).
     const { streak, graceUsed } = computeStreak(metrics, todayKey, { graceDays: 1 });
     const segs = [];
     for (let i = 6; i >= 0; i--) {

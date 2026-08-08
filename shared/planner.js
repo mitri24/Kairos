@@ -1,6 +1,6 @@
 // Reiner Auto-Tagesplaner. Kein DOM, kein Storage, kein Side-Effect.
 //
-// Grundidee (bewusst simpel & vorhersagbar, ADHS-freundlich): der Plan ist eine
+// Grundidee (bewusst simpel & vorhersagbar, Konzentration-freundlich): der Plan ist eine
 // GEORDNETE Liste — Priorität → Deadline → manuelle Reihenfolge. Aufgaben werden
 // sequenziell ab "jetzt" platziert, mit Puffer dazwischen; feste (vom Nutzer
 // getimte) Blöcke und Kalender-Termine werden umflossen, nie verschoben.

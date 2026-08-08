@@ -148,7 +148,7 @@ add("PUT", /^\/api\/tasks\/(\d+)$/, (p, b) => {
 });
 add("DELETE", /^\/api\/tasks\/(\d+)$/, (p) => { repo.deleteTask(Number(p[0])); return timer.getSnapshot(); });
 // Verschieben (Tomorrow / Reschedule / „keine Zeit mehr"): erhöht postpone_count
-// UND setzt Datum/Uhrzeit in einem Schritt (ADHS-Signal „aufteilen?").
+// UND setzt Datum/Uhrzeit in einem Schritt (Konzentration-Signal „aufteilen?").
 add("POST", /^\/api\/tasks\/(\d+)\/postpone$/, (p, b) => {
   const id = Number(p[0]);
   repo.incrementPostpone(id);

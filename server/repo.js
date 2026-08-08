@@ -279,7 +279,7 @@ export function updateTask(id, patch) {
   );
   return getTask(id);
 }
-// Verschiebe-Zähler erhöhen (Tomorrow / Reschedule / „keine Zeit mehr"). ADHS-Signal.
+// Verschiebe-Zähler erhöhen (Tomorrow / Reschedule / „keine Zeit mehr"). Konzentration-Signal.
 export function incrementPostpone(id) {
   getDb().prepare("UPDATE tasks SET postpone_count = postpone_count + 1 WHERE id = ? AND user_id = ?").run(id, uid());
 }
@@ -501,7 +501,7 @@ export function setMeta(key, value) {
 const mapProfile = (r) => r && ({
   displayName: r.display_name, birthDate: r.birth_date, sex: r.sex,
   heightCm: r.height_cm, weightKg: r.weight_kg, timezone: r.timezone,
-  chronotype: r.chronotype, adhd: !!r.adhd, conditions: r.conditions,
+  chronotype: r.chronotype, focus: !!r.focus, conditions: r.conditions,
   primaryDevice: r.primary_device, sleepGoalHours: r.sleep_goal_hours,
   targetBedtime: r.target_bedtime, targetWakeTime: r.target_wake_time,
   restingHrBaseline: r.resting_hr_baseline, hrvBaselineMs: r.hrv_baseline_ms,
@@ -513,7 +513,7 @@ const PROFILE_FIELDS = [
   ["displayName", "display_name", "text"], ["birthDate", "birth_date", "text"],
   ["sex", "sex", "text"], ["heightCm", "height_cm", "num"], ["weightKg", "weight_kg", "num"],
   ["timezone", "timezone", "text"], ["chronotype", "chronotype", "text"],
-  ["adhd", "adhd", "bool"], ["conditions", "conditions", "text"],
+  ["focus", "focus", "bool"], ["conditions", "conditions", "text"],
   ["primaryDevice", "primary_device", "text"], ["sleepGoalHours", "sleep_goal_hours", "num"],
   ["targetBedtime", "target_bedtime", "text"], ["targetWakeTime", "target_wake_time", "text"],
   ["restingHrBaseline", "resting_hr_baseline", "num"], ["hrvBaselineMs", "hrv_baseline_ms", "num"],

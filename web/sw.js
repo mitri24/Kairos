@@ -1,4 +1,4 @@
-// Service Worker für die ADHD-Lernuhr (Offline-PWA).
+// Service Worker für die Focus-Lernuhr (Offline-PWA).
 // Strategie:
 //   • /api/*            → immer Netzwerk (nie cachen). Bei Fehler JSON-Fehler durchreichen.
 //   • Navigation/statisch → network-first mit Fallback auf den Cache

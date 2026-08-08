@@ -114,9 +114,9 @@ test("methods: suggestMethods gewichtet Lernprofil", () => {
   // Schreib-Methoden steigen für Schreibtypen nach oben.
   assert.ok(idx(forWriter, "generation-effect") < idx(forWriter, "sq3r"));
 
-  const forAdhd = suggestMethods({ styles: [], challenges: ["adhd"], helps: ["short-blocks"] });
-  assert.ok(idx(forAdhd, "pomodoro") < 6, "Pomodoro in den Top-6 bei ADHS + kurze Blöcke");
-  assert.ok(idx(forAdhd, "micro-steps") < 6, "Mini-Schritte in den Top-6 bei ADHS");
+  const forfocus = suggestMethods({ styles: [], challenges: ["focus"], helps: ["short-blocks"] });
+  assert.ok(idx(forfocus, "pomodoro") < 6, "Pomodoro in den Top-6 bei Konzentration + kurze Blöcke");
+  assert.ok(idx(forfocus, "micro-steps") < 6, "Mini-Schritte in den Top-6 bei Konzentration");
 
   const forProcras = suggestMethods({ challenges: ["procrastination"] });
   assert.ok(idx(forProcras, "implementation-intentions") < 5, "Wenn-Dann bei Aufschieben vorn");

@@ -1,18 +1,18 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// ADHD-Pomodoro — Content-Script-Overlay
+// Focus-Pomodoro — Content-Script-Overlay
 //
 // Blendet auf JEDER Website oben rechts ein aus-/einfahrbares Widget ein, das
-//   • immer die aktuelle Aufgabe zeigt (adhdCurrentTask),
+//   • immer die aktuelle Aufgabe zeigt (focusCurrentTask),
 //   • den Timer 1:1 wie die Extension darstellt (ablaufendes Dial, Focus,
 //     Start/Pause, Skip, Reset).
 //
 // Datenfluss (berechtigungsarm, ohne Fetch auf Fremdseiten):
 //   • Timer:   chrome.runtime.sendMessage({type:"GET_STATE"|"START"|…}) → Background.
-//              Live-Push über chrome.storage.onChanged (Key "adhdPomodoroState"),
+//              Live-Push über chrome.storage.onChanged (Key "focusPomodoroState"),
 //              da runtime.sendMessage-Broadcasts Content-Scripts NICHT erreichen.
 //              Sekündlicher lokaler Tick fürs Countdown (aus endsAt gerechnet).
-//   • Aufgabe: chrome.storage.local["adhdCurrentTask"], vom Popup-Todo gespiegelt.
-//   • UI:      Ein-/Ausfahren in chrome.storage.local["adhdOverlayExpanded"]
+//   • Aufgabe: chrome.storage.local["focusCurrentTask"], vom Popup-Todo gespiegelt.
+//   • UI:      Ein-/Ausfahren in chrome.storage.local["focusOverlayExpanded"]
 //              (über alle Tabs synchron).
 //
 // Als klassisches IIFE geschrieben — MV3-Content-Scripts unterstützen kein
@@ -25,13 +25,13 @@
   if (!globalThis.chrome?.runtime?.id) return;
   if (window.top !== window) return;
 
-  const HOST_ID = "adhd-pomodoro-overlay-host";
+  const HOST_ID = "focus-pomodoro-overlay-host";
   if (document.getElementById(HOST_ID)) return;
 
   // ── Konstanten (aus der Extension übernommen) ──────────────────────────────
-  const STATE_KEY = "adhdPomodoroState";   // { state, settings }
-  const TASK_KEY  = "adhdCurrentTask";      // { text, id } | null
-  const UI_KEY    = "adhdOverlayExpanded";  // boolean
+  const STATE_KEY = "focusPomodoroState";   // { state, settings }
+  const TASK_KEY  = "focusCurrentTask";      // { text, id } | null
+  const UI_KEY    = "focusOverlayExpanded";  // boolean
 
   const STATUS = { IDLE: "idle", RUNNING: "running", PAUSED: "paused" };
   const DIAL_MIN = 10, DIAL_MAX = 90, DIAL_R = 90;

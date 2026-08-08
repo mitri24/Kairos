@@ -1,4 +1,4 @@
-// Reine Streak-Berechnung mit ADHS-freundlichem Gnadentag: ein einzelner Fehltag
+// Reine Streak-Berechnung mit Konzentration-freundlichem Gnadentag: ein einzelner Fehltag
 // bricht die Serie NICHT (er wird übersprungen und verbraucht die „Gnade"); erst
 // ein zweiter (ununterbrochen fehlender) Tag beendet die Serie. Kein Side-Effect.
 //

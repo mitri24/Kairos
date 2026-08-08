@@ -42,7 +42,7 @@ CREATE TABLE push_subscriptions (endpoint TEXT PRIMARY KEY, p256dh TEXT NOT NULL
 
 const HEALTH_LEGACY = `
 CREATE TABLE profile (id INTEGER PRIMARY KEY CHECK (id=1), display_name TEXT, birth_date TEXT, sex TEXT,
-  height_cm REAL, weight_kg REAL, timezone TEXT, chronotype TEXT, adhd INTEGER NOT NULL DEFAULT 0,
+  height_cm REAL, weight_kg REAL, timezone TEXT, chronotype TEXT, focus INTEGER NOT NULL DEFAULT 0,
   conditions TEXT, primary_device TEXT NOT NULL DEFAULT 'ringconn', sleep_goal_hours REAL NOT NULL DEFAULT 8,
   target_bedtime TEXT, target_wake_time TEXT, resting_hr_baseline REAL, hrv_baseline_ms REAL,
   ai_enabled INTEGER NOT NULL DEFAULT 0, ai_notes TEXT, data_consent_at INTEGER, updated_at INTEGER NOT NULL DEFAULT 0);
@@ -71,7 +71,7 @@ function seedLegacy(db, { withHealth = true } = {}) {
   db.exec("INSERT INTO app_meta (key, value) VALUES ('vapid_public_key', 'PUB'), ('vapid_private_key', 'PRIV')");
   db.exec("INSERT INTO push_subscriptions (endpoint, p256dh, auth, created_at) VALUES ('https://push/x', 'p', 'a', 1)");
   if (withHealth) {
-    db.exec("INSERT INTO profile (id, display_name, adhd) VALUES (1, 'Mira', 1)");
+    db.exec("INSERT INTO profile (id, display_name, focus) VALUES (1, 'Mira', 1)");
     db.exec("INSERT INTO health_daily (day_key, source, resting_hr, imported_at, updated_at) VALUES ('2026-07-01','ringconn',52,1,1)");
     db.exec("INSERT INTO health_samples (source, metric, t, value) VALUES ('ringconn','heart_rate',1,60)");
   }

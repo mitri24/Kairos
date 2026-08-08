@@ -1,5 +1,5 @@
 // KI-Lernbuddy: seitliches Chat-Panel, das sich dem Lernprofil anpasst
-// (visuell → Diagramme/Tabellen, Schreibtyp → Merksätze zum Abschreiben, ADHS →
+// (visuell → Diagramme/Tabellen, Schreibtyp → Merksätze zum Abschreiben, Konzentration →
 // kurze Schritte …). Die Anpassung passiert server-seitig (server/ai.js baut den
 // Systemprompt aus Profil + Prefs); hier: UI, Provider-Setup, Kontext-Chip.
 import { escapeHtml as esc } from "/js/util.js";

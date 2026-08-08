@@ -17,4 +17,4 @@ export const PHASE = Object.freeze({
   LONG_BREAK:  "long-break",
 });
 
-export const TODO_STORAGE_KEY = "adhd_pomodoro_todos";
+export const TODO_STORAGE_KEY = "focus_pomodoro_todos";

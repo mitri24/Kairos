@@ -279,7 +279,7 @@ Backend des künftigen „Persönliche Informationen"-Tabs. Alle Felder optional
 | `heightCm` / `weightKg` | number | Größe/Gewicht |
 | `timezone` | string | IANA-Zeitzone |
 | `chronotype` | string | `early`/`intermediate`/`late` (planungsrelevant) |
-| `adhd` | bool | ADHS-Kontext |
+| `focus` | bool | Konzentration-Kontext |
 | `conditions` | string | freie Notiz (sensibel) |
 | `primaryDevice` | string | Hauptquelle für den Kontext (Default `ringconn`) |
 | `sleepGoalHours` | number | Schlafziel (Default 8; ≥7 h harte Constraint) |
@@ -295,7 +295,7 @@ gesetzt.
 
 ## 8. Ausblick: KI-Integration
 
-Der Kontext (§6) plus Profil (`aiNotes`, Chronotyp, ADHS, Schlafziel) ist als
+Der Kontext (§6) plus Profil (`aiNotes`, Chronotyp, Konzentration, Schlafziel) ist als
 kompakter, erklärbarer Input für ein KI-Planungsmodell gedacht: Es liest
 `capacityMultiplier`, `reasons`, Schlafschuld und Chronotyp und schlägt daraus
 dynamisch angepasste Tagespläne vor — z. B. an einem Tag mit niedriger HRV

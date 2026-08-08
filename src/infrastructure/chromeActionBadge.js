@@ -41,7 +41,7 @@ export class ChromeActionBadge {
 
   async clear() {
     await chrome.action.setBadgeText({ text: "" });
-    await chrome.action.setTitle({ title: "ADHD Exam Pomodoro" });
+    await chrome.action.setTitle({ title: "Focus Exam Pomodoro" });
   }
 
   _formatBadgeText(remainingMs) {
@@ -63,6 +63,6 @@ export class ChromeActionBadge {
     const seconds = totalSeconds % 60;
     const phaseLabel = PHASE_LABELS[state.phase] ?? "Phase";
 
-    return `ADHD Exam Pomodoro • ${phaseLabel} • ${minutes}:${String(seconds).padStart(2, "0")}`;
+    return `Focus Exam Pomodoro • ${phaseLabel} • ${minutes}:${String(seconds).padStart(2, "0")}`;
   }
 }

@@ -297,7 +297,7 @@
     <!-- ── SCOPE ── -->
     <div class="callout co-scope" id="scope" style="scroll-margin-top:20px">
       <h4>⚠︎ Scope-Hinweis: Vorlage ≠ Domäne (transparent gemacht)</h4>
-      <p>Die Aufgabenvorlage ist für eine <b>Flugplanungs-App</b> formuliert („Flug planen“, „Startentscheidung“, „Wetter/Luftraum/No-Fly-Zones“, „Payload“, „Pilot/Admin“). Das tatsächliche Projekt ist jedoch <b>Kairos</b> — ein <b>ADHS-Fokus-/Lernplaner</b> (<code class="ev">README.md:1</code>, <code class="ev">web/manifest.webmanifest:2</code>, <code class="ev">docs/SPEC.md:1</code>). Um dennoch jeden geforderten Abschnitt zu liefern, <b>ohne zu halluzinieren</b>, wurde die Vorlage 1:1 auf die reale Domäne übertragen:</p>
+      <p>Die Aufgabenvorlage ist für eine <b>Flugplanungs-App</b> formuliert („Flug planen“, „Startentscheidung“, „Wetter/Luftraum/No-Fly-Zones“, „Payload“, „Pilot/Admin“). Das tatsächliche Projekt ist jedoch <b>Kairos</b> — ein <b>Konzentration-Fokus-/Lernplaner</b> (<code class="ev">README.md:1</code>, <code class="ev">web/manifest.webmanifest:2</code>, <code class="ev">docs/SPEC.md:1</code>). Um dennoch jeden geforderten Abschnitt zu liefern, <b>ohne zu halluzinieren</b>, wurde die Vorlage 1:1 auf die reale Domäne übertragen:</p>
       <div class="tbl-wrap" style="margin-top:10px">
         <table class="compact">
           <thead><tr><th>Vorlage (Aviation)</th><th>Kairos-Äquivalent (real, im Code belegt)</th></tr></thead>
@@ -330,7 +330,7 @@
       <p>Kairos ist ein <b>Fokus-Timer mit angebauter Lern-/Aufgabenplanung</b>. Der/die Nutzer:in legt Aufgaben an, gibt ihnen optional eine Uhrzeit auf einem Tages-Zeitstrahl (06:00–24:00), startet einen Pomodoro-Fokusblock und sieht Fortschritt gegen ein Tagesziel. Dazu kommen ein Wochenkalender, ein Prüfungs-Countdown mit Themen-Checkliste, ein Notizblock und zwei „weiche“ Ansichten: <b>Health</b> (Schlaf/Erholung/Readiness → empfohlene Tageslast) und <b>Insights</b> (Fokus-Statistik). Der Timer läuft <b>server-autoritativ</b> weiter, auch bei geschlossenem Tab (<code class="ev">docs/README-Lernuhr.md:63</code>, <code class="ev">server/timer.js</code>), und die PWA ist offline-fähig (<code class="ev">web/sw.js:8</code>). <b>Wichtig für die Einordnung:</b> Kairos ist die <b>Planungs-/Fokus-Ebene</b> — das eigentliche Lernen passiert bewusst auf <b>externen, verlinkten Seiten</b>, die die App orchestrieren, aber nicht ersetzen soll.</p>
 
       <h3>Für wen sie gedacht ist</h3>
-      <p>Explizit für <b>Studierende in Prüfungsphasen, ADHS als First-Class-Use-Case</b> (<code class="ev">docs/SPEC.md:88-90</code>, <code class="ev">README.md:3</code>). Die Design-Sprache (immer sichtbare Zeit, „ein nächster Schritt“, scham-freie Nachplanung überfälliger Blöcke) folgt einem ADHS-„Nordstern“ (<code class="ev">docs/SPEC.md:83</code>).</p>
+      <p>Explizit für <b>Studierende in Prüfungsphasen, Konzentration als First-Class-Use-Case</b> (<code class="ev">docs/SPEC.md:88-90</code>, <code class="ev">README.md:3</code>). Die Design-Sprache (immer sichtbare Zeit, „ein nächster Schritt“, scham-freie Nachplanung überfälliger Blöcke) folgt einem Konzentration-„Nordstern“ (<code class="ev">docs/SPEC.md:83</code>).</p>
 
       <h3>Wie klar der Nutzerfluss ist</h3>
       <p>Der <b>Kern-Loop ist klar und schnell</b>: „Aufgabe eintippen → (Zeit geben) → Start focus“. Er ist an drei Stellen ein Klick entfernt (Header-<code class="k">New</code>, <code class="k">Up next → Start focus</code>, <code class="k">Start now</code>). Alles darüber hinaus ist jedoch <b>ohne Führung</b>: kein Onboarding, kein Login, kein Erklärtext beim leeren Erststart, und mehrere Ansichten (Health, Insights) sind ohne Daten leer.</p>
@@ -356,7 +356,7 @@
             <li><b>Extension-Overlay auf <em>jeder</em> Website, ohne Schließen-Knopf</b> (nur „zu Pille schrumpfen“) — max. z-index (<code class="ev">src/content/overlay.js:66</code>, <code class="ev">:357</code>).</li>
             <li><b>Kein Login trotz sensibler Health-/Personendaten.</b> API offen, <code class="k">CORS *</code> (<code class="ev">server/index.js:22</code>).</li>
             <li><b>Planungs-Intelligenz fehlt.</b> Auto-Scheduling &amp; Machbarkeits-Check sind nicht gebaut (Planung ist rein manuell). <em>Hinweis:</em> FSRS/aktives Lernen aus <code class="ev">docs/SPEC.md</code> gehören zum separaten „Pace“-Track bzw. laufen bewusst <b>extern</b> — das ist <b>kein</b> Kairos-Defizit.</li>
-            <li><b>Inkonsistentes Branding/Sprache.</b> „Kairos“ vs. „ADHD Pomodoro“, DE/EN gemischt (<code class="ev">src/presentation/sidepanel.html:15</code>).</li>
+            <li><b>Inkonsistentes Branding/Sprache.</b> „Kairos“ vs. „Focus Pomodoro“, DE/EN gemischt (<code class="ev">src/presentation/sidepanel.html:15</code>).</li>
           </ol>
         </div>
         <div class="callout co-info card--flat">
@@ -373,7 +373,7 @@
 
       <div class="callout co-ok">
         <h4>Einordnung in einem Satz</h4>
-        <p style="margin-bottom:0"><b>Kairos ist als Single-User-<em>Planungs-</em>&amp;-Fokus-App bereits erstaunlich rund und liebevoll ADHS-gerecht gebaut — aber es ist kein produktreifes Multi-User-Produkt:</b> Onboarding, Authentifizierung, ein <em>erstklassiger Hand-off zu den externen Lern-Seiten</em> und optionale Planungs-Automatik fehlen. <b>Aktives Lernen selbst ist bewusst extern und daher kein Mangel der App.</b></p>
+        <p style="margin-bottom:0"><b>Kairos ist als Single-User-<em>Planungs-</em>&amp;-Fokus-App bereits erstaunlich rund und liebevoll Konzentration-gerecht gebaut — aber es ist kein produktreifes Multi-User-Produkt:</b> Onboarding, Authentifizierung, ein <em>erstklassiger Hand-off zu den externen Lern-Seiten</em> und optionale Planungs-Automatik fehlen. <b>Aktives Lernen selbst ist bewusst extern und daher kein Mangel der App.</b></p>
       </div>
     </section>
 
@@ -387,7 +387,7 @@
         <article class="persona">
           <div class="persona__head">
             <div class="persona__ava" style="background:var(--accent)">M</div>
-            <div><div style="font-weight:800">Mira, 22</div><div class="persona__tag">Primärer Nutzer · ADHS · Medizin</div></div>
+            <div><div style="font-weight:800">Mira, 22</div><div class="persona__tag">Primärer Nutzer · Konzentration · Medizin</div></div>
           </div>
           <div class="persona__body">
             <dl style="margin:0">
@@ -536,7 +536,7 @@
           <div class="mini"><span class="lbl">Nötige Info</span>Vollständigkeit, Readiness, Konflikte.</div>
           <div class="mini"><span class="lbl">App-Unterstützung</span><b>Keine Freigabe-/Blockade-Logik.</b> Start ist immer sofort möglich (<code class="ev">web/js/timer.js:43</code>).</div>
           <div class="mini"><span class="lbl">Pain Point</span>Anders als eine Flug-App gibt es keinen „Ready-to-start“-Check.</div>
-          <div class="mini"><span class="lbl">Risiko / Fix</span><span class="sev m"></span>Für ADHS ist „sofort start“ meist richtig — aber ein optionaler „aim erreicht/übertroffen“-Hinweis fehlt.</div>
+          <div class="mini"><span class="lbl">Risiko / Fix</span><span class="sev m"></span>Für Konzentration ist „sofort start“ meist richtig — aber ein optionaler „aim erreicht/übertroffen“-Hinweis fehlt.</div>
         </div>
       </div>
       <!-- Phase 8 -->
@@ -745,7 +745,7 @@
       <div class="quotes">
         <div class="quote"><div class="q">Wo fange ich an?</div><div class="a"><span class="b b-ok">gut</span> „Up next“ + „Start focus“ + „New“ geben einen klaren Einstieg. <code class="ev">web/js/tasks.js:360</code></div></div>
         <div class="quote"><div class="q">Ist das jetzt erlaubt / soll ich starten?</div><div class="a"><span class="b b-gap">unklar</span> Keine Freigabe-Logik; Start ist immer möglich. Readiness ist nur Hinweis. <code class="ev">web/js/timer.js:43</code></div></div>
-        <div class="quote"><div class="q">Habe ich alle Pflichtdaten eingegeben?</div><div class="a"><span class="b b-part">teils</span> Nur Aufgabentext ist Pflicht; alles andere optional — gut für ADHS, aber „ist das genug?“ bleibt offen. <code class="ev">server/routes.js:68</code></div></div>
+        <div class="quote"><div class="q">Habe ich alle Pflichtdaten eingegeben?</div><div class="a"><span class="b b-part">teils</span> Nur Aufgabentext ist Pflicht; alles andere optional — gut für Konzentration, aber „ist das genug?“ bleibt offen. <code class="ev">server/routes.js:68</code></div></div>
         <div class="quote"><div class="q">Kann ich jetzt starten?</div><div class="a"><span class="b b-ok">ja</span> Immer sofort — ein Klick. Kein Blocker. <code class="ev">web/js/today.js:29</code></div></div>
         <div class="quote"><div class="q">Was passiert, wenn Health-Daten fehlen?</div><div class="a"><span class="b b-ok">ehrlich</span> Ehrliche Leerzustände, Kapazität = 1,0×, „Not enough data“. <code class="ev">web/js/health.js:27</code></div></div>
         <div class="quote"><div class="q">Speichert die App meinen Plan automatisch?</div><div class="a"><span class="b b-part">ja, aber unsichtbar</span> Jede Mutation persistiert server-seitig — aber ohne sichtbares „gespeichert“. <code class="ev">web/js/api.js:9</code></div></div>
@@ -876,11 +876,11 @@
             <tr><td><b>Datenleck / -missbrauch</b> — unauth API, <code class="k">CORS *</code>, Health-PII per <code class="k">GET /api/profile</code>, <code class="k">/api/push/test</code>-Broadcast für alle, VAPID-Private-Key in der SQLite-Datei</td><td class="tight"><span class="sev m"></span>mittel</td><td class="tight"><span class="sev h"></span><b>hoch</b></td><td><code class="ev">server/index.js:22</code>, <code class="ev">server/routes.js:24</code></td><td>Auth + Tenancy; API hinter Login; Proxy-Härtung; Key aus DB in Secret.</td></tr>
             <tr><td><b>Nutzer versteht die App nicht</b> (leerer Erststart, kein Onboarding)</td><td class="tight"><span class="sev h"></span>hoch</td><td class="tight"><span class="sev m"></span>mittel</td><td><code class="ev">web/js/nav.js:35</code></td><td>Onboarding, Demo-Daten, leere Zustände mit CTA.</td></tr>
             <tr><td><b>Schlechte Mobile-Bedienbarkeit</b></td><td class="tight"><span class="b b-nv">NV</span></td><td class="tight"><span class="sev h"></span>hoch</td><td><code class="ev">web/index.html:5</code></td><td>Real auf Geräten testen; responsives Layout.</td></tr>
-            <tr><td><b>Start mit unvollständigen Daten</b> / kein „genug?“-Signal</td><td class="tight"><span class="sev m"></span>mittel</td><td class="tight"><span class="sev l"></span>gering</td><td><code class="ev">server/routes.js:68</code></td><td>Für ADHS bewusst niedrigschwellig lassen; optionaler Hinweis.</td></tr>
+            <tr><td><b>Start mit unvollständigen Daten</b> / kein „genug?“-Signal</td><td class="tight"><span class="sev m"></span>mittel</td><td class="tight"><span class="sev l"></span>gering</td><td><code class="ev">server/routes.js:68</code></td><td>Für Konzentration bewusst niedrigschwellig lassen; optionaler Hinweis.</td></tr>
             <tr><td><b>Readiness ohne Konsequenz</b> → Selbstüberschätzung, Schlaf-Schutz nicht durchgesetzt</td><td class="tight"><span class="sev m"></span>mittel</td><td class="tight"><span class="sev m"></span>mittel</td><td><code class="ev">web/js/today.js:74</code></td><td>„aim“ sanft an Tagesziel/Warnung koppeln.</td></tr>
             <tr><td><b>Fehlende Fehlermeldungen</b> (nur <code class="k">console.warn</code>)</td><td class="tight"><span class="sev m"></span>mittel</td><td class="tight"><span class="sev m"></span>mittel</td><td><code class="ev">web/js/exam.js:48</code></td><td>Sichtbare Toasts/Inline-Fehler + Retry.</td></tr>
             <tr><td><b>Unklare Verantwortlichkeit</b> (kein Login, aber User-Chip suggeriert Konto)</td><td class="tight"><span class="sev h"></span>hoch</td><td class="tight"><span class="sev m"></span>mittel</td><td><code class="ev">web/js/main.js:62</code></td><td>Entweder echtes Konto oder Chip entschärfen.</td></tr>
-            <tr><td><b>Fehlende Trust-Signale</b> (kein „gespeichert“, keine Datenschutz-Info, Branding Kairos/ADHD Pomodoro gemischt)</td><td class="tight"><span class="sev h"></span>hoch</td><td class="tight"><span class="sev l"></span>gering</td><td><code class="ev">src/presentation/sidepanel.html:15</code></td><td>Konsistentes Branding, Save-Indikator, Datenschutz-Hinweis.</td></tr>
+            <tr><td><b>Fehlende Trust-Signale</b> (kein „gespeichert“, keine Datenschutz-Info, Branding Kairos/Focus Pomodoro gemischt)</td><td class="tight"><span class="sev h"></span>hoch</td><td class="tight"><span class="sev l"></span>gering</td><td><code class="ev">src/presentation/sidepanel.html:15</code></td><td>Konsistentes Branding, Save-Indikator, Datenschutz-Hinweis.</td></tr>
             <tr><td><b>Extension überrascht/verunsichert</b> (Overlay überall, Auto-Lesezeichen, Max-Prio-Notifications)</td><td class="tight"><span class="sev h"></span>hoch</td><td class="tight"><span class="sev m"></span>mittel</td><td><code class="ev">src/content/overlay.js:24</code></td><td>Opt-in/Schließen; Lesezeichen entfernen; Notif-Prio senken.</td></tr>
           </tbody>
         </table>
@@ -915,7 +915,7 @@
         <div class="arr"></div>
         <div class="node alt">Nach dem Block<small>Pause · Insights · (keine Reflexion)</small></div>
       </div>
-      <p class="mini" style="color:var(--muted)">Rot = in einer echten „Start-Freigabe“-App eine Kontroll-/Blockade-Stelle; in Kairos bewusst durchlässig (ADHS: „einfach anfangen“). Amber = optional/oft leer.</p>
+      <p class="mini" style="color:var(--muted)">Rot = in einer echten „Start-Freigabe“-App eine Kontroll-/Blockade-Stelle; in Kairos bewusst durchlässig (Konzentration: „einfach anfangen“). Amber = optional/oft leer.</p>
 
       <!-- B · Decision tree -->
       <h3>B) Decision Tree — „Kann der Fokusblock gestartet werden?“</h3>
@@ -1217,7 +1217,7 @@
       <h2><span class="num">13</span> Senior Product Verdict</h2>
 
       <div class="grid g2">
-        <div class="card"><h4>Ist die App für echte Nutzer verständlich?</h4><p style="margin-bottom:0"><b>Der Kern-Loop ja, das Gesamtprodukt nein.</b> „Aufgabe → Start focus → Fokus“ ist vorbildlich niedrigschwellig und ADHS-gerecht. Aber ohne Onboarding, ohne Profilseite und mit mehreren leeren Ansichten wirkt der Erststart unfertig. <span class="b b-part">bedingt</span></p></div>
+        <div class="card"><h4>Ist die App für echte Nutzer verständlich?</h4><p style="margin-bottom:0"><b>Der Kern-Loop ja, das Gesamtprodukt nein.</b> „Aufgabe → Start focus → Fokus“ ist vorbildlich niedrigschwellig und Konzentration-gerecht. Aber ohne Onboarding, ohne Profilseite und mit mehreren leeren Ansichten wirkt der Erststart unfertig. <span class="b b-part">bedingt</span></p></div>
         <div class="card"><h4>Ist der Planungsflow vollständig?</h4><p style="margin-bottom:0"><b>Teilweise.</b> Der Fokus-/Timing-Loop ist komplett. Der Planungs-Loop ist rein manuell (kein Auto-Scheduling, keine Machbarkeits-Prüfung). Und der <b>Hand-off zur externen Ausführung</b> — das Verlinken/Öffnen der Lern-Seite pro Aufgabe — fehlt als eigene Funktion. <em>Aktives Lernen selbst ist bewusst extern und daher kein Mangel.</em> <span class="b b-part">Brücke fehlt</span></p></div>
         <div class="card"><h4>Kann ein Nutzer „sicher“ starten?</h4><p style="margin-bottom:0"><b>Funktional immer, datenschutz-technisch nein.</b> Der Start eines Fokusblocks ist jederzeit möglich (kein Gate). „Sicher“ im Sinne von Datensicherheit ist es <b>nicht</b>: unauthentifizierte API, <code class="k">CORS *</code>, sensible Gesundheits-/Personendaten offen lesbar. <span class="b b-gap">Risiko</span></p></div>
         <div class="card"><h4>Was verhindert aktuell Produktreife?</h4><p style="margin-bottom:0">(1) <b>Fehlende Auth/Tenancy</b> — der größte Blocker (nur geparkte Migration). (2) <b>Kein Onboarding</b>. (3) <b>Ungeprüftes Mobile</b>. (4) <b>Vision-Reality-Gap</b> (Spec ≫ Web-Build). (5) <b>Inkonsistentes Branding/Sprache</b> &amp; überraschende Extension.</p></div>
@@ -1237,7 +1237,7 @@
 
       <div class="callout co-ok">
         <h4>Gesamturteil</h4>
-        <p><b>Kairos ist ein handwerklich starker, liebevoll ADHS-zentrierter Single-User-Fokusplaner — aber noch kein produktreifes Produkt.</b> Die Domänenlogik, der server-autoritative Timer, die erklärbare Readiness-Berechnung und die Test-Disziplin auf Backend-Ebene sind über dem Durchschnitt. Die Produktreife scheitert nicht am Können, sondern an der <b>Reihenfolge der Investitionen</b>: Es wurde tief in Backend/Domäne und in zwei Zusatz-Frontends (Extension) investiert, bevor die <b>Grundlagen für echte Nutzer</b> — Anmeldung, Datenschutz, Onboarding, Mobile, ein ehrlich eingelöstes Leistungsversprechen — standen.</p>
+        <p><b>Kairos ist ein handwerklich starker, liebevoll Konzentration-zentrierter Single-User-Fokusplaner — aber noch kein produktreifes Produkt.</b> Die Domänenlogik, der server-autoritative Timer, die erklärbare Readiness-Berechnung und die Test-Disziplin auf Backend-Ebene sind über dem Durchschnitt. Die Produktreife scheitert nicht am Können, sondern an der <b>Reihenfolge der Investitionen</b>: Es wurde tief in Backend/Domäne und in zwei Zusatz-Frontends (Extension) investiert, bevor die <b>Grundlagen für echte Nutzer</b> — Anmeldung, Datenschutz, Onboarding, Mobile, ein ehrlich eingelöstes Leistungsversprechen — standen.</p>
         <p style="margin-bottom:0"><b>Empfehlung:</b> Einen fokussierten „Trust &amp; Clarity“-Zyklus fahren (Auth, Onboarding, Aufräumen, Mobile), das Feature-Wachstum kurz pausieren — dann ist aus einem sehr guten persönlichen Werkzeug ein veröffentlichbares Produkt.</p>
       </div>
     </section>
@@ -1264,7 +1264,7 @@
             <tr><td class="usid">1.1</td><td>Als Student möchte ich <b>alle Klausuren mit Datum erfassen</b>, um Dringlichkeit &amp; Reihenfolge zu sehen.</td><td><span class="b b-info">Must</span></td><td><span class="st-ok">✅</span> Exam + Countdown <code class="ev">exam.js:141</code></td><td>In-App</td></tr>
             <tr><td class="usid">1.2</td><td>…den <b>Stoff in Themen zerlegen</b>, um den Umfang greifbar zu machen.</td><td><span class="b b-info">Must</span></td><td><span class="st-ok">✅</span> Themen-Checkliste <code class="ev">topics.js</code></td><td>In-App</td></tr>
             <tr><td class="usid">1.3</td><td>…<b>abschätzen, ob meine Zeit bis zur Klausur reicht</b>, um realistisch statt nach Wunsch zu planen.</td><td><span class="b b-info">Must</span></td><td><span class="st-gap">❌</span> kein Machbarkeits-Check <code class="ev">docs/SPEC.md:314</code></td><td>In-App <em>(fehlt)</em></td></tr>
-            <tr><td class="usid">1.4</td><td>…<b>große Aufgaben in kleine, startbare Schritte</b> zerlegen, um die (ADHS-)Startschwelle zu senken.</td><td><span class="b b-info">Must</span></td><td><span class="st-ok">✅</span> Subtasks <code class="ev">tasks.js:219</code></td><td>In-App</td></tr>
+            <tr><td class="usid">1.4</td><td>…<b>große Aufgaben in kleine, startbare Schritte</b> zerlegen, um die (Konzentration-)Startschwelle zu senken.</td><td><span class="b b-info">Must</span></td><td><span class="st-ok">✅</span> Subtasks <code class="ev">tasks.js:219</code></td><td>In-App</td></tr>
             <tr><td class="usid">1.5</td><td>…meine <b>Lern-Ressourcen (Skript, Anki, Video, LMS) an ein Thema/eine Aufgabe hängen</b>, um beim Start sofort dort zu sein.</td><td><span class="b b-info">Must</span></td><td><span class="st-gap">❌</span> kein Link-Feld <code class="ev">notes.js:158</code></td><td><b>Brücke</b> <em>(fehlt)</em></td></tr>
             <tr><td class="usid">1.6</td><td>…Aufgaben auf <b>Tage/Uhrzeiten verteilen</b>, um einen sichtbaren Plan zu haben.</td><td><span class="b b-part">Should</span></td><td><span class="st-ok">✅</span> Day/Week + Drag&amp;Drop (manuell) <code class="ev">week.js:103</code></td><td>In-App</td></tr>
             <tr><td class="usid">1.7</td><td>…<b>NICHT gezwungen sein</b>, für jede Aufgabe Prio/Dauer/Datum auszufüllen, um nicht in Planung zu versinken.</td><td><span class="b b-info">Must</span> <span class="b b-nv">Anti-Feature</span></td><td><span class="st-ok">✅</span> optional / Progressive Disclosure <code class="ev">tasks.js:235</code></td><td>In-App <em>(gut so)</em></td></tr>
@@ -1334,7 +1334,7 @@
             <tr><td>Aufgaben + Subtasks</td><td style="text-align:center"><span class="rel h"></span></td><td style="text-align:center"><span class="rel h"></span></td><td style="text-align:center"><span class="rel m"></span></td><td style="text-align:center"><span class="rel l"></span></td><td>Rückgrat des Tuns.</td></tr>
             <tr><td>Tages-/Wochenplan</td><td style="text-align:center"><span class="rel h"></span></td><td style="text-align:center"><span class="rel h"></span></td><td style="text-align:center"><span class="rel m"></span></td><td style="text-align:center"><span class="rel l"></span></td><td>Eine Darstellung reicht — aktuell drei.</td></tr>
             <tr><td><b>Fokus-Timer</b></td><td style="text-align:center"><span class="rel l"></span></td><td style="text-align:center"><span class="rel h"></span></td><td style="text-align:center"><span class="rel h"></span></td><td style="text-align:center"><span class="rel l"></span></td><td>DER Motor der Lernphase — stark umgesetzt.</td></tr>
-            <tr><td>Shame-free Reschedule</td><td style="text-align:center"><span class="rel l"></span></td><td style="text-align:center"><span class="rel h"></span></td><td style="text-align:center"><span class="rel m"></span></td><td style="text-align:center"><span class="rel l"></span></td><td>ADHS-Herzstück — genau richtig gebaut.</td></tr>
+            <tr><td>Shame-free Reschedule</td><td style="text-align:center"><span class="rel l"></span></td><td style="text-align:center"><span class="rel h"></span></td><td style="text-align:center"><span class="rel m"></span></td><td style="text-align:center"><span class="rel l"></span></td><td>Konzentration-Herzstück — genau richtig gebaut.</td></tr>
             <tr><td><b>Ressourcen-Link / Hand-off</b></td><td style="text-align:center"><span class="rel h"></span></td><td style="text-align:center"><span class="rel h"></span></td><td style="text-align:center"><span class="rel h"></span></td><td style="text-align:center"><span class="rel l"></span></td><td><b>Durchgehend hoch — aber fehlt komplett.</b> Größte echte Lücke.</td></tr>
             <tr><td>Machbarkeits-Check</td><td style="text-align:center"><span class="rel h"></span></td><td style="text-align:center"><span class="rel m"></span></td><td style="text-align:center"><span class="rel m"></span></td><td style="text-align:center"><span class="rel l"></span></td><td>Fehlt; besonders vor der Lernphase wichtig.</td></tr>
             <tr><td>Notizen</td><td style="text-align:center"><span class="rel m"></span></td><td style="text-align:center"><span class="rel h"></span></td><td style="text-align:center"><span class="rel m"></span></td><td style="text-align:center"><span class="rel m"></span></td><td>Solide; Links darin sollten klickbar sein.</td></tr>
@@ -1382,7 +1382,7 @@
 
     <div class="foot">
       <p><b>Methodik &amp; Belege.</b> Dieser Bericht basiert ausschließlich auf dem im Repository sichtbaren Code, Routen, State-Modell, DB-Schema, Tests und Docs (Branch <code class="k">feat/multi-tenant-auth</code>, Stand 2026-07-10). Analysiert wurden u. a. <code class="k">web/js/*</code> (PWA-Module), <code class="k">shared/*</code> (Domäne), <code class="k">server/*</code> (Backend, Routen, Repo, Health, Timer), <code class="k">src/*</code> (Chrome-Extension), <code class="k">tests/*</code> und <code class="k">docs/*</code>. Jede Aussage ist mit <code class="ev">Datei:Zeile</code> belegt; Unklarheiten sind als <span class="b b-nv">Needs manual verification</span> markiert. Es wurden keine Features erfunden.</p>
-      <p style="margin-bottom:0"><b>Scope-Erinnerung:</b> Die Aufgabenvorlage war für eine Flugplanungs-App formuliert; das reale Projekt ist der ADHS-Lernplaner <b>Kairos</b>. Aviation-Begriffe wurden transparent auf die Lern-Domäne übertragen (siehe Scope-Hinweis oben).</p>
+      <p style="margin-bottom:0"><b>Scope-Erinnerung:</b> Die Aufgabenvorlage war für eine Flugplanungs-App formuliert; das reale Projekt ist der Konzentration-Lernplaner <b>Kairos</b>. Aviation-Begriffe wurden transparent auf die Lern-Domäne übertragen (siehe Scope-Hinweis oben).</p>
     </div>
   </main>
 </div>

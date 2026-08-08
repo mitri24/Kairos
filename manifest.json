@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Kairos",
-  "description": "Kairos — Fokus-Timer für ADHS-Lernphasen, als Browser-Begleiter zum Lernplaner.",
+  "description": "Kairos — Fokus-Timer für Konzentration-Lernphasen, als Browser-Begleiter zum Lernplaner.",
   "version": "1.0.0",
   "permissions": ["storage", "alarms", "notifications", "bookmarks", "offscreen", "sidePanel"],
   "host_permissions": ["http://localhost:4321/*", "http://127.0.0.1:4321/*"],

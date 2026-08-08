@@ -85,7 +85,7 @@ const STYLE_HINTS = {
 
 const CHALLENGE_HINTS = {
   de: {
-    adhd: "ADHS: Halte Antworten kurz, EIN Gedanke pro Absatz, maximal ein nächster Schritt pro Antwort, keine Textwände.",
+    focus: "Konzentration: Halte Antworten kurz, EIN Gedanke pro Absatz, maximal ein nächster Schritt pro Antwort, keine Textwände.",
     dyslexia: "Legasthenie: kurze Sätze, einfache Wörter, Aufzählungen statt Fließtext, wichtige Begriffe **fett**.",
     dyscalculia: "Dyskalkulie: Jeden Rechenschritt einzeln zeigen, Zahlen mit Alltagsbeispielen verankern, nie mehrere Rechnungen in einem Satz.",
     anxiety: "Prüfungsangst: Ermutigend und normalisierend formulieren; betone, dass Fehler zum Lernen gehören.",
@@ -93,7 +93,7 @@ const CHALLENGE_HINTS = {
     overwhelm: "Schnell überfordert: Eine Sache nach der anderen; frage nach, bevor du zusätzliche Themen aufmachst.",
   },
   en: {
-    adhd: "ADHD: keep answers short, ONE idea per paragraph, at most one next step per reply, no walls of text.",
+    focus: "Focus: keep answers short, ONE idea per paragraph, at most one next step per reply, no walls of text.",
     dyslexia: "Dyslexia: short sentences, simple words, bullet lists over prose, key terms in **bold**.",
     dyscalculia: "Dyscalculia: show every calculation step separately, anchor numbers in everyday examples, never several calculations in one sentence.",
     anxiety: "Test anxiety: encourage and normalise; stress that mistakes are part of learning.",

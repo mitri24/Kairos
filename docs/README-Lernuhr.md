@@ -1,6 +1,6 @@
-# ADHD Lernuhr — PWA-Lernplaner + Backend
+# Focus Lernuhr — PWA-Lernplaner + Backend
 
-Die **ADHD Lernuhr** ist ein offline-fähiger Lernplaner als Progressive Web App (PWA)
+Die **Focus Lernuhr** ist ein offline-fähiger Lernplaner als Progressive Web App (PWA)
 mit einer immer sichtbaren, NTP-synchronisierten Uhr, einem Fokus-Timer (Pomodoro),
 Aufgaben-/Subtask-Verwaltung, Prüfungs-Countdown, Tagesziel, einer Tages-Timeline und
 einer Prüfungs-Themen-Checkliste. Persistiert wird alles in einer lokalen **SQLite**-Datei;
@@ -22,7 +22,7 @@ in App und Extension identisch.
 ## Architektur-Überblick
 
 ```
-PomodoroTimer_Adhd/
+PomodoroTimer_focus/
 ├── server/          Node + node:sqlite Backend (Zero-Dependency)
 │   ├── index.js       HTTP-Server: liefert PWA statisch aus, REST-API, 1-s-Tick-Loop
 │   ├── routes.js      REST-Routentabelle (jede Mutation → volle Momentaufnahme)

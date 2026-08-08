@@ -63,7 +63,7 @@ function mirrorCurrentTask() {
   if (!store) return;
   const top = getSortedTodos().find((todo) => !todo.done);
   try {
-    store.set({ adhdCurrentTask: top ? { id: top.id, text: top.text } : null });
+    store.set({ focusCurrentTask: top ? { id: top.id, text: top.text } : null });
   } catch (_) { /* noop */ }
 }
 

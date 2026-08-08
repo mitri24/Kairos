@@ -458,7 +458,7 @@ const todoAddBtn = document.getElementById("todoAddBtn");
 const todoList   = document.getElementById("todoList");
 const todoEmpty  = document.getElementById("todoEmpty");
 
-const TODO_STORAGE_KEY = "adhd_pomodoro_todos";
+const TODO_STORAGE_KEY = "focus_pomodoro_todos";
 let todos = loadTodos();
 renderTodos();
 

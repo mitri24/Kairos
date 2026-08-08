@@ -61,7 +61,7 @@ const TXT = {
 const CHANGELOG = {
   de: [
     { tag: "Neu", title: "Lernmethoden statt Pomodoro-Zwang", body: "Katalog mit über 25 Methoden inkl. Evidenz; jede Timer-Methode (25/5, 50/10, 52/17, 90er-Zyklen, Flowtime) als Modus aktivierbar." },
-    { tag: "Neu", title: "Lernprofil & anpassbares UI", body: "Ausführliches Onboarding: Lernwege, ADHS/Legasthenie/Dyskalkulie, was hilft. Darauf passen sich Vorschläge, KI und Oberfläche an — inklusive ausblendbarer Bereiche." },
+    { tag: "Neu", title: "Lernprofil & anpassbares UI", body: "Ausführliches Onboarding: Lernwege, Konzentration/Legasthenie/Dyskalkulie, was hilft. Darauf passen sich Vorschläge, KI und Oberfläche an — inklusive ausblendbarer Bereiche." },
     { tag: "Neu", title: "Darstellung wie bei Apple", body: "Akzentfarben, Hell/Dunkel/Automatisch, Schriftgröße, Dichte, hoher Kontrast, weniger Animationen, Legasthenie-Typografie." },
     { tag: "Neu", title: "Bibliothek + Referenz-Panel", body: "Dateien (PDF, Bilder …), Links und Formel-/Regelkarten je Thema speichern. Angepinnte Karten schweben als Referenz-Panel über jeder Ansicht — Schluss mit Hin-und-her-Switchen." },
     { tag: "Neu", title: "Journal mit aktivem Abruf", body: "Jeder Tag wird festgehalten (Sessions, Notizen, Material). Gelerntes kommt nach der Vergessenskurve zurück: erst aufschreiben, dann aufdecken, dann bewerten." },
@@ -74,7 +74,7 @@ const CHANGELOG = {
   ],
   en: [
     { tag: "New", title: "Study methods instead of forced Pomodoro", body: "Catalogue of 25+ methods incl. evidence; every timer method (25/5, 50/10, 52/17, 90-min cycles, flowtime) can be activated as a mode." },
-    { tag: "New", title: "Learning profile & adaptive UI", body: "In-depth onboarding: ways of learning, ADHD/dyslexia/dyscalculia, what helps. Suggestions, AI and the interface adapt — including hideable areas." },
+    { tag: "New", title: "Learning profile & adaptive UI", body: "In-depth onboarding: ways of learning, Focus/dyslexia/dyscalculia, what helps. Suggestions, AI and the interface adapt — including hideable areas." },
     { tag: "New", title: "Appearance like Apple", body: "Accent colours, light/dark/auto, font size, density, high contrast, reduced motion, dyslexia-friendly typography." },
     { tag: "New", title: "Library + reference panel", body: "Store files, links and formula/rule cards per topic. Pinned cards float as a reference panel over any view — no more tab-hopping." },
     { tag: "New", title: "Journal with active recall", body: "Every day is captured (sessions, notes, material). What you learned comes back along the forgetting curve: write first, reveal, then rate." },

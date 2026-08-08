@@ -3,7 +3,7 @@
 // Methode (preset), Vorschläge folgen dem Lernprofil (Stile/Herausforderungen).
 //
 // evidence: 3 = stark belegt (Meta-Analysen, z. B. Dunlosky 2013, Cepeda 2006,
-// Gollwitzer 2006) · 2 = gut belegt · 1 = bewährte Praxis (v. a. ADHS-Community).
+// Gollwitzer 2006) · 2 = gut belegt · 1 = bewährte Praxis (v. a. Konzentration-Community).
 // preset: { focus, short, long, cycles } in Minuten → PUT /api/settings.
 // styles/challenges/helps: Schlüssel aus LEARN_STYLES/CHALLENGES/HELPS (Lernprofil).
 
@@ -27,7 +27,7 @@ export const LEARN_STYLES = [
 ];
 
 export const CHALLENGES = [
-  { id: "adhd",            icon: "zap", de: "ADHS / Konzentration",             en: "ADHD / focus" },
+  { id: "focus",            icon: "zap", de: "Konzentration / Konzentration",             en: "Focus / focus" },
   { id: "dyslexia",        icon: "type", de: "Legasthenie (Lesen & Schreiben)",  en: "Dyslexia (reading & writing)" },
   { id: "dyscalculia",     icon: "hash", de: "Dyskalkulie (Zahlen & Rechnen)",   en: "Dyscalculia (numbers & maths)" },
   { id: "anxiety",         icon: "wind", de: "Prüfungsangst",                    en: "Test anxiety" },
@@ -60,21 +60,21 @@ export const HELPS = [
 export const METHODS = [
   // ═══ Zeit & Fokus ═══
   {
-    id: "pomodoro", cat: "time", icon: "timer", evidence: 2, adhd: true,
+    id: "pomodoro", cat: "time", icon: "timer", evidence: 2, focus: true,
     preset: { focus: 25, short: 5, long: 15, cycles: 4 },
     styles: [], helps: ["short-blocks"],
     de: {
       name: "Pomodoro (25/5)",
       short: "25 Minuten Fokus, 5 Minuten Pause — nach 4 Runden eine lange Pause.",
       how: "Eine Aufgabe wählen, Timer starten, bis zum Klingeln nur diese Aufgabe. Pausen sind Pflicht, kein Bonus.",
-      science: "Kurze, klar begrenzte Blöcke senken die Einstiegshürde und beugen mentaler Ermüdung vor — besonders hilfreich bei ADHS.",
+      science: "Kurze, klar begrenzte Blöcke senken die Einstiegshürde und beugen mentaler Ermüdung vor — besonders hilfreich bei Konzentration.",
       inApp: "Als Timer-Modus aktivierbar; Kairos zählt Zyklen, plant die lange Pause und schickt Erinnerungen, wenn die Pause überzogen wird.",
     },
     en: {
       name: "Pomodoro (25/5)",
       short: "25 minutes of focus, 5 minutes break — long break after 4 rounds.",
       how: "Pick one task, start the timer, work only on that task until it rings. Breaks are mandatory, not a bonus.",
-      science: "Short, clearly bounded blocks lower the activation barrier and prevent mental fatigue — especially helpful with ADHD.",
+      science: "Short, clearly bounded blocks lower the activation barrier and prevent mental fatigue — especially helpful with Focus.",
       inApp: "Activate as a timer mode; Kairos counts cycles, schedules the long break and nudges you when a break overruns.",
     },
   },
@@ -136,26 +136,26 @@ export const METHODS = [
     },
   },
   {
-    id: "flowtime", cat: "time", icon: "waves", evidence: 1, adhd: true,
+    id: "flowtime", cat: "time", icon: "waves", evidence: 1, focus: true,
     preset: null,
     styles: [], helps: ["long-blocks"],
     de: {
       name: "Flowtime",
       short: "Arbeiten, solange der Fokus trägt — Pause, wenn er nachlässt. Kein Wecker mitten im Flow.",
       how: "Starte den Timer ohne festen Endpunkt im Kopf. Wenn die Konzentration kippt, pausiere bewusst und notiere, wie lange du im Flow warst.",
-      science: "Alternative zu Pomodoro für Hyperfokus-Phasen (ADHS): Unterbrechungen mitten im Flow kosten mehr, als feste Intervalle bringen.",
+      science: "Alternative zu Pomodoro für Hyperfokus-Phasen (Konzentration): Unterbrechungen mitten im Flow kosten mehr, als feste Intervalle bringen.",
       inApp: "Nutze Start/Pause frei — Kairos protokolliert die echte Fokuszeit je Session im Journal, ohne dich zu unterbrechen.",
     },
     en: {
       name: "Flowtime",
       short: "Work while focus carries you — break when it fades. No alarm mid-flow.",
       how: "Start the timer without a fixed endpoint in mind. When concentration tips, pause deliberately and note how long you were in flow.",
-      science: "An alternative to Pomodoro for hyperfocus phases (ADHD): interrupting mid-flow costs more than fixed intervals gain.",
+      science: "An alternative to Pomodoro for hyperfocus phases (Focus): interrupting mid-flow costs more than fixed intervals gain.",
       inApp: "Use start/pause freely — Kairos logs your true focus time per session in the journal without interrupting you.",
     },
   },
   {
-    id: "timeboxing", cat: "time", icon: "box", evidence: 2, adhd: true,
+    id: "timeboxing", cat: "time", icon: "box", evidence: 2, focus: true,
     styles: [], helps: ["structure", "deadlines"],
     de: {
       name: "Timeboxing",
@@ -173,20 +173,20 @@ export const METHODS = [
     },
   },
   {
-    id: "body-doubling", cat: "time", icon: "users", evidence: 1, adhd: true,
+    id: "body-doubling", cat: "time", icon: "users", evidence: 1, focus: true,
     styles: ["social"], helps: [],
     de: {
       name: "Body Doubling",
       short: "Neben jemandem arbeiten (real oder per Video) macht Anfangen und Dranbleiben leichter.",
       how: "Verabrede feste Co-Working-Zeiten — Bibliothek, Freundin, Focusmate. Beide arbeiten still an eigenen Dingen.",
-      science: "ADHS-Community-Standard: Die bloße Anwesenheit einer zweiten Person wirkt als externe Struktur und sanfte Rechenschaft.",
+      science: "Konzentration-Community-Standard: Die bloße Anwesenheit einer zweiten Person wirkt als externe Struktur und sanfte Rechenschaft.",
       inApp: "Teile deinen Prüfungs-Lernplan per Link, verabredet euch auf dieselben Zeitfenster — und startet parallel den Timer.",
     },
     en: {
       name: "Body doubling",
       short: "Working next to someone (in person or on video) makes starting and persisting easier.",
       how: "Schedule fixed co-working times — library, friend, Focusmate. Both work silently on their own things.",
-      science: "An ADHD community staple: the mere presence of another person acts as external structure and gentle accountability.",
+      science: "An Focus community staple: the mere presence of another person acts as external structure and gentle accountability.",
       inApp: "Share your exam study plan via link, agree on the same time windows — and start the timer in parallel.",
     },
   },
@@ -501,7 +501,7 @@ export const METHODS = [
     },
   },
   {
-    id: "movement-learning", cat: "process", icon: "walk", evidence: 1, adhd: true,
+    id: "movement-learning", cat: "process", icon: "walk", evidence: 1, focus: true,
     styles: ["move", "listen", "speak"], challenges: ["dyslexia"],
     de: {
       name: "Lernen in Bewegung",
@@ -539,8 +539,8 @@ export const METHODS = [
     },
   },
   {
-    id: "five-minute-start", cat: "plan", icon: "play", evidence: 2, adhd: true,
-    styles: [], challenges: ["procrastination", "adhd"],
+    id: "five-minute-start", cat: "plan", icon: "play", evidence: 2, focus: true,
+    styles: [], challenges: ["procrastination", "focus"],
     de: {
       name: "5-Minuten-Start",
       short: "Nur 5 Minuten anfangen — aufhören ist danach ausdrücklich erlaubt.",
@@ -593,20 +593,20 @@ export const METHODS = [
     },
   },
   {
-    id: "micro-steps", cat: "plan", icon: "stairs", evidence: 2, adhd: true,
-    styles: [], challenges: ["adhd", "overwhelm", "dyscalculia"],
+    id: "micro-steps", cat: "plan", icon: "stairs", evidence: 2, focus: true,
+    styles: [], challenges: ["focus", "overwhelm", "dyscalculia"],
     de: {
       name: "Mini-Schritte",
       short: "Aufgaben so klein schneiden, dass der nächste Schritt keine Überwindung mehr braucht.",
       how: "„Kapitel 3 lernen“ wird: PDF öffnen → Überschriften lesen → 1 Absatz zusammenfassen → … Jeder Schritt einzeln abhakbar.",
-      science: "Kleine Einheiten liefern häufige Erfolgserlebnisse (Dopamin!) und machen Fortschritt sichtbar — zentral bei ADHS und Überforderung.",
+      science: "Kleine Einheiten liefern häufige Erfolgserlebnisse (Dopamin!) und machen Fortschritt sichtbar — zentral bei Konzentration und Überforderung.",
       inApp: "Jede Aufgabe hat Unterschritte; rutscht etwas immer wieder, schlägt Kairos von selbst vor, es kleiner zu schneiden.",
     },
     en: {
       name: "Micro-steps",
       short: "Cut tasks so small that the next step needs no willpower.",
       how: "\"Learn chapter 3\" becomes: open PDF → read headings → summarise 1 paragraph → … Each step individually checkable.",
-      science: "Small units deliver frequent wins (dopamine!) and make progress visible — central for ADHD and overwhelm.",
+      science: "Small units deliver frequent wins (dopamine!) and make progress visible — central for Focus and overwhelm.",
       inApp: "Every task has sub-steps; if something keeps slipping, Kairos itself suggests cutting it smaller.",
     },
   },
@@ -629,20 +629,20 @@ export const METHODS = [
     },
   },
   {
-    id: "reward-pairing", cat: "plan", icon: "trophy", evidence: 1, adhd: true,
-    styles: [], challenges: ["adhd"], helps: ["rewards"],
+    id: "reward-pairing", cat: "plan", icon: "trophy", evidence: 1, focus: true,
+    styles: [], challenges: ["focus"], helps: ["rewards"],
     de: {
       name: "Belohnungs-Kopplung",
       short: "Direkt nach dem Block eine kleine, vorher festgelegte Belohnung.",
       how: "Belohnung VOR dem Block festlegen (Serie, Snack, 10 min Handy) und sofort nach Abschluss einlösen — nicht „irgendwann“.",
-      science: "Das ADHS-Belohnungssystem reagiert stärker auf unmittelbare als auf ferne Belohnungen — die Kopplung holt die Motivation in die Gegenwart.",
+      science: "Das Konzentration-Belohnungssystem reagiert stärker auf unmittelbare als auf ferne Belohnungen — die Kopplung holt die Motivation in die Gegenwart.",
       inApp: "Tagesziel-Ring, Serie und der Tagesabschluss feiern jeden Fortschritt sofort — häng deine private Belohnung an den Pausen-Gong.",
     },
     en: {
       name: "Reward pairing",
       short: "A small, pre-agreed reward right after the block.",
       how: "Set the reward BEFORE the block (episode, snack, 10 min of phone) and redeem immediately after finishing — not \"sometime\".",
-      science: "The ADHD reward system responds far more to immediate than distant rewards — pairing pulls motivation into the present.",
+      science: "The Focus reward system responds far more to immediate than distant rewards — pairing pulls motivation into the present.",
       inApp: "The daily goal ring, streak and day wrap-up celebrate every win instantly — attach your private reward to the break chime.",
     },
   },
@@ -696,7 +696,7 @@ export function timerMethods() {
 }
 
 // Empfehlung aus dem Lernprofil: Punktzahl = Evidenz + Treffer auf Stile/
-// Herausforderungen/Hilfen (+ADHS-Bonus). Liefert ALLE Methoden absteigend
+// Herausforderungen/Hilfen (+Konzentration-Bonus). Liefert ALLE Methoden absteigend
 // sortiert mit score + reasons (Schlüssel der Treffer) — die UI zeigt z. B. Top 6.
 export function suggestMethods({ styles = [], challenges = [], helps = [] } = {}) {
   const S = new Set(styles), C = new Set(challenges), H = new Set(helps);
@@ -706,7 +706,7 @@ export function suggestMethods({ styles = [], challenges = [], helps = [] } = {}
     for (const s of m.styles || []) if (S.has(s)) { score += 2; reasons.push("style:" + s); }
     for (const c of m.challenges || []) if (C.has(c)) { score += 2; reasons.push("challenge:" + c); }
     for (const h of m.helps || []) if (H.has(h)) { score += 1; reasons.push("help:" + h); }
-    if (m.adhd && C.has("adhd")) { score += 1; if (!reasons.includes("challenge:adhd")) reasons.push("challenge:adhd"); }
+    if (m.focus && C.has("focus")) { score += 1; if (!reasons.includes("challenge:focus")) reasons.push("challenge:focus"); }
     return { id: m.id, score, reasons };
   }).sort((a, b) => b.score - a.score || a.id.localeCompare(b.id));
 }

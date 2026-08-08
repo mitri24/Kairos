@@ -8,7 +8,7 @@
 //   · Konsistent: daily_metrics werden AUS den Sessions summiert, Task-spent_ms
 //     aus denselben Sessions — keine widersprüchlichen Zahlen in der UI.
 //   · Realistisch: Ist/Soll-Verhältnisse steigen mit der Schwierigkeit (klassische
-//     ADHS-Unterschätzung) und verbessern sich über die Zeit leicht → das
+//     Konzentration-Unterschätzung) und verbessern sich über die Zeit leicht → das
 //     Pace-Lernen (shared/pace.js) zeigt sichtbar unterschiedliche Faktoren.
 //   · Additiv per Default: löscht NICHTS, ohne dass --reset gesetzt ist.
 //   · Backup: vor jedem Schreiben wird die DB-Datei kopiert.
@@ -325,7 +325,7 @@ try {
   const prof = db.prepare("SELECT * FROM profile WHERE user_id = ?").get(U);
   db.prepare(`
     UPDATE profile SET display_name = COALESCE(?, display_name), timezone = COALESCE(timezone, ?),
-      chronotype = COALESCE(chronotype, ?), adhd = ?, primary_device = ?, sleep_goal_hours = ?,
+      chronotype = COALESCE(chronotype, ?), focus = ?, primary_device = ?, sleep_goal_hours = ?,
       target_bedtime = COALESCE(target_bedtime, ?), target_wake_time = COALESCE(target_wake_time, ?),
       resting_hr_baseline = COALESCE(resting_hr_baseline, ?), hrv_baseline_ms = COALESCE(hrv_baseline_ms, ?),
       height_cm = COALESCE(height_cm, ?), weight_kg = COALESCE(weight_kg, ?),
@@ -352,7 +352,7 @@ try {
   `);
   const prefs = {
     learnStyles: ["write", "visual", "do"],
-    challenges: ["adhd", "procrastination"],
+    challenges: ["focus", "procrastination"],
     helps: ["short-blocks", "structure", "deadlines"],
     methods: ["pomodoro", "spaced-repetition", "active-recall", "micro-steps", "eat-the-frog", "feynman", "interleaving"],
     appearance: { theme: "system", accent: "sage", density: "cosy" },

@@ -1,4 +1,4 @@
-# BUILD — Contract für ADHD-Lernuhr-Feature-Module
+# BUILD — Contract für Focus-Lernuhr-Feature-Module
 
 Diese Datei ist der **verbindliche Vertrag**. Halte dich exakt daran, damit alle Module
 zusammenpassen. Kernfundament (Store, API, Util, HTML-Shell, Tokens, Timer, Clock) existiert

@@ -1,5 +1,5 @@
 // Erststart-Assistent v2 — die Lerntyp-Analyse. Statt drei knappen Schritten:
-// Wer bist du → WIE lernst du (Lernwege) → was fordert dich (ADHS/Legasthenie/
+// Wer bist du → WIE lernst du (Lernwege) → was fordert dich (Konzentration/Legasthenie/
 // Dyskalkulie …) → was hilft dir → Methoden-Vorschlag (kein Pomodoro-Zwang) →
 // Aussehen & Reizreduktion (Live-Vorschau) → erste Prüfung. Alles landet in
 // profile + settings + prefs und steuert UI, Vorschläge und KI.
@@ -354,7 +354,7 @@ export function initOnboarding({ store, api }) {
     await act(() => api.profile.save({
       displayName: st.name || undefined,
       chronotype: st.chrono,
-      adhd: st.challenges.has("adhd"),
+      focus: st.challenges.has("focus"),
     }));
     await act(() => api.setSettings({
       todayGoalHours: st.goal,

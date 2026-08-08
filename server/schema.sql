@@ -1,4 +1,4 @@
--- ADHD Lernuhr — SQLite-Schema (node:sqlite).
+-- Focus Lernuhr — SQLite-Schema (node:sqlite).
 -- Singletons (settings, timer_state) haben feste id = 1.
 
 PRAGMA journal_mode = WAL;
@@ -145,7 +145,7 @@ CREATE TABLE IF NOT EXISTS profile (
   weight_kg          REAL,
   timezone           TEXT,                          -- IANA, z. B. Europe/Zurich
   chronotype         TEXT,                          -- 'early'|'intermediate'|'late'
-  adhd               INTEGER NOT NULL DEFAULT 0,     -- 0/1
+  focus               INTEGER NOT NULL DEFAULT 0,     -- 0/1
   conditions         TEXT,                          -- freie Notiz (sensibel)
   primary_device     TEXT    NOT NULL DEFAULT 'ringconn',
   sleep_goal_hours   REAL    NOT NULL DEFAULT 8,     -- ≥7 h harte Constraint (SPEC)
